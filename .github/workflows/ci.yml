@@ -1,0 +1,69 @@
+name: CI
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      api: ${{ steps.f.outputs.api }}
+      web: ${{ steps.f.outputs.web }}
+      evals: ${{ steps.f.outputs.evals }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: f
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            api: ['apps/api/**', 'supabase/**']
+            web: ['apps/web/**']
+            evals: ['apps/api/app/prompts/**', 'apps/api/app/extraction/**']
+
+  api:
+    needs: changes
+    if: needs.changes.outputs.api == 'true' && hashFiles('apps/api/pyproject.toml') != ''
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: apps/api } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync --frozen
+      - run: uv run ruff check .
+      - run: uv run mypy app
+      - run: uv run pytest -q
+
+  web:
+    needs: changes
+    if: needs.changes.outputs.web == 'true' && hashFiles('apps/web/package.json') != ''
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: apps/web } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm, cache-dependency-path: apps/web/pnpm-lock.yaml }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+
+  evals:
+    needs: changes
+    if: needs.changes.outputs.evals == 'true' && github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: apps/api } }
+    env:
+      LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+      LLM_EXTRACTION_MODEL: ${{ vars.LLM_EXTRACTION_MODEL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync --frozen
+      - run: uv run python -m evals.run --fail-on-regression

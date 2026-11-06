@@ -1,0 +1,26 @@
+# env
+.env
+.env.*
+!.env.example
+# python
+__pycache__/
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+# node
+node_modules/
+.next/
+dist/
+coverage/
+playwright-report/
+test-results/
+# supabase
+supabase/.branches/
+supabase/.temp/
+# os / editors
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+docs/.obsidian/workspace*.json
