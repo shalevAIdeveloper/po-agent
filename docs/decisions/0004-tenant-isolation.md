@@ -1,0 +1,18 @@
+# 0004 — Tenant isolation in the database
+
+## Context
+SPEC principle 5: every query is scoped by `org_id`, with RLS on every tenant table. Users may belong to several orgs (decided 2026-11-07). Hosted Supabase stopped granting `anon`/`authenticated` access to new `public` objects on 2026-10-30, while the local CLI (2.117) still grants everything by default, so relying on defaults behaves differently per environment.
+
+## Decision
+- **Explicit grants only.** Every migration revokes from `anon`/`authenticated` and grants exactly what is needed (column-level where useful, e.g. `organizations(name, settings)`; `slug` and `created_by` are not client-updatable). `alter default privileges` in `public` revokes table/sequence/function access from `anon`/`authenticated` for future objects. `EXECUTE` for `PUBLIC` cannot be revoked per schema, so each function revokes it explicitly. No role used by the API gets `TRUNCATE` (it skips row triggers and RLS).
+- **RLS enabled and forced** on every `public` table. Policies use `to authenticated` plus an org predicate; no `auth.role()`. Views in `public` must use `security_invoker`.
+- **Membership helpers** `private.is_org_member(org)` / `private.has_org_role(org, roles[])`: `SECURITY DEFINER` (avoids policy recursion on `memberships`; owner `postgres` has BYPASSRLS), `set search_path = ''`, fully qualified names, `EXECUTE` for `authenticated` only. Schema `private` is not exposed by the Data API.
+- **No client INSERT/DELETE** on orgs or memberships. Orgs are created through `public.create_organization(name, slug)` (SECURITY DEFINER, checks `auth.uid()`, rejects anonymous users, creates org + owner atomically). Each user may **create** at most 5 orgs (`created_by`; membership in more orgs is unlimited); calls are serialized per user with an advisory lock, and the function refuses to run outside READ COMMITTED (under REPEATABLE READ / SERIALIZABLE its snapshot predates the lock, so the count could be raced). PostgREST and SQLAlchemy default to READ COMMITTED; API code must not call it from a stricter transaction. Slugs are validated (not transformed) and system/role names (`admin`, `postmaster`, `orders`, …) are reserved because slugs become mailbox names in M6. Membership management goes through the API (F7).
+- **Every org keeps an owner**: a `SECURITY DEFINER` trigger blocks deleting, demoting or moving the last owner, independent of what the caller's RLS lets it see. It locks the org row with a no-op `UPDATE`, so concurrent removals serialize under READ COMMITTED and fail with a serialization error under REPEATABLE READ (no write skew). Deleting the org cascades; `TRUNCATE` on memberships is blocked. Deleting a user who is the last owner is blocked until ownership is transferred (F7).
+- **`organizations.settings` holds non-secret preferences only** (readable by every member, max 64 KB). Secrets such as ERP credentials go in a separate service-role-only table.
+- The API will also run each request as `authenticated` so RLS applies there too (ADR 0003, planned for 0.4b); the worker uses `service_role`, which bypasses RLS.
+
+## Consequences
+- Local and hosted behave the same; a forgotten grant fails closed.
+- `supabase/tests/00_security_guards.test.sql` checks every table, view and function in `public`/`private` (RLS forced, nothing for `anon` incl. column grants, definer functions pin `search_path`, views are `security_invoker`, no `TRUNCATE` for API roles), so new migrations are covered automatically.
+- Policies call a function per row; fine for small tables. Large tenant tables (orders, lines) should use a set-returning helper (`org_id in (select private.user_org_ids())`) — follow-up D3.

@@ -6,19 +6,20 @@ M0 — Foundations (plan: `docs/plans/m0.md`)
 ## Done
 - Spec v0.1, CLAUDE.md, Alpha team subagents, CI skeleton
 - 0.1 apps/api skeleton (FastAPI /health, settings, JSON logging, worker stub) + fixes for the 6 medium `sec` findings — [PR #1](https://github.com/shalevAIdeveloper/po-agent/pull/1), squash-merged to `dev` as `6465a43`; CI green on `dev` (incl. push-path `paths-filter` with `persist-credentials: false`)
+- 0.2 apps/web skeleton (Next 16.4, TS strict, Tailwind v4 placeholder tokens, shadcn/ui, Vitest, Playwright smoke, CI web job on Node 24) + `qa`/`ux-ui` fixes, ADR 0002 — [PR #2](https://github.com/shalevAIdeveloper/po-agent/pull/2), squash-merged to `dev` as `cff4893`; CI green on `dev`
 
 ## In progress
-- 0.2 apps/web skeleton (Next 16.4, TS strict, Tailwind v4 tokens placeholder, shadcn/ui, Vitest, Playwright smoke, CI web job on Node 24) — PR to `dev` open, not merged. `qa` major + 5 `ux-ui` fixes applied; ADR 0002 (theme class on `<html>`).
+- 0.3 Supabase local + orgs/memberships/RLS — `feature/db-orgs-rls`, not yet in a PR. Migrations (extensions, organizations + memberships + RLS, `create_organization` with a 5-orgs-per-creator cap and reserved slugs, last-owner trigger), 73 pgTAP tests (mutation check: 8 mutations listed in ADR 0005, all caught), CI `db` job (CLI 2.117.0 pinned), ADR 0004 (tenant isolation), ADR 0005 (test strategy). `sec` + `qa` findings fixed; `sec` re-review: no critical/high, cap race under REPEATABLE READ fixed (READ COMMITTED required), lows in D7–D12.
 
 ## Next
-- 0.3 Supabase local + orgs/memberships/RLS → 0.4 auth → 0.5 cloud envs
+- 0.4 auth → 0.5 cloud envs
 
 ## Follow-ups
 Low-severity `sec` findings from PR #1, each assigned to the task that should close it.
 
 | # | Finding | Fix | Task |
 |---|---|---|---|
-| L1 | `.gitignore` misses secret-file patterns | Add `*.pem`, `*.key`, `*.p12`, `*.jwk`, `supabase/signing_keys.json`, `*.log`, `apps/api/evals/fixtures/private/` | 0.3a |
+| ~~L1~~ | ✅ closed in 0.3a — `.gitignore` misses secret-file patterns | Add `*.pem`, `*.key`, `*.p12`, `*.jwk`, `supabase/signing_keys.json`, `*.log`, `apps/api/evals/fixtures/private/` | 0.3a |
 | L2 | Log redaction matches only exact key names, not nested dicts | Match key fragments (`token`, `secret`, `key`, `jwt`, `cookie`, `dsn`…), recurse into dicts/lists; add PII keys (`email`, `address`, `phone`, `raw_text`, `price`) before M1 | 0.4a |
 | L3 | `LOG_LEVEL` not validated (bad value → `KeyError` at startup) | `Literal["DEBUG","INFO","WARNING","ERROR"]` in `Settings` | 0.4a |
 | L4 | `.env` paths resolve from the CWD; a `.env` baked into an image would load in prod | Paths from `Path(__file__)`; skip `.env` files when `APP_ENV != local`; `.dockerignore` with `.env*` | 0.5c |
@@ -46,6 +47,23 @@ From the 0.2 (`apps/web`) `qa` and `ux-ui` reviews:
 | W10 | `<main>` repeated in every page; no skip link / nav landmark / `min-h-dvh` | App shell in layout: `<main id="main">`, skip link, `<nav>` | M3 |
 | W11 | Keyboard-first layer is not provided by shadcn/Base UI: J/K row nav, scoped shortcuts, `?` sheet, command palette (verify `cmdk` + Base UI Dialog focus), Base UI `render` prop vs Radix `asChild` | ADR + shortcut layer | M3 |
 | W12 | Theme toggle + pre-paint script (ADR 0002); the inline script needs a CSP nonce/hash later | Implement with the toggle | M3 |
+
+From 0.3 (database):
+
+| # | Item | Fix | Task |
+|---|---|---|---|
+| D1 | Supabase CLI pinned at 2.117.0 (local + CI); v3.0 is local-by-default and removes deprecated commands | Separate `chore:` PR: upgrade local + CI pin together, re-run `db`/`test db`/advisors | after M0 |
+| D2 | Transfer ownership before leaving: the last-owner trigger blocks deleting a user who is the sole owner of an org | API/UI flow to transfer ownership (and to leave/delete an org) | F7 |
+| D3 | RLS policies call a membership function per row; fine for orgs/memberships, slow for large tenant tables | Use a set-returning helper (`org_id in (select private.user_org_ids())`) for orders/lines | M1/M2 |
+| D4 | Duplicate-slug error (`23505`) tells a caller that another tenant owns that slug (`sec` L3) | API maps `23505` → generic "slug unavailable" and `53400` → "organization limit reached"; rate-limit `POST /orgs`; never return raw DB error text | 0.4b |
+| D5 | Local auth allows open sign-up without email confirmation (`config.toml`: `enable_signup = true`, `enable_confirmations = false`), while the pilot is invite-only (`sec` M2) | Local: `enable_signup = false` in `[auth]` and `[auth.email]`, confirmations on; e2e creates users via the admin API / Mailpit | 0.4c |
+| D7 | A user who is the sole owner of an org cannot delete their account (blocked with `23514`, pinned by pgTAP); this matters for account/data deletion requests (`sec` re-review L-A) | Runbook: "transfer ownership or delete the org before deleting the user"; build the flow with D2 | 0.5c (runbook) / F7 |
+| D8 | The last-owner trigger locks the org with a no-op `UPDATE`, which fires real UPDATE side effects on `organizations` (future `updated_at`/audit triggers, Realtime) (`sec` re-review L-B) | Any UPDATE trigger on `organizations` must ignore `old is not distinct from new`; add a guard test when the first one is added | M5 (audit) |
+| D9 | Deadlock (`40P01`) possible if a transaction updates an org and then removes an owner (locks taken in the opposite order to the trigger) (`sec` re-review L-C) | Service code locks the org first (`for no key update`), then changes memberships; treat `40P01`/`40001` as retryable | 0.4b |
+| D10 | Reserved slugs are a hard-coded CHECK; list incomplete (`bounce(s)`, `inbound`, `notifications`, `unsubscribe`, `contact`, `privacy`, `legal`, `auth`, `login`, `webhook(s)`, `autoconfig`, `autodiscover`, `smtp`, `imap`, `dmarc`, `po-agent`…); adding a word fails if an org already uses it (`sec` re-review L-D) | Move to `private.reserved_slugs` checked in `create_organization` (+ service_role insert trigger); existing slugs are grandfathered | M6 |
+| D11 | Advisory lock keys share one global space with any future locks, e.g. a worker queue (`sec` re-review L-E) | Document a key-prefix convention (`'<function>:' \|\| id`) in ADR 0004 when the second advisory lock appears | M1 |
+| D12 | The creation cap counts orgs that currently exist with `created_by` = user; deleting an org frees a slot | Consider a cumulative creation quota (option A: `private.org_creation_quota` counter with conditional upsert) if we see create/delete loops being abused | when observed (M7) |
+| D6 | Hosted auth hardening (`sec` M2 + L5): sign-up off (invite-only), email confirmations on, password ≥ 12 with `lower_upper_letters_digits`, `secure_password_change`, TOTP MFA for owners/admins, custom SMTP; mirror the same values in local `config.toml` | Configure `po-agent-dev` / `po-agent-prod` | 0.5b |
 
 ## Blockers / open questions
 - Which ERP to integrate first → decided by customer discovery (target: 20 calls)
