@@ -5,49 +5,63 @@ on:
   push:
     branches: [dev, main]
 
+# Least privilege: jobs only read the repo unless a job asks for more.
+permissions:
+  contents: read
+
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# Third-party actions are pinned to full commit SHAs (tag in the trailing comment).
 jobs:
   changes:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read # paths-filter lists PR files via the API
     outputs:
       api: ${{ steps.f.outputs.api }}
       web: ${{ steps.f.outputs.web }}
       evals: ${{ steps.f.outputs.evals }}
     steps:
-      - uses: actions/checkout@v4
+      # Full history: on push, paths-filter diffs commits locally and cannot fetch without creds.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with: { persist-credentials: false, fetch-depth: 0 }
       - id: f
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@0e4a8c6effa4802afeda77dc8d303f8176d7dfad # v3.0.4
         with:
           filters: |
-            api: ['apps/api/**', 'supabase/**']
+            api: ['apps/api/**', 'supabase/**', '.github/workflows/**']
             web: ['apps/web/**']
             evals: ['apps/api/app/prompts/**', 'apps/api/app/extraction/**']
 
   api:
     needs: changes
-    if: needs.changes.outputs.api == 'true' && hashFiles('apps/api/pyproject.toml') != ''
+    if: needs.changes.outputs.api == 'true'
     runs-on: ubuntu-latest
     defaults: { run: { working-directory: apps/api } }
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with: { persist-credentials: false }
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5.4.2
+        with: { version: "0.13.7" }
       - run: uv sync --frozen
       - run: uv run ruff check .
+      - run: uv run ruff format --check .
       - run: uv run mypy app
       - run: uv run pytest -q
 
   web:
     needs: changes
-    if: needs.changes.outputs.web == 'true' && hashFiles('apps/web/package.json') != ''
+    if: needs.changes.outputs.web == 'true'
     runs-on: ubuntu-latest
     defaults: { run: { working-directory: apps/web } }
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with: { persist-credentials: false }
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with: { node-version: 22, cache: pnpm, cache-dependency-path: apps/web/pnpm-lock.yaml }
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
@@ -63,7 +77,9 @@ jobs:
       LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
       LLM_EXTRACTION_MODEL: ${{ vars.LLM_EXTRACTION_MODEL }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with: { persist-credentials: false }
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5.4.2
+        with: { version: "0.13.7" }
       - run: uv sync --frozen
       - run: uv run python -m evals.run --fail-on-regression
