@@ -27,3 +27,12 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 docs/.obsidian/
+# secrets & keys (never commit)
+*.pem
+*.key
+*.p12
+*.jwk
+supabase/signing_keys.json
+*.log
+# real customer POs used for local evals are PII
+apps/api/evals/fixtures/private/

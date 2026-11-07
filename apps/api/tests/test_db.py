@@ -71,11 +71,19 @@ def test_db_error_in_log_has_no_parameter_values() -> None:
     assert "sqlalchemy.exc.DBAPIError" in output
 
 
+def _integration_database_url() -> str:
+    """Skips locally without a DB, but fails in CI so integration tests never pass by skipping."""
+    url = os.environ.get("INTEGRATION_DATABASE_URL")
+    if url:
+        return url
+    if os.environ.get("CI"):
+        pytest.fail("INTEGRATION_DATABASE_URL must be set when CI is set")
+    pytest.skip("INTEGRATION_DATABASE_URL not set (start local Supabase first)")
+
+
 @pytest.mark.integration
 async def test_db_error_message_has_no_parameter_values(monkeypatch: pytest.MonkeyPatch) -> None:
-    url = os.environ.get("INTEGRATION_DATABASE_URL")
-    if not url:
-        pytest.skip("INTEGRATION_DATABASE_URL not set (start local Supabase first)")
+    url = _integration_database_url()
     monkeypatch.setattr(
         db, "get_settings", lambda: Settings(_env_file=None, database_url=SecretStr(url))
     )
@@ -100,9 +108,7 @@ async def test_db_error_message_has_no_parameter_values(monkeypatch: pytest.Monk
 
 @pytest.mark.integration
 async def test_select_one_against_local_db(monkeypatch: pytest.MonkeyPatch) -> None:
-    url = os.environ.get("INTEGRATION_DATABASE_URL")
-    if not url:
-        pytest.skip("INTEGRATION_DATABASE_URL not set (start local Supabase first)")
+    url = _integration_database_url()
     monkeypatch.setattr(
         db, "get_settings", lambda: Settings(_env_file=None, database_url=SecretStr(url))
     )

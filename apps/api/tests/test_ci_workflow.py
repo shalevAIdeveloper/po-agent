@@ -32,3 +32,11 @@ def test_checkout_does_not_persist_credentials(workflow: str) -> None:
     )
 
     assert len(checkouts) == workflow.count("uses: actions/checkout@")
+
+
+def test_db_job_runs_pgtap_and_integration_tests_with_a_database(workflow: str) -> None:
+    db_job = workflow.split("\n  db:\n", 1)[1].split("\n  evals:\n", 1)[0]
+
+    assert "supabase test db" in db_job
+    assert re.search(r"INTEGRATION_DATABASE_URL: postgresql://\S+", db_job)
+    assert re.search(r"pytest -m integration\b.*-rs", db_job)
