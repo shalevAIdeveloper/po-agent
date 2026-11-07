@@ -7,7 +7,7 @@ from app.config import AppEnv, Settings
 from app.main import create_app
 
 # Env vars that would leak a developer's real config into unit tests.
-_SETTINGS_ENV_VARS = ("APP_ENV", "DATABASE_URL", "SUPABASE_URL", "LOG_LEVEL")
+_SETTINGS_ENV_VARS = ("APP_ENV", "DATABASE_URL", "SUPABASE_URL", "WEB_ORIGIN", "LOG_LEVEL")
 
 
 @pytest.fixture(autouse=True)

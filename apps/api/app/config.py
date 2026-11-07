@@ -1,8 +1,9 @@
 from enum import StrEnum
 from functools import lru_cache
-from typing import Self
+from typing import Literal, Self
+from urllib.parse import urlsplit
 
-from pydantic import Field, SecretStr, model_validator
+from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -13,7 +14,19 @@ class AppEnv(StrEnum):
 
 
 # Settings that may be empty locally but must be set in every cloud environment.
-REQUIRED_OUTSIDE_LOCAL: tuple[str, ...] = ("database_url", "supabase_url")
+REQUIRED_OUTSIDE_LOCAL: tuple[str, ...] = ("database_url", "supabase_url", "web_origin")
+
+LogLevel = Literal["DEBUG", "INFO", "WARNING", "ERROR"]
+
+# A bare origin: scheme, host, optional port. No path, query, fragment or userinfo.
+# Host labels must start and end with a letter/digit (no "..", no trailing dot).
+_LABEL = r"[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?"
+_ORIGIN_PATTERN = rf"^https?://{_LABEL}(?:\.{_LABEL})*(:\d{{1,5}})?$"
+_MAX_PORT = 65535
+
+# Outside local these must use TLS: the JWKS fetched over plain http could be
+# swapped in transit, letting anyone on the path mint valid tokens.
+HTTPS_OUTSIDE_LOCAL: tuple[str, ...] = ("supabase_url", "web_origin")
 
 
 def _is_blank(value: SecretStr | str | None) -> bool:
@@ -35,12 +48,31 @@ class Settings(BaseSettings):
     )
 
     app_env: AppEnv = AppEnv.LOCAL
-    log_level: str = "INFO"
+    log_level: LogLevel = "INFO"
 
+    # The API connects as `po_api` (ADR 0003); the worker as a bypass role.
     database_url: SecretStr | None = None
-    supabase_url: str | None = None
+    # e.g. http://127.0.0.1:54321; JWT issuer and JWKS are derived from it.
+    supabase_url: str | None = Field(default=None, pattern=_ORIGIN_PATTERN)
+    # The only browser origin allowed by CORS, e.g. http://localhost:3000.
+    web_origin: str | None = Field(default=None, pattern=_ORIGIN_PATTERN)
 
     worker_poll_interval_seconds: float = Field(default=1.0, gt=0)
+
+    @property
+    def jwt_issuer(self) -> str | None:
+        return f"{self.supabase_url}/auth/v1" if self.supabase_url else None
+
+    @property
+    def jwks_url(self) -> str | None:
+        return f"{self.jwt_issuer}/.well-known/jwks.json" if self.jwt_issuer else None
+
+    @field_validator("supabase_url", "web_origin")
+    @classmethod
+    def _port_in_range(cls, value: str | None) -> str | None:
+        if value is not None and (port := urlsplit(value).port) is not None and port > _MAX_PORT:
+            raise ValueError("port out of range")
+        return value
 
     @model_validator(mode="after")
     def _require_cloud_settings(self) -> Self:
@@ -51,6 +83,15 @@ class Settings(BaseSettings):
             raise ValueError(
                 f"missing required settings for APP_ENV={self.app_env}: "
                 + ", ".join(name.upper() for name in missing)
+            )
+        insecure = [
+            name
+            for name in HTTPS_OUTSIDE_LOCAL
+            if not str(getattr(self, name)).startswith("https://")
+        ]
+        if insecure:
+            raise ValueError(
+                f"https is required outside local for: {', '.join(n.upper() for n in insecure)}"
             )
         return self
 

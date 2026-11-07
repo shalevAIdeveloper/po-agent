@@ -6,8 +6,10 @@ requires-python = ">=3.12,<3.13"
 dependencies = [
     "asyncpg>=0.32.0",
     "fastapi[standard-no-fastapi-cloud-cli]>=0.162.0",
+    "httpx>=0.28.1",
     "pydantic>=2",
     "pydantic-settings>=2.16.2",
+    "pyjwt[crypto]>=2.15.1",
     "sqlalchemy[asyncio]>=2",
     "structlog>=26.1.0",
 ]

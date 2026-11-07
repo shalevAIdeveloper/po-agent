@@ -1,5 +1,4 @@
 import io
-import os
 
 import pytest
 import structlog
@@ -10,6 +9,7 @@ from sqlalchemy.exc import DBAPIError
 from app import db
 from app.config import Settings
 from app.logging import configure_logging
+from tests.integration_support import require_env
 
 
 @pytest.mark.parametrize(
@@ -72,13 +72,7 @@ def test_db_error_in_log_has_no_parameter_values() -> None:
 
 
 def _integration_database_url() -> str:
-    """Skips locally without a DB, but fails in CI so integration tests never pass by skipping."""
-    url = os.environ.get("INTEGRATION_DATABASE_URL")
-    if url:
-        return url
-    if os.environ.get("CI"):
-        pytest.fail("INTEGRATION_DATABASE_URL must be set when CI is set")
-    pytest.skip("INTEGRATION_DATABASE_URL not set (start local Supabase first)")
+    return require_env("INTEGRATION_DATABASE_URL")
 
 
 @pytest.mark.integration

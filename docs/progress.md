@@ -7,12 +7,13 @@ M0 — Foundations (plan: `docs/plans/m0.md`)
 - Spec v0.1, CLAUDE.md, Alpha team subagents, CI skeleton
 - 0.1 apps/api skeleton (FastAPI /health, settings, JSON logging, worker stub) + fixes for the 6 medium `sec` findings — [PR #1](https://github.com/shalevAIdeveloper/po-agent/pull/1), squash-merged to `dev` as `6465a43`; CI green on `dev` (incl. push-path `paths-filter` with `persist-credentials: false`)
 - 0.2 apps/web skeleton (Next 16.4, TS strict, Tailwind v4 placeholder tokens, shadcn/ui, Vitest, Playwright smoke, CI web job on Node 24) + `qa`/`ux-ui` fixes, ADR 0002 — [PR #2](https://github.com/shalevAIdeveloper/po-agent/pull/2), squash-merged to `dev` as `cff4893`; CI green on `dev`
+- 0.3 Supabase local + orgs/memberships/RLS (migrations with forced RLS and explicit grants, `create_organization` with 5-per-creator cap + reserved slugs + READ COMMITTED, last-owner trigger, 73 pgTAP tests incl. schema-wide guards, 8 mutations caught, CI `db` job on CLI 2.117.0), ADR 0004 + 0005; `sec` (2 rounds) + `qa` findings fixed — [PR #3](https://github.com/shalevAIdeveloper/po-agent/pull/3), squash-merged to `dev` as `49661ce`; CI green on `dev` (incl. `db` job)
 
 ## In progress
-- 0.3 Supabase local + orgs/memberships/RLS — `feature/db-orgs-rls`, not yet in a PR. Migrations (extensions, organizations + memberships + RLS, `create_organization` with a 5-orgs-per-creator cap and reserved slugs, last-owner trigger), 73 pgTAP tests (mutation check: 8 mutations listed in ADR 0005, all caught), CI `db` job (CLI 2.117.0 pinned), ADR 0004 (tenant isolation), ADR 0005 (test strategy). `sec` + `qa` findings fixed; `sec` re-review: no critical/high, cap race under REPEATABLE READ fixed (READ COMMITTED required), lows in D7–D12.
+- 0.4 auth — 0.4a+b on `feature/auth-api` (not yet in a PR): JWKS verification (ES256/RS256 only), `CurrentUser`, `po_api` DB role + per-request RLS (`run_as_user`, retry on 40001/40P01), `OrgContext` (`X-Org-Id`, 404 for non-members), `require_role`, `GET /me`, `POST /orgs`, `GET|PATCH /orgs/current`, CORS, OpenAPI → TS types; logging follow-ups L2/L3/L9/L10 closed; ADR 0003 + 0006. 0.4c (web) next.
 
 ## Next
-- 0.4 auth → 0.5 cloud envs
+- 0.5 cloud envs
 
 ## Follow-ups
 Low-severity `sec` findings from PR #1, each assigned to the task that should close it.
@@ -20,15 +21,15 @@ Low-severity `sec` findings from PR #1, each assigned to the task that should cl
 | # | Finding | Fix | Task |
 |---|---|---|---|
 | ~~L1~~ | ✅ closed in 0.3a — `.gitignore` misses secret-file patterns | Add `*.pem`, `*.key`, `*.p12`, `*.jwk`, `supabase/signing_keys.json`, `*.log`, `apps/api/evals/fixtures/private/` | 0.3a |
-| L2 | Log redaction matches only exact key names, not nested dicts | Match key fragments (`token`, `secret`, `key`, `jwt`, `cookie`, `dsn`…), recurse into dicts/lists; add PII keys (`email`, `address`, `phone`, `raw_text`, `price`) before M1 | 0.4a |
-| L3 | `LOG_LEVEL` not validated (bad value → `KeyError` at startup) | `Literal["DEBUG","INFO","WARNING","ERROR"]` in `Settings` | 0.4a |
+| ~~L2~~ | ✅ closed in 0.4a (key fragments, `key`/`*_key` names, nested values, PII keys; token counters kept visible) — Log redaction matches only exact key names, not nested dicts | Match key fragments (`token`, `secret`, `key`, `jwt`, `cookie`, `dsn`…), recurse into dicts/lists; add PII keys (`email`, `address`, `phone`, `raw_text`, `price`) before M1 | 0.4a |
+| ~~L3~~ | ✅ closed in 0.4a — `LOG_LEVEL` not validated (bad value → `KeyError` at startup) | `Literal["DEBUG","INFO","WARNING","ERROR"]` in `Settings` | 0.4a |
 | L4 | `.env` paths resolve from the CWD; a `.env` baked into an image would load in prod | Paths from `Path(__file__)`; skip `.env` files when `APP_ENV != local`; `.dockerignore` with `.env*` | 0.5c |
 | L5 | `/docs` and `/openapi.json` public on deployed dev | Enable only for `APP_ENV=local` (or protect in dev) | 0.5c |
 | L6 | `fastapi[standard-no-fastapi-cloud-cli]` pulls OpenTelemetry SDK + OTLP exporter, can be switched on by env alone | Depend on `fastapi` + `uvicorn[standard]` explicitly, or set `OTEL_SDK_DISABLED=true` in deployed envs | 0.5c |
 | L7 | Callers choose their own `x-request-id` (can mix their requests into a victim's log trail) | Trust incoming ids only behind Railway's proxy, or log server id + client id separately | 0.5c |
 | L8 | `/health` exposes env and version unauthenticated | Return only `status` unless uptime checks need more | 0.5c |
-| L9 | stdlib records are interpolated before processors run, so PII in `%s` args (asyncpg, uvicorn "Invalid HTTP request", `logger.error("failed: %s", exc)`) reaches logs | Pre-chain processor: outside an allow-list (`uvicorn.error`, `app.*`), log the template `record.msg` instead of the interpolated message; test with a PII arg | 0.4a |
-| L10 | `log.error("x", exception=str(e))` bypasses sanitization; `stack_info=True` is not rendered; frame paths are absolute (show the user's home dir) | Drop/redact the `exception` key in `sanitize_exception`; add `StackInfoRenderer` or drop `stack_info`; make frame paths relative to `app/` | 0.4a |
+| ~~L9~~ | ✅ closed in 0.4a — stdlib records are interpolated before processors run, so PII in `%s` args (asyncpg, uvicorn "Invalid HTTP request", `logger.error("failed: %s", exc)`) reaches logs | Pre-chain processor: outside an allow-list (`uvicorn.error`, `app.*`), log the template `record.msg` instead of the interpolated message; test with a PII arg | 0.4a |
+| ~~L10~~ | ✅ closed in 0.4a — `log.error("x", exception=str(e))` bypasses sanitization; `stack_info=True` is not rendered; frame paths are absolute (show the user's home dir) | Drop/redact the `exception` key in `sanitize_exception`; add `StackInfoRenderer` or drop `stack_info`; make frame paths relative to `app/` | 0.4a |
 | L11 | DB driver messages (asyncpg/Postgres) can quote values even with `hide_parameters=True` | Never return DB error text in HTTP responses; Sentry `before_send` must strip `exception.values[*].value` | M7 (Sentry) |
 
 From the 0.2 (`apps/web`) `qa` and `ux-ui` reviews:
@@ -55,15 +56,28 @@ From 0.3 (database):
 | D1 | Supabase CLI pinned at 2.117.0 (local + CI); v3.0 is local-by-default and removes deprecated commands | Separate `chore:` PR: upgrade local + CI pin together, re-run `db`/`test db`/advisors | after M0 |
 | D2 | Transfer ownership before leaving: the last-owner trigger blocks deleting a user who is the sole owner of an org | API/UI flow to transfer ownership (and to leave/delete an org) | F7 |
 | D3 | RLS policies call a membership function per row; fine for orgs/memberships, slow for large tenant tables | Use a set-returning helper (`org_id in (select private.user_org_ids())`) for orders/lines | M1/M2 |
-| D4 | Duplicate-slug error (`23505`) tells a caller that another tenant owns that slug (`sec` L3) | API maps `23505` → generic "slug unavailable" and `53400` → "organization limit reached"; rate-limit `POST /orgs`; never return raw DB error text | 0.4b |
+| ~~D4~~ | ✅ errors mapped in 0.4b (`slug_unavailable`, `organization_limit_reached`, `invalid_organization`, never raw DB text); rate limit moved to A1 — Duplicate-slug error (`23505`) tells a caller that another tenant owns that slug (`sec` L3) | API maps `23505` → generic "slug unavailable" and `53400` → "organization limit reached"; rate-limit `POST /orgs`; never return raw DB error text | A1 (M7) |
 | D5 | Local auth allows open sign-up without email confirmation (`config.toml`: `enable_signup = true`, `enable_confirmations = false`), while the pilot is invite-only (`sec` M2) | Local: `enable_signup = false` in `[auth]` and `[auth.email]`, confirmations on; e2e creates users via the admin API / Mailpit | 0.4c |
 | D7 | A user who is the sole owner of an org cannot delete their account (blocked with `23514`, pinned by pgTAP); this matters for account/data deletion requests (`sec` re-review L-A) | Runbook: "transfer ownership or delete the org before deleting the user"; build the flow with D2 | 0.5c (runbook) / F7 |
 | D8 | The last-owner trigger locks the org with a no-op `UPDATE`, which fires real UPDATE side effects on `organizations` (future `updated_at`/audit triggers, Realtime) (`sec` re-review L-B) | Any UPDATE trigger on `organizations` must ignore `old is not distinct from new`; add a guard test when the first one is added | M5 (audit) |
-| D9 | Deadlock (`40P01`) possible if a transaction updates an org and then removes an owner (locks taken in the opposite order to the trigger) (`sec` re-review L-C) | Service code locks the org first (`for no key update`), then changes memberships; treat `40P01`/`40001` as retryable | 0.4b |
+| ~~D9~~ | ✅ closed in 0.4b (retry on 40001/40P01 in `run_as_user`; lock-org-first rule in ADR 0003) — Deadlock (`40P01`) possible if a transaction updates an org and then removes an owner (locks taken in the opposite order to the trigger) (`sec` re-review L-C) | Service code locks the org first (`for no key update`), then changes memberships; treat `40P01`/`40001` as retryable | 0.4b |
 | D10 | Reserved slugs are a hard-coded CHECK; list incomplete (`bounce(s)`, `inbound`, `notifications`, `unsubscribe`, `contact`, `privacy`, `legal`, `auth`, `login`, `webhook(s)`, `autoconfig`, `autodiscover`, `smtp`, `imap`, `dmarc`, `po-agent`…); adding a word fails if an org already uses it (`sec` re-review L-D) | Move to `private.reserved_slugs` checked in `create_organization` (+ service_role insert trigger); existing slugs are grandfathered | M6 |
 | D11 | Advisory lock keys share one global space with any future locks, e.g. a worker queue (`sec` re-review L-E) | Document a key-prefix convention (`'<function>:' \|\| id`) in ADR 0004 when the second advisory lock appears | M1 |
 | D12 | The creation cap counts orgs that currently exist with `created_by` = user; deleting an org frees a slot | Consider a cumulative creation quota (option A: `private.org_creation_quota` counter with conditional upsert) if we see create/delete loops being abused | when observed (M7) |
 | D6 | Hosted auth hardening (`sec` M2 + L5): sign-up off (invite-only), email confirmations on, password ≥ 12 with `lower_upper_letters_digits`, `secure_password_change`, TOTP MFA for owners/admins, custom SMTP; mirror the same values in local `config.toml` | Configure `po-agent-dev` / `po-agent-prod` | 0.5b |
+
+From 0.4 (auth):
+
+| # | Item | Fix | Task |
+|---|---|---|---|
+| A1 | Rate limiting for `POST /orgs` and auth-adjacent endpoints (moved from D4) | Per-user + per-IP limits at the API (and Supabase Auth rate limits) | M7 |
+| A2 | Hosted `po_api` (`sec` M2/M4, `qa` m7): password set out of band; Supavisor user `po_api.<project-ref>`; `grant ... with inherit false, set true` needs PG ≥ 16 and `postgres` holding ADMIN on `authenticated`; never deploy with `db push --include-roles` (would push the local password from `supabase/roles.sql`) | Runbook: set the password in `po-agent-dev`/`-prod`, verify the local password is rejected there, store `DATABASE_URL` in Railway only; use a direct/session-mode connection, or transaction mode with asyncpg `statement_cache_size=0` + `prepared_statement_cache_size=0`; keep transaction-local `set_config` (never session-level `SET ROLE`); JWKS key rotation: publish the standby key at least one TTL (10 min) before rotating, or new tokens get 401 for up to 30 s | 0.5b |
+| A3 | Tokens of a deleted/demoted user stay valid until expiry (1 h); membership is re-checked per request, but the session lingers (`sec` L1) | Shorter `jwt_expiry` and/or `session_id` checks against `auth.sessions` for sensitive operations (approve/export) | M7 |
+| A4 | `po_api` can create temp tables (database `TEMP` via `PUBLIC`) (`sec` L5) | Harmless today (all SQL is schema-qualified); decide `revoke temporary on database postgres from public` for hosted, or document | 0.5b |
+| A5 | Error responses (401/403/404/409/503 + `detail` codes) are not in the OpenAPI schema, so the TS client has no error types (`qa` m8) | `responses=` on routes; regenerate `schema.d.ts` | 0.4c |
+| A6 | Local integration runs can hit GoTrue's sign-in rate limit (30 / 5 min / IP) and fail after laptop sleep if Docker's clock drifts > 30 s (`qa` m4) | Runbook note (wait / `supabase stop && supabase start`) | 0.5c |
+| A7 | JWKS refresh blocks requests: when the 10-min TTL expires, every request waits for the refetch (bounded by a 5 s total timeout) (`sec` re-review L-b) | Serve still-valid cached keys while one refresh runs; only unknown-`kid` callers wait | M7 |
+| A8 | Small items from `sec` delta review: log `db.statement_timeout` vs `db.lock_timeout` separately (a slow query should alert, not hide behind 503 `busy`); `expose_headers` must include `Retry-After` before the web reads it; port check in `config.py` relies on `urlsplit` raising (dead branch) and accepts `:0` | Fix with the web client's error handling | 0.4c |
 
 ## Blockers / open questions
 - Which ERP to integrate first → decided by customer discovery (target: 20 calls)
