@@ -16,12 +16,22 @@ class AppEnv(StrEnum):
 REQUIRED_OUTSIDE_LOCAL: tuple[str, ...] = ("database_url", "supabase_url")
 
 
+def _is_blank(value: SecretStr | str | None) -> bool:
+    if isinstance(value, SecretStr):
+        value = value.get_secret_value()
+    return value is None or not value.strip()
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         # Repo-root .env first, then apps/api/.env; real env vars win over both.
         env_file=("../../.env", ".env"),
         env_file_encoding="utf-8",
         extra="ignore",
+        # `DATABASE_URL=` (as in .env.example) counts as unset, not as an empty value.
+        env_ignore_empty=True,
+        # Validation errors must never echo setting values (they include secrets).
+        hide_input_in_errors=True,
     )
 
     app_env: AppEnv = AppEnv.LOCAL
@@ -36,7 +46,7 @@ class Settings(BaseSettings):
     def _require_cloud_settings(self) -> Self:
         if self.app_env is AppEnv.LOCAL:
             return self
-        missing = [name for name in REQUIRED_OUTSIDE_LOCAL if getattr(self, name) is None]
+        missing = [name for name in REQUIRED_OUTSIDE_LOCAL if _is_blank(getattr(self, name))]
         if missing:
             raise ValueError(
                 f"missing required settings for APP_ENV={self.app_env}: "

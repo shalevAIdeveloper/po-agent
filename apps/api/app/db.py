@@ -30,7 +30,12 @@ def get_engine() -> AsyncEngine:
     database_url = get_settings().database_url
     if database_url is None:
         raise RuntimeError("DATABASE_URL is not configured")
-    return create_async_engine(to_async_url(database_url.get_secret_value()), pool_pre_ping=True)
+    return create_async_engine(
+        to_async_url(database_url.get_secret_value()),
+        pool_pre_ping=True,
+        # Keep bound values (PO lines, prices, addresses) out of exception messages and logs.
+        hide_parameters=True,
+    )
 
 
 @lru_cache

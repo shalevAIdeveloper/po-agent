@@ -39,14 +39,20 @@ async def test_failing_tick_does_not_kill_worker() -> None:
         nonlocal calls
         calls += 1
         if calls == 1:
-            raise RuntimeError("boom")
+            raise RuntimeError("ACME 123 Main St $4.50")
         stop.set()
 
     ticks = await run_worker(stop, tick=tick, poll_interval=0.01)
 
     assert ticks == 2
-    events = [json.loads(line)["event"] for line in stream.getvalue().splitlines()]
-    assert events == ["worker.started", "worker.tick_failed", "worker.stopped"]
+    lines = [json.loads(line) for line in stream.getvalue().splitlines()]
+    assert [line["event"] for line in lines] == [
+        "worker.started",
+        "worker.tick_failed",
+        "worker.stopped",
+    ]
+    assert lines[1]["exc_type"] == "builtins.RuntimeError"
+    assert "ACME" not in stream.getvalue()
 
 
 async def test_stop_interrupts_poll_wait() -> None:
