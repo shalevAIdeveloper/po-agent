@@ -1,15 +1,20 @@
 import { z } from "zod";
 
+import type { components } from "@/lib/api/schema";
 import { env } from "@/lib/env";
 
-// Hand-written until 0.4b generates types from the API's OpenAPI schema.
+type Schemas = components["schemas"];
+
+// Types come from the API's OpenAPI schema (`pnpm gen:api`, ADR 0006). The Zod
+// schemas validate responses at runtime; `satisfies` makes them fail to compile
+// if they drift from the generated types.
 const healthSchema = z.object({
   status: z.literal("ok"),
   env: z.enum(["local", "dev", "prod"]),
   version: z.string(),
-});
+}) satisfies z.ZodType<Schemas["HealthResponse"]>;
 
-export type Health = z.infer<typeof healthSchema>;
+export type Health = Schemas["HealthResponse"];
 
 export type ApiErrorKind = "network" | "http" | "invalid_response";
 

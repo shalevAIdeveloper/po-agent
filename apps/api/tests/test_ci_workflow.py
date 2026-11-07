@@ -39,4 +39,20 @@ def test_db_job_runs_pgtap_and_integration_tests_with_a_database(workflow: str) 
 
     assert "supabase test db" in db_job
     assert re.search(r"INTEGRATION_DATABASE_URL: postgresql://\S+", db_job)
+    assert re.search(r"INTEGRATION_API_DATABASE_URL: postgresql://po_api:\S+", db_job)
+    for name in ("URL", "PUBLISHABLE_KEY", "SECRET_KEY"):
+        assert f"INTEGRATION_SUPABASE_{name}=" in db_job
+    # Auth must run for the real-user integration tests; `db start` would start Postgres only.
+    excludes = re.search(r"supabase start\s+-x\s+([\w,-]+)", db_job)
+    assert excludes, "db job must use `supabase start -x ...`"
+    excluded = set(excludes.group(1).split(","))
+    assert not excluded & {"gotrue", "kong"}, "auth (gotrue behind kong) must not be excluded"
     assert re.search(r"pytest -m integration\b.*-rs", db_job)
+
+
+def test_web_job_checks_generated_api_types_are_committed_and_current(workflow: str) -> None:
+    web_job = workflow.split("\n  web:\n", 1)[1].split("\n  db:\n", 1)[0]
+
+    assert "git ls-files --error-unmatch src/lib/api/schema.d.ts" in web_job
+    assert "pnpm gen:api" in web_job
+    assert "git status --porcelain -- src/lib/api/schema.d.ts" in web_job

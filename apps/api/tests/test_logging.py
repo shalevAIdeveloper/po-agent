@@ -3,6 +3,7 @@ import json
 import logging
 from typing import Any
 
+import pytest
 import structlog
 from fastapi.testclient import TestClient
 from pydantic import BaseModel, ValidationError
@@ -199,3 +200,145 @@ def test_request_log_has_request_id_and_no_token(settings: Settings) -> None:
     assert line["request_id"] == "req-1"
     assert line["path"] == "/health"
     assert line["status"] == 200
+
+
+# ----- L2: key fragments, nested values, PII keys -----
+
+
+@pytest.mark.parametrize(
+    "key",
+    [
+        "service_role_key",
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "encryption_key",
+        "hmac_key",
+        "key",
+        "client_secret",
+        "x-api-key",
+        "supabase_jwt",
+        "sentry_dsn",
+        "refresh_token",
+        "Set-Cookie",
+        "email",
+        "raw_text",
+        "unit_price",
+        "customer_email",
+        "ship_to_address",
+        "contact_phone",
+        "line_price",
+    ],
+)
+def test_sensitive_and_pii_keys_are_redacted(key: str) -> None:
+    stream = io.StringIO()
+    configure_logging(stream=stream)
+
+    structlog.get_logger().info("evt", **{key: "LEAKED-VALUE"})
+
+    assert "LEAKED-VALUE" not in stream.getvalue()
+    [line] = _lines(stream)
+    assert line[key] == REDACTED
+
+
+def test_nested_values_are_redacted() -> None:
+    stream = io.StringIO()
+    configure_logging(stream=stream)
+
+    structlog.get_logger().info(
+        "http.call",
+        request={"headers": {"Authorization": "Bearer LEAK1"}, "items": [{"email": "a@b.c"}]},
+    )
+
+    output = stream.getvalue()
+    assert "LEAK1" not in output
+    assert "a@b.c" not in output
+    [line] = _lines(stream)
+    assert line["request"]["headers"]["Authorization"] == REDACTED
+
+
+def test_ordinary_keys_are_kept() -> None:
+    stream = io.StringIO()
+    configure_logging(stream=stream)
+
+    structlog.get_logger().info("http.request", method="GET", path="/me", status=200, org_id="x")
+
+    [line] = _lines(stream)
+    assert (line["method"], line["path"], line["status"], line["org_id"]) == (
+        "GET",
+        "/me",
+        200,
+        "x",
+    )
+
+
+# ----- L9: third-party %s args are not interpolated -----
+
+
+def test_third_party_log_args_are_not_interpolated() -> None:
+    stream = io.StringIO()
+    configure_logging(stream=stream)
+
+    logging.getLogger("asyncpg.pool").warning("bad row: %s", PO_TEXT)
+    logging.getLogger("uvicorn.error").info("Started server process [%d]", 4242)
+    logging.getLogger("app.services.orgs").info("org %s", "kept-for-app")
+
+    output = stream.getvalue()
+    assert PO_TEXT not in output
+    events = [line["event"] for line in _lines(stream)]
+    assert events == ["bad row: %s", "Started server process [4242]", "org kept-for-app"]
+
+
+# ----- L10: explicit exception text, stack_info, relative frame paths -----
+
+
+def test_explicit_exception_text_and_stack_info_are_dropped() -> None:
+    stream = io.StringIO()
+    configure_logging(stream=stream)
+
+    structlog.get_logger().error("x", exception=PO_TEXT, stack_info=True)
+
+    [line] = _lines(stream)
+    assert PO_TEXT not in stream.getvalue()
+    assert "exception" not in line
+    assert "stack_info" not in line
+
+
+def test_frame_paths_are_relative_to_the_api_root() -> None:
+    stream = io.StringIO()
+    configure_logging(stream=stream)
+
+    try:
+        raise ValueError("x")
+    except ValueError:
+        structlog.get_logger().exception("boom")
+
+    [line] = _lines(stream)
+    frame = line["exc_frames"][-1]
+    assert frame.startswith("tests/test_logging.py:")
+    assert ":\\" not in frame
+    assert "Users" not in frame
+
+
+@pytest.mark.parametrize(
+    "key",
+    [
+        "input_tokens",
+        "output_tokens",
+        "total_tokens",
+        "prompt_tokens",
+        "completion_tokens",
+        "token_count",
+        "idempotency_key",
+        "sort_key",
+        "monkey",
+        "keys",
+        "price_count",
+    ],
+)
+def test_counters_and_ordinary_names_are_not_redacted(key: str) -> None:
+    stream = io.StringIO()
+    configure_logging(stream=stream)
+
+    structlog.get_logger().info("llm.call", **{key: 1234})
+
+    [line] = _lines(stream)
+    assert line[key] == 1234

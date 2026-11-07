@@ -34,7 +34,7 @@ jobs:
         with:
           filters: |
             api: ['apps/api/**', 'supabase/**', '.github/workflows/**']
-            web: ['apps/web/**', '.github/workflows/**']
+            web: ['apps/web/**', 'apps/api/openapi.json', '.github/workflows/**']
             db: ['supabase/**', 'apps/api/**', '.github/workflows/**']
             evals: ['apps/api/app/prompts/**', 'apps/api/app/extraction/**']
 
@@ -74,6 +74,11 @@ jobs:
           cache: pnpm
           cache-dependency-path: apps/web/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
+      - name: API types are generated from the committed OpenAPI schema
+        run: |
+          git ls-files --error-unmatch src/lib/api/schema.d.ts
+          pnpm gen:api
+          test -z "$(git status --porcelain -- src/lib/api/schema.d.ts)"
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
@@ -97,8 +102,21 @@ jobs:
       # Same CLI version as local dev; the v3 upgrade is a separate PR.
       - uses: supabase/setup-cli@1dedf2c611547ede7232d26866dd3c56ab903bbb # v1.7.3
         with: { version: "2.117.0" }
-      # Postgres only: applies all migrations to a fresh database.
-      - run: supabase db start
+      # Postgres + Auth (GoTrue behind Kong) only: applies roles.sql and all
+      # migrations to a fresh database; auth is needed for the API integration tests.
+      - run: >-
+          supabase start
+          -x realtime,storage-api,imgproxy,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+      # Local-only, well-known keys of the throwaway stack (not secrets).
+      - name: Export local Supabase keys for integration tests
+        run: |
+          supabase status -o env > "$RUNNER_TEMP/supabase.env"
+          get() { grep "^$1=" "$RUNNER_TEMP/supabase.env" | cut -d= -f2- | tr -d '"'; }
+          {
+            echo "INTEGRATION_SUPABASE_URL=$(get API_URL)"
+            echo "INTEGRATION_SUPABASE_PUBLISHABLE_KEY=$(get PUBLISHABLE_KEY)"
+            echo "INTEGRATION_SUPABASE_SECRET_KEY=$(get SECRET_KEY)"
+          } >> "$GITHUB_ENV"
       - run: supabase db lint --local --level warning --fail-on warning
       - run: supabase db advisors --local --type all --fail-on warn
       # pgTAP: RLS, grants, cross-org isolation (supabase/tests)
@@ -109,6 +127,8 @@ jobs:
         working-directory: apps/api
         env:
           INTEGRATION_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+          # po_api password comes from supabase/roles.sql (local-only value).
+          INTEGRATION_API_DATABASE_URL: postgresql://po_api:po_api_local_only@127.0.0.1:54322/postgres
         run: |
           uv sync --frozen
           uv run pytest -m integration -q -rs
