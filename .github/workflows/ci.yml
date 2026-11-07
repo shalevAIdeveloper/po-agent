@@ -33,7 +33,7 @@ jobs:
         with:
           filters: |
             api: ['apps/api/**', 'supabase/**', '.github/workflows/**']
-            web: ['apps/web/**']
+            web: ['apps/web/**', '.github/workflows/**']
             evals: ['apps/api/app/prompts/**', 'apps/api/app/extraction/**']
 
   api:
@@ -57,16 +57,33 @@ jobs:
     if: needs.changes.outputs.web == 'true'
     runs-on: ubuntu-latest
     defaults: { run: { working-directory: apps/web } }
+    env:
+      # Inlined at build time. Nothing listens here, so e2e exercises the error state.
+      NEXT_PUBLIC_API_URL: http://127.0.0.1:8000
+      NEXT_TELEMETRY_DISABLED: "1"
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with: { persist-credentials: false }
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+        with: { package_json_file: apps/web/package.json }
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
-        with: { node-version: 22, cache: pnpm, cache-dependency-path: apps/web/pnpm-lock.yaml }
+        with:
+          node-version-file: apps/web/.nvmrc
+          cache: pnpm
+          cache-dependency-path: apps/web/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
+      - run: pnpm build
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
+      - if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: playwright-report
+          path: apps/web/playwright-report
+          retention-days: 7
 
   evals:
     needs: changes

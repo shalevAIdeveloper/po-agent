@@ -1,0 +1,105 @@
+/*
+ * Design tokens: PLACEHOLDER values (neutral shadcn defaults + system fonts).
+ * M3 replaces the values in this file only; names are the contract that
+ * globals.css maps into Tailwind and that components consume.
+ *
+ * Rules (SPEC §12):
+ * - Components use tokens only: no hard-coded colors, spacing, radii, durations.
+ * - Status colors (--status-*) are reserved for confidence and flags.
+ * - Spacing is Tailwind's 4px grid (--spacing: 0.25rem, set in globals.css).
+ */
+
+:root {
+  /* Native controls, scrollbars and autofill follow the theme. */
+  color-scheme: light;
+
+  /* ---- typography ---- */
+  --font-family-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* SKUs, quantities and prices; pair with `tabular-nums` */
+  --font-family-mono: ui-monospace, "Cascadia Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+
+  /* ---- surfaces & text (shadcn semantic names) ---- */
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+
+  /* ---- actions ---- */
+  /* --primary is THE brand accent (SPEC §12: one confident accent; M3 picks it). */
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  /* --accent is shadcn's NEUTRAL hover/highlight surface (menus, ghost buttons).
+     Never put the brand color here, or every menu hover turns brand-colored. */
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+
+  /* ---- status: confidence chips and validation flags only ---- */
+  --status-success: oklch(0.6 0.15 150);
+  --status-warning: oklch(0.75 0.15 75);
+  --status-danger: oklch(0.577 0.245 27.325);
+  --status-info: oklch(0.6 0.12 250);
+
+  /* ---- shape ---- */
+  --radius: 0.625rem;
+
+  /* ---- elevation ---- */
+  --elevation-sm: 0 1px 2px 0 oklch(0 0 0 / 5%);
+  --elevation-md: 0 4px 12px -2px oklch(0 0 0 / 10%);
+
+  /* ---- motion: 120-200ms, purposeful ---- */
+  --duration-fast: 120ms;
+  --duration-base: 160ms;
+  --duration-slow: 200ms;
+  --motion-ease: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* Applied on <html> (see docs/decisions/0002-theme-class-on-html.md). */
+.dark {
+  color-scheme: dark;
+
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+
+  --status-success: oklch(0.7 0.15 150);
+  --status-warning: oklch(0.8 0.15 75);
+  --status-danger: oklch(0.704 0.191 22.216);
+  --status-info: oklch(0.7 0.12 250);
+
+  --elevation-sm: 0 1px 2px 0 oklch(0 0 0 / 30%);
+  --elevation-md: 0 4px 12px -2px oklch(0 0 0 / 40%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+    --duration-slow: 0ms;
+  }
+}
