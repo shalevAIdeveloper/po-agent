@@ -28,7 +28,7 @@ jobs:
 
   api:
     needs: changes
-    if: needs.changes.outputs.api == 'true' && hashFiles('apps/api/pyproject.toml') != ''
+    if: needs.changes.outputs.api == 'true'
     runs-on: ubuntu-latest
     defaults: { run: { working-directory: apps/api } }
     steps:
@@ -36,12 +36,13 @@ jobs:
       - uses: astral-sh/setup-uv@v5
       - run: uv sync --frozen
       - run: uv run ruff check .
+      - run: uv run ruff format --check .
       - run: uv run mypy app
       - run: uv run pytest -q
 
   web:
     needs: changes
-    if: needs.changes.outputs.web == 'true' && hashFiles('apps/web/package.json') != ''
+    if: needs.changes.outputs.web == 'true'
     runs-on: ubuntu-latest
     defaults: { run: { working-directory: apps/web } }
     steps:
