@@ -86,6 +86,13 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm build
+      # W5: browsers cached per Playwright version; OS deps are still installed each run.
+      - id: pw
+        run: echo "version=$(pnpm exec playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:e2e
       - if: failure()
@@ -140,6 +147,12 @@ jobs:
           cache-dependency-path: apps/web/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
+      - id: pw
+        run: echo "version=$(pnpm exec playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:e2e
       - if: failure()
@@ -206,3 +219,22 @@ jobs:
         with: { version: "0.13.7" }
       - run: uv sync --frozen
       - run: uv run python -m evals.run --fail-on-regression
+
+  # The single required status check for branch protection. Path filters skip jobs,
+  # and a skipped job can't be "required", so this job aggregates them: every job
+  # must have succeeded or been skipped, and `changes` must have succeeded (if it
+  # failed, every other job is skipped and that must not count as green).
+  ci-ok:
+    if: always()
+    needs: [changes, api, web, e2e-auth, db, evals]
+    runs-on: ubuntu-latest
+    steps:
+      - name: All jobs succeeded or were skipped
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          echo "$NEEDS" | jq -r 'to_entries[] | "\(.key): \(.value.result)"'
+          echo "$NEEDS" | jq -e '
+            .changes.result == "success"
+            and (to_entries | all(.value.result == "success" or .value.result == "skipped"))
+          ' > /dev/null
