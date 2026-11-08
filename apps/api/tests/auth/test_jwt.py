@@ -274,6 +274,80 @@ async def test_concurrent_callers_share_one_fetch(client: JwksClient, endpoint: 
 
 
 @pytest.mark.usefixtures("clock")
+async def test_callers_arriving_during_the_first_fetch_wait_for_it(endpoint: _Endpoint) -> None:
+    # A slow (yielding) endpoint: the other callers arrive while the fetch is in flight.
+    # They used to see "attempted < 30 s ago", skip the lock, find no keys and 503.
+    async def slow_handler(request: httpx.Request) -> httpx.Response:
+        await asyncio.sleep(0.05)
+        return endpoint.handler(request)
+
+    async with httpx.AsyncClient(transport=httpx.MockTransport(slow_handler)) as http:
+        client = JwksClient("http://supabase.test/jwks", http=http)
+
+        results = await asyncio.gather(*(client.get_key("k1") for _ in range(5)))
+
+    assert all(result is not None for result in results)
+    assert endpoint.calls == 1
+
+
+@pytest.mark.usefixtures("clock")
+async def test_unknown_kid_waits_for_an_in_flight_refresh(
+    endpoint: _Endpoint, clock: _Clock
+) -> None:
+    # Rotation: a refresh that will bring k3 is already running; a k3 caller must wait
+    # for it instead of getting None (a 401) from the old key set.
+    gate = asyncio.Event()
+
+    async def gated_handler(request: httpx.Request) -> httpx.Response:
+        if endpoint.calls >= 1:
+            await gate.wait()
+        return endpoint.handler(request)
+
+    async with httpx.AsyncClient(transport=httpx.MockTransport(gated_handler)) as http:
+        client = JwksClient("http://supabase.test/jwks", http=http)
+        await client.get_key("k1")
+        endpoint.kids.append("k3")
+        clock.advance(JWKS_TTL_SECONDS + 1)
+
+        refreshing = asyncio.create_task(client.get_key("k1"))
+        await asyncio.sleep(0.01)  # the refresh is now waiting on the gate
+        waiting = asyncio.create_task(client.get_key("k3"))
+        await asyncio.sleep(0.01)
+        gate.set()
+
+        assert await refreshing is not None
+        assert await waiting is not None
+    assert endpoint.calls == 2
+
+
+@pytest.mark.usefixtures("clock")
+async def test_known_kid_does_not_wait_for_an_in_flight_refresh(
+    endpoint: _Endpoint, clock: _Clock
+) -> None:
+    # The other half of the in-flight rule: a caller whose kid is cached is served from
+    # the cache (within the grace period) and never queues behind a slow refresh.
+    gate = asyncio.Event()
+
+    async def gated_handler(request: httpx.Request) -> httpx.Response:
+        if endpoint.calls >= 1:
+            await gate.wait()
+        return endpoint.handler(request)
+
+    async with httpx.AsyncClient(transport=httpx.MockTransport(gated_handler)) as http:
+        client = JwksClient("http://supabase.test/jwks", http=http)
+        await client.get_key("k1")
+        clock.advance(JWKS_TTL_SECONDS + 1)
+
+        refreshing = asyncio.create_task(client.get_key("k1"))
+        await asyncio.sleep(0.01)  # the refresh is now waiting on the gate
+
+        assert await asyncio.wait_for(client.get_key("k2"), timeout=0.5) is not None
+        gate.set()
+        assert await refreshing is not None
+    assert endpoint.calls == 2
+
+
+@pytest.mark.usefixtures("clock")
 @pytest.mark.parametrize("body", [[], None, [1], "keys", 42])
 async def test_non_object_jwks_body_is_unavailable_not_a_crash(body: object) -> None:
     def handler(_request: httpx.Request) -> httpx.Response:

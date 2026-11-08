@@ -42,7 +42,8 @@ RETRYABLE_SQLSTATES = frozenset({"40001", "40P01"})
 MAX_TRANSACTION_ATTEMPTS = 3
 # query_canceled (statement_timeout), lock_not_available (lock_timeout): the DB is
 # busy; the client may retry later. Not retried here, so a request never waits long.
-BUSY_SQLSTATES = frozenset({"57014", "55P03"})
+STATEMENT_TIMEOUT_SQLSTATE = "57014"
+BUSY_SQLSTATES = frozenset({STATEMENT_TIMEOUT_SQLSTATE, "55P03"})
 # Waiting for a lock (row, advisory) fails fast instead of eating the 8 s statement budget.
 LOCK_TIMEOUT = "3s"
 
@@ -135,7 +136,11 @@ async def run_as_user[T](
         except DBAPIError as error:
             code = sqlstate(error)
             if code in BUSY_SQLSTATES:
-                log.warning("db.busy", sqlstate=code)
+                if code == STATEMENT_TIMEOUT_SQLSTATE:
+                    # A slow query is a bug to fix, not load: alert on it (A8).
+                    log.error("db.statement_timeout", sqlstate=code)
+                else:
+                    log.warning("db.lock_timeout", sqlstate=code)
                 raise DatabaseBusyError from None
             if code not in RETRYABLE_SQLSTATES or attempt == MAX_TRANSACTION_ATTEMPTS:
                 raise

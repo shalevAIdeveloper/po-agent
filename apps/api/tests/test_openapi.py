@@ -28,3 +28,22 @@ def test_protected_operations_declare_bearer_auth() -> None:
         for operation in schema["paths"][path].values():
             assert {"HTTPBearer": []} in operation["security"], path
     assert "security" not in schema["paths"]["/health"]["get"]
+
+
+ERROR_REF = {"$ref": "#/components/schemas/ErrorResponse"}
+
+
+@pytest.mark.parametrize(
+    ("path", "method", "statuses"),
+    [
+        ("/me", "get", {"401", "503"}),
+        ("/orgs", "post", {"400", "401", "409", "503"}),
+        ("/orgs/current", "get", {"400", "401", "404", "503"}),
+        ("/orgs/current", "patch", {"400", "401", "403", "404", "503"}),
+    ],
+)
+def test_error_responses_are_typed(path: str, method: str, statuses: set[str]) -> None:
+    responses = openapi_schema()["paths"][path][method]["responses"]
+
+    for status in statuses:
+        assert responses[status]["content"]["application/json"]["schema"] == ERROR_REF, status

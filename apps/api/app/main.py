@@ -63,7 +63,8 @@ def create_app(settings: Settings | None = None, *, jwks: KeySource | None = Non
             allow_origins=[settings.web_origin],
             allow_methods=["GET", "POST", "PATCH", "DELETE"],
             allow_headers=["Authorization", "Content-Type", "X-Org-Id", REQUEST_ID_HEADER],
-            expose_headers=[REQUEST_ID_HEADER],
+            # Retry-After: the web backs off on 503 `busy` (A8).
+            expose_headers=[REQUEST_ID_HEADER, "Retry-After"],
         )
 
     app.add_exception_handler(OrgServiceError, handle_org_service_error)
