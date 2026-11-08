@@ -33,6 +33,11 @@ python_version = "3.12"
 strict = true
 plugins = ["pydantic.mypy"]
 
+# asyncpg ships no type information; only operator tools import it directly.
+[[tool.mypy.overrides]]
+module = ["asyncpg", "asyncpg.*"]
+ignore_missing_imports = true
+
 [tool.pydantic-mypy]
 init_forbid_extra = true
 init_typed = true

@@ -1,0 +1,107 @@
+name: migrate
+
+# Applies supabase/migrations to a hosted Supabase project (0.5b, ADR 0001).
+#   dev:        on every push to `dev` that changes migrations, or by hand (Run workflow on `dev`).
+#   production: ONLY by hand on `main` (decided 2026-11-08; required reviewers aren't
+#               available for private repos). The `production` environment exists but has
+#               no secret until pilot gate P1, so this job stops with a clear error.
+# Never uses `--include-roles` (would push the local po_api password, A2) or seeds.
+# Runbook: docs/runbooks/supabase-project.md
+#
+# Credentials: one environment secret, SUPABASE_DB_URL (session-pooler URL for the
+# `postgres` role; GitHub runners have no IPv6). No Supabase access token: a personal
+# token can reach every project on the account, including prod (sec M1, 0.5b).
+
+on:
+  push:
+    branches: [dev]
+    paths: ["supabase/migrations/**"]
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "Apply the migrations (unticked = dry run only)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+# One migration run per branch at a time, and never cancelled halfway.
+concurrency:
+  group: migrate-${{ github.ref }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    # Explicit bash adds -o pipefail: a failing `supabase … | tee` fails the step.
+    shell: bash
+
+jobs:
+  migrate:
+    # dev: push or dispatch on `dev`. production: dispatch on `main` only.
+    # The real control is each environment's branch rule (dev → `dev`, production → `main`).
+    if: >-
+      github.ref == 'refs/heads/dev' ||
+      (github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'dev' }}
+    env:
+      TARGET: ${{ github.ref == 'refs/heads/main' && 'production' || 'dev' }}
+      # A push to `dev` applies; a manual run applies only when "apply" is ticked.
+      APPLY: ${{ github.event_name == 'push' || inputs.apply }}
+      SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+    steps:
+      # The secret is passed only to the steps that need it (not to checkout / setup).
+      - name: Environment is configured
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ] || [ -z "$SUPABASE_PROJECT_REF" ]; then
+            echo "::error::GitHub environment '$TARGET' is not configured (needs secret SUPABASE_DB_URL and variable SUPABASE_PROJECT_REF). Production is set up at pilot gate P1 (docs/progress.md)."
+            exit 1
+          fi
+          [[ "$SUPABASE_PROJECT_REF" =~ ^[a-z]{20}$ ]] || { echo "::error::SUPABASE_PROJECT_REF is not a project ref"; exit 1; }
+          # The URL must point at this environment's project and use TLS (sec M3).
+          [[ "$SUPABASE_DB_URL" == postgresql://postgres.$SUPABASE_PROJECT_REF:* ]] \
+            || { echo "::error::SUPABASE_DB_URL is not the postgres session-pooler URL of $SUPABASE_PROJECT_REF"; exit 1; }
+          [[ "$SUPABASE_DB_URL" != *sslmode=disable* && "$SUPABASE_DB_URL" != *sslmode=allow* && "$SUPABASE_DB_URL" != *sslmode=prefer* ]] \
+            || { echo "::error::SUPABASE_DB_URL must not weaken TLS (sslmode)"; exit 1; }
+          echo "Target: $TARGET ($SUPABASE_PROJECT_REF), apply=$APPLY"
+
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with: { persist-credentials: false }
+      # Same CLI version as local dev and the CI `db` job.
+      - uses: supabase/setup-cli@1dedf2c611547ede7232d26866dd3c56ab903bbb # v1.7.3
+        with: { version: "2.117.0" }
+
+      - name: Plan (dry run)
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          supabase db push --db-url "$SUPABASE_DB_URL" --dry-run --output-format json | tee "$RUNNER_TEMP/plan.json"
+          jq -r '"Pending migrations: " + ((.migrations // []) | length | tostring)' "$RUNNER_TEMP/plan.json"
+          # A2: roles (and their local passwords) are never pushed; seeds neither.
+          jq -e '((.roles // []) | length) == 0 and ((.seeds // []) | length) == 0' "$RUNNER_TEMP/plan.json" > /dev/null \
+            || { echo "::error::The plan includes roles or seeds; they must never be pushed"; exit 1; }
+
+      - name: Apply
+        if: env.APPLY == 'true'
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: supabase db push --db-url "$SUPABASE_DB_URL" --output-format json
+
+      - name: Local and remote histories match
+        if: env.APPLY == 'true'
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          supabase migration list --db-url "$SUPABASE_DB_URL" --output-format json | tee "$RUNNER_TEMP/list.json"
+          jq -e '.migrations | length > 0 and all(.local == .remote)' "$RUNNER_TEMP/list.json" > /dev/null \
+            || { echo "::error::Local and remote migration histories differ"; exit 1; }
+
+      # Security and performance advisors on the hosted database. Errors fail the run;
+      # warnings are listed (some are deliberate decisions, e.g. A21's 1 h link expiry).
+      - name: Advisors
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: supabase db advisors --db-url "$SUPABASE_DB_URL" --type all --fail-on error
