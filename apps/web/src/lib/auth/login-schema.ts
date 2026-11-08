@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import type { FormState } from "@/lib/forms/form-state";
+
 /**
  * Login only checks presence and sane bounds. The 12-character policy applies when a
  * password is set (0.4c-2), not here: an older password must still be able to sign in.
@@ -12,17 +14,11 @@ export const loginSchema = z.object({
   next: z.string().optional(),
 });
 
-export type LoginFieldErrors = Partial<Record<"email" | "password", string>>;
+export type LoginField = "email" | "password";
+export type LoginFieldErrors = Partial<Record<LoginField, string>>;
 
-export type LoginState = {
-  /** Increments on every failed submit, so the UI re-announces and re-focuses. */
-  attempt: number;
-  /** Form-level error, shown in an alert above the fields. */
-  error?: string;
-  fieldErrors?: LoginFieldErrors;
-  /** Echoed back so the user doesn't retype it. Never the password. */
-  email?: string;
-};
+/** `values` only ever holds the email, never the password. */
+export type LoginState = FormState<LoginField>;
 
 export function parseLoginForm(formData: FormData) {
   const raw = {

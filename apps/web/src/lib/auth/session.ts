@@ -3,6 +3,7 @@ import "server-only";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 
+import { signedInByRecentEmailLink } from "@/lib/auth/amr";
 import { LOGIN_PATH } from "@/lib/auth/routes";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -11,6 +12,8 @@ export type SignedInUser = {
   email: string | null;
   /** For server-side API calls only. Never pass it to a Client Component. */
   accessToken: string;
+  /** Signed in through an invite/recovery email link in the last 15 minutes (verified JWT `amr`). */
+  recentEmailLinkSignIn: boolean;
 };
 
 /**
@@ -38,10 +41,12 @@ export async function requireUser(): Promise<SignedInUser> {
   // as signed out instead of a 500. redirect() stays outside the try (it throws too).
   let sub: string | undefined;
   let email: unknown;
+  let amr: unknown;
   try {
     const { data } = await supabase.auth.getClaims(accessToken);
     sub = data?.claims.sub;
     email = data?.claims.email;
+    amr = data?.claims.amr;
   } catch {
     sub = undefined;
   }
@@ -53,5 +58,6 @@ export async function requireUser(): Promise<SignedInUser> {
     userId: sub,
     email: typeof email === "string" ? email : null,
     accessToken,
+    recentEmailLinkSignIn: signedInByRecentEmailLink(amr, Math.floor(Date.now() / 1000)),
   };
 }

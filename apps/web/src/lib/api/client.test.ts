@@ -45,6 +45,49 @@ describe("createApiClient().getMe", () => {
   });
 });
 
+describe("createApiClient().createOrganization", () => {
+  it("POSTs JSON with the Bearer token and parses the created org", async () => {
+    const org = ME.organizations[0];
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(
+      new Response(JSON.stringify(org), { status: 201 }),
+    );
+
+    const created = await createApiClient("http://api.test", fetchMock).createOrganization("tok", {
+      name: "Acme Supply",
+      slug: "acme",
+    });
+
+    expect(created).toEqual(org);
+    const [url, init] = fetchMock.mock.calls[0] ?? [];
+    expect(String(url)).toBe("http://api.test/orgs");
+    expect(init?.method).toBe("POST");
+    expect(new Headers(init?.headers).get("authorization")).toBe("Bearer tok");
+    expect(new Headers(init?.headers).get("content-type")).toBe("application/json");
+    expect(JSON.parse(String(init?.body))).toEqual({ name: "Acme Supply", slug: "acme" });
+  });
+
+  it("surfaces the API's error code", async () => {
+    const fetchMock = vi
+      .fn<typeof fetch>()
+      .mockResolvedValue(new Response(JSON.stringify({ detail: "slug_unavailable" }), { status: 409 }));
+
+    await expect(
+      createApiClient("http://api.test", fetchMock).createOrganization("t", { name: "A", slug: "acme" }),
+    ).rejects.toMatchObject({ kind: "http", status: 409, code: "slug_unavailable" });
+  });
+
+  it("GETs send no body and no content-type", async () => {
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(new Response(JSON.stringify(ME)));
+
+    await createApiClient("http://api.test", fetchMock).getMe("t");
+
+    const init = fetchMock.mock.calls[0]?.[1];
+    expect(init?.method).toBe("GET");
+    expect(init?.body).toBeUndefined();
+    expect(new Headers(init?.headers).has("content-type")).toBe(false);
+  });
+});
+
 describe("parseRetryAfter", () => {
   it.each([
     ["2", 2],

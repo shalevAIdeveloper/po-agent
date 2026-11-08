@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
-import { EmptyState } from "@/components/states/empty-state";
 import { ErrorState } from "@/components/states/error-state";
 import { LoadingState } from "@/components/states/loading-state";
 import { Button } from "@/components/ui/button";
@@ -56,6 +56,10 @@ function SignOutButton({ label = "Sign out" }: { label?: string }) {
 async function Workspace() {
   const user = await requireUser();
   const result = await loadMe(user.accessToken);
+  // No organization yet: create one. Users an admin added to an org never get here.
+  if (result.status === "ok" && result.me.organizations.length === 0) {
+    redirect("/onboarding");
+  }
 
   return (
     <>
@@ -98,24 +102,17 @@ function Organizations({ me }: { me: Me }) {
       <h2 id="orgs-heading" className="text-lg font-medium">
         {heading}
       </h2>
-      {me.organizations.length === 0 ? (
-        <EmptyState
-          title="No organization yet"
-          description="You're not a member of any organization. Ask your organization's admin to invite you."
-        />
-      ) : (
-        <ul className="flex flex-col gap-2">
-          {me.organizations.map((org) => (
-            <li key={org.id} className="flex items-center justify-between rounded-lg border p-4">
-              <span className="font-medium">{org.name}</span>
-              <span className="text-sm text-muted-foreground">
-                <span className="sr-only">Role: </span>
-                {org.role}
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
+      <ul className="flex flex-col gap-2">
+        {me.organizations.map((org) => (
+          <li key={org.id} className="flex items-center justify-between rounded-lg border p-4">
+            <span className="font-medium">{org.name}</span>
+            <span className="text-sm text-muted-foreground">
+              <span className="sr-only">Role: </span>
+              {org.role}
+            </span>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }

@@ -105,23 +105,33 @@ async function errorFromResponse(response: Response): Promise<ApiError> {
 type RequestOptions = {
   /** Supabase access token; sent as a Bearer token, never logged. */
   accessToken?: string;
+  method?: "GET" | "POST" | "PATCH";
+  /** Sent as JSON. */
+  body?: unknown;
 };
+
+export type OrganizationCreate = Schemas["OrganizationCreate"];
 
 export function createApiClient(baseUrl: string, fetchImpl: Fetch = fetch) {
   async function request<T>(
     path: string,
     schema: z.ZodType<T>,
-    { accessToken }: RequestOptions = {},
+    { accessToken, method = "GET", body: requestBody }: RequestOptions = {},
   ): Promise<T> {
     const headers: Record<string, string> = { accept: "application/json" };
     if (accessToken !== undefined) {
       headers.authorization = `Bearer ${accessToken}`;
     }
+    if (requestBody !== undefined) {
+      headers["content-type"] = "application/json";
+    }
 
     let response: Response;
     try {
       response = await fetchImpl(resolveApiUrl(baseUrl, path), {
+        method,
         headers,
+        body: requestBody === undefined ? undefined : JSON.stringify(requestBody),
         cache: "no-store",
         signal: AbortSignal.timeout(DEFAULT_TIMEOUT_MS),
       });
@@ -150,6 +160,9 @@ export function createApiClient(baseUrl: string, fetchImpl: Fetch = fetch) {
   return {
     getHealth: () => request("/health", healthSchema),
     getMe: (accessToken: string) => request("/me", meSchema, { accessToken }),
+    // Not retried: a timeout after the API committed would otherwise create a second org.
+    createOrganization: (accessToken: string, body: OrganizationCreate) =>
+      request("/orgs", organizationSchema, { accessToken, method: "POST", body }),
   };
 }
 

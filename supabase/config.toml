@@ -231,8 +231,10 @@ enable_confirmations = true
 secure_password_change = true
 # Controls the minimum amount of time that must pass before sending another signup confirmation or password reset email.
 max_frequency = "1s"
-# Number of characters used in the email OTP.
-otp_length = 6
+# Number of characters used in the email OTP. 8, not 6: every recovery/magic-link
+# email also carries a code that can be verified directly against Auth, and an `otp`
+# session passes the /set-password gate (sec L, 0.4c-2). Mirror in hosted (A14).
+otp_length = 8
 # Number of seconds before the email OTP expires (defaults to 1 hour).
 otp_expiry = 3600
 
@@ -246,10 +248,21 @@ otp_expiry = 3600
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
 
-# Uncomment to customize email template
-# [auth.email.template.invite]
-# subject = "You have been invited"
-# content_path = "./supabase/templates/invite.html"
+# Links go to /auth/confirm with token_hash (verified on POST, ADR 0007). Hosted
+# projects need the same templates, which requires custom SMTP on new Free projects (A11).
+[auth.email.template.invite]
+subject = "You've been invited to PO Agent"
+content_path = "./supabase/templates/invite.html"
+
+[auth.email.template.recovery]
+subject = "Reset your PO Agent password"
+content_path = "./supabase/templates/recovery.html"
+
+# Magic-link sign-in is not a product flow, but Auth sends it to any existing user on
+# request (POST /otp). Neutral text, no link or code, so it can't be used or phished.
+[auth.email.template.magic_link]
+subject = "PO Agent sign-in request"
+content_path = "./supabase/templates/magic_link.html"
 
 # Uncomment to customize notification email template
 # [auth.email.notification.password_changed]

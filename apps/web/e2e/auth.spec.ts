@@ -53,7 +53,7 @@ test.describe("auth (real Supabase + API)", () => {
     // Focus moves to the message, and both fields point at it.
     await expect(formAlert(page)).toBeFocused();
     await expect(page.getByLabel("Password")).toHaveAttribute("aria-invalid", "true");
-    await expect(page.getByLabel("Password")).toHaveAttribute("aria-describedby", "login-error");
+    await expect(page.getByLabel("Password")).toHaveAttribute("aria-describedby", "form-error");
     await expect(page.getByLabel("Email")).toHaveValue(owner.email);
     await expect(page.getByLabel("Password")).toHaveValue("");
     await expect(page).toHaveURL(/\/login$/);
@@ -98,13 +98,13 @@ test.describe("auth (real Supabase + API)", () => {
     await expect(page).toHaveURL(/\/login\?next=%2Fapp$/);
   });
 
-  test("a user without an organization sees the empty state", async ({ page }) => {
+  test("a user without an organization is sent to onboarding", async ({ page }) => {
     await page.goto("/login");
     await signIn(page, orgless);
 
-    await expect(page.getByText("No organization yet")).toBeVisible();
-    await expect(page.getByRole("heading", { level: 2, name: "Your organization" })).toBeVisible();
-    await expect(page).toHaveTitle("Your organizations · PO Agent");
+    await expect(page).toHaveURL(/\/onboarding$/);
+    await expect(page.getByRole("heading", { level: 1, name: "Set up your organization" })).toBeVisible();
+    await expect(page).toHaveTitle("Set up your organization · PO Agent");
   });
 
   test("an external `next` is ignored after sign in", async ({ page }) => {
