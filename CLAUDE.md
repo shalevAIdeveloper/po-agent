@@ -46,6 +46,7 @@ The developer uses **Windows + PowerShell**. Give commands in PowerShell syntax 
 - Never push directly to `dev` or `main`. Never force-push shared branches.
 - Conventional Commits: `feat:`, `fix:`, `chore:`, `docs:`, `test:`, `refactor:`.
 - Never edit an applied migration; add a new one.
+- Never weaken CI to make it pass (removing jobs from `ci-ok.needs`, loosening its check, skipping steps, `continue-on-error`). Fix the cause; any intended CI change is called out explicitly in the PR.
 
 ## Working style
 - **Plan → approve → execute.** For any non-trivial task, write a plan (files to touch, tests to add, risks) and wait for approval before coding.
