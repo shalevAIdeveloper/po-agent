@@ -2,14 +2,16 @@
 
 Runs on the operator's machine only; never deployed. It asks (hidden input) for:
   1. the `postgres` session-pooler connection string of the project (Dashboard → Connect);
-  2. the new po_api password, twice.
+  2. the new po_api password, twice — or, with --generate, creates one itself (40 letters
+     and digits) and prints it once at the end, together with the po_api connection string.
+After each hidden input it prints only what arrived (length, expected prefix), never content.
 It computes the SCRAM-SHA-256 verifier locally and runs
 `ALTER ROLE po_api PASSWORD '<verifier>'`, so neither the SQL editor's saved snippets
 nor database logs ever see the password itself (sec M2, 0.5b). Postgres stores a
 pre-hashed SCRAM verifier as is.
 
 Usage (from apps/api, PowerShell):
-    uv run python -m tools.set_api_role_password [--ca-file prod-ca-2021.crt]
+    uv run python -m tools.set_api_role_password --generate [--ca-file prod-ca-2021.crt]
 Then check: uv run python -m tools.check_api_role
 Runbook: docs/runbooks/supabase-project.md
 """
@@ -25,9 +27,10 @@ import hmac
 import re
 import secrets
 import ssl
+import string
 import sys
 from collections.abc import Callable
-from urllib.parse import parse_qs, unquote, urlsplit
+from urllib.parse import parse_qs, quote, unquote, urlsplit, urlunsplit
 
 import asyncpg
 
@@ -116,25 +119,78 @@ async def apply_verifier(admin_url: str, ssl_context: ssl.SSLContext | None, ver
         await conn.close()
 
 
+GENERATED_LENGTH = 40
+GENERATED_ALPHABET = string.ascii_letters + string.digits
+
+
+def generate_password(length: int = GENERATED_LENGTH) -> str:
+    """Letters and digits only: nothing to percent-encode in a connection string."""
+    return "".join(secrets.choice(GENERATED_ALPHABET) for _ in range(length))
+
+
+def describe_url_input(value: str) -> str:
+    """What was received, without any of its content (hidden prompts are easy to mis-paste)."""
+    starts = "yes" if value.startswith(("postgresql://", "postgres://")) else "no"
+    return f"received {len(value)} chars, starts with postgresql://: {starts}"
+
+
+def describe_secret_input(value: str) -> str:
+    return f"received {len(value)} chars"
+
+
+def api_role_url(admin_url: str, password: str) -> str:
+    """The po_api connection string on the same pooler: user postgres.<ref> → po_api.<ref>."""
+    parts = urlsplit(admin_url)
+    user = unquote(parts.username or "")
+    suffix = user.split(".", 1)[1] if "." in user else ""
+    api_user = f"po_api.{suffix}" if suffix else "po_api"
+    hostport = parts.netloc.rsplit("@", 1)[1]
+    netloc = f"{api_user}:{quote(password, safe='')}@{hostport}"
+    return urlunsplit((parts.scheme, netloc, parts.path, parts.query, parts.fragment))
+
+
 def main(argv: list[str] | None = None, prompt: Callable[[str], str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="python -m tools.set_api_role_password")
     parser.add_argument("--ca-file", help="Supabase CA certificate for verify-full TLS")
+    parser.add_argument(
+        "--generate",
+        action="store_true",
+        help=f"generate a {GENERATED_LENGTH}-character password and print it once at the end",
+    )
     args = parser.parse_args(argv)
     ask = prompt if prompt is not None else (getpass.getpass if sys.stdin.isatty() else None)
     try:
         if ask is None:
             raise ToolError("Run this in an interactive terminal: it asks for the secrets.")
-        admin_url, context = parse_admin_url(
-            ask("postgres connection string (input hidden): "), args.ca_file
-        )
-        password = ask("new po_api password (input hidden): ")
-        validate_password(password, ask("repeat the po_api password: "))
+        # Paste into a hidden prompt can pick up stray whitespace or line breaks: strip
+        # them (passwords may not contain spaces anyway) and confirm what arrived.
+        raw_url = ask("postgres connection string (input hidden): ").strip()
+        print(describe_url_input(raw_url))
+        admin_url, context = parse_admin_url(raw_url, args.ca_file)
+
+        if args.generate:
+            password = generate_password()
+        else:
+            password = ask("new po_api password (input hidden): ").strip()
+            print(describe_secret_input(password))
+            confirm = ask("repeat the po_api password: ").strip()
+            print(describe_secret_input(confirm))
+        validate_password(password, password if args.generate else confirm)
         asyncio.run(apply_verifier(admin_url, context, scram_verifier(password)))
     except ToolError as error:
         print(f"error: {error}", file=sys.stderr)
         return 1
+
     print("po_api password set (only a SCRAM verifier was sent).")
-    print("Next: uv run python -m tools.check_api_role")
+    if args.generate:
+        # Shown once, at the very end, so it's the last thing on screen to copy.
+        print()
+        print("Save these in your password manager NOW; they are not stored anywhere else:")
+        print(f"  po_api password:          {password}")
+        print(f"  po_api connection string: {api_role_url(admin_url, password)}")
+        print()
+        print("Then clear the screen and scrollback: cls (PowerShell: Clear-Host).")
+    print("Next: uv run python -m tools.check_api_role --ca-file <certificate>")
     return 0
 
 
