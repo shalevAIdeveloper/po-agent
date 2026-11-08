@@ -44,6 +44,11 @@ $env:E2E_SUPABASE_SECRET_KEY = "<SECRET_KEY from supabase status>"
 pnpm test:e2e
 ```
 
+The invite / reset specs (`e2e/onboarding.spec.ts`) read their links from Mailpit
+(`http://127.0.0.1:54324`, override with `E2E_MAILPIT_URL`) and run the operator tool
+`apps/api/tools/add_member.py` through `uv`. Email templates use the Site URL (port 3000),
+so the tests open the same `/auth/confirm?...` path on port 3100.
+
 Without `E2E_AUTH` the auth specs are skipped (that is what the `web` CI job runs; the
 `e2e-auth` job runs them).
 

@@ -1,35 +1,27 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import Link from "next/link";
+import { useActionState, useRef } from "react";
 
+import {
+  FORM_ERROR_ID,
+  FormFeedback,
+  PendingStatus,
+  useFocusAfterSubmit,
+} from "@/components/forms/form-feedback";
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/text-field";
-import type { LoginState } from "@/lib/auth/login-schema";
+import type { LoginField, LoginState } from "@/lib/auth/login-schema";
 
 import { login } from "./actions";
 
 const INITIAL_STATE: LoginState = { attempt: 0 };
-const FORM_ERROR_ID = "login-error";
+const FIELD_ORDER: readonly LoginField[] = ["email", "password"];
 
 export function LoginForm({ next }: { next?: string }) {
   const [state, formAction, pending] = useActionState(login, INITIAL_STATE);
   const formRef = useRef<HTMLFormElement>(null);
-
-  // After each failed attempt, move focus to what needs attention: the first invalid
-  // field, else the form-level alert. Without this, focus is lost while pending.
-  useEffect(() => {
-    if (state.attempt === 0) return;
-    const selector = state.fieldErrors?.email
-      ? "#email"
-      : state.fieldErrors?.password
-        ? "#password"
-        : state.error
-          ? `#${FORM_ERROR_ID}`
-          : null;
-    if (selector) {
-      formRef.current?.querySelector<HTMLElement>(selector)?.focus();
-    }
-  }, [state]);
+  useFocusAfterSubmit(formRef, state, FIELD_ORDER);
 
   const credentialsError = Boolean(state.error);
 
@@ -45,21 +37,8 @@ export function LoginForm({ next }: { next?: string }) {
       }}
       className="flex flex-col gap-4"
     >
-      {state.error ? (
-        <p
-          // A new element per attempt, so an identical message is announced again.
-          key={state.attempt}
-          id={FORM_ERROR_ID}
-          role="alert"
-          tabIndex={-1}
-          className="rounded-md border border-destructive/40 p-3 text-sm text-destructive outline-none focus-visible:ring-3 focus-visible:ring-ring"
-        >
-          {state.error}
-        </p>
-      ) : null}
-      <span role="status" className="sr-only">
-        {pending ? "Signing in…" : ""}
-      </span>
+      <FormFeedback state={state} />
+      <PendingStatus pending={pending} label="Signing in…" />
       {next ? <input type="hidden" name="next" value={next} /> : null}
       <TextField
         id="email"
@@ -68,7 +47,7 @@ export function LoginForm({ next }: { next?: string }) {
         label="Email"
         autoComplete="username"
         required
-        defaultValue={state.email}
+        defaultValue={state.values?.email}
         // Remount after each attempt so defaultValue reflects the echoed email.
         key={`email-${state.attempt}`}
         error={state.fieldErrors?.email}
@@ -96,6 +75,14 @@ export function LoginForm({ next }: { next?: string }) {
       >
         {pending ? "Signing in…" : "Sign in"}
       </Button>
+      <p className="text-sm">
+        <Link
+          href="/forgot-password"
+          className="rounded-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+        >
+          Forgot your password?
+        </Link>
+      </p>
     </form>
   );
 }

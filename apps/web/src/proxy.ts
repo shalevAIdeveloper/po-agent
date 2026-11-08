@@ -14,5 +14,7 @@ export const config = {
     // Everything under /app, even paths with a file extension (e.g. a future export.xml
     // Route Handler), always gets the session refresh and the guard.
     "/app/:path*",
+    "/onboarding/:path*",
+    "/set-password/:path*",
   ],
 };

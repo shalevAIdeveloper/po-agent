@@ -15,6 +15,10 @@ export default defineConfig({
   forbidOnly: isCI,
   retries: isCI ? 1 : 0,
   reporter: isCI ? [["github"], ["html", { open: "never" }]] : "list",
+  // Server-rendered auth pages call Auth and then the API before they leave their
+  // loading state; under parallel load (and on CI runners) that can exceed the
+  // default 5 s. Seen once locally in 0.4c-2: /app stuck on "Loading" at 5 s.
+  expect: { timeout: 10_000 },
   use: {
     baseURL: `http://localhost:${PORT}`,
     trace: "retain-on-failure",

@@ -51,7 +51,7 @@ jobs:
       - run: uv sync --frozen
       - run: uv run ruff check .
       - run: uv run ruff format --check .
-      - run: uv run mypy app
+      - run: uv run mypy app tools
       - run: uv run pytest -q
 
   web:
@@ -112,10 +112,11 @@ jobs:
         with: { persist-credentials: false }
       - uses: supabase/setup-cli@1dedf2c611547ede7232d26866dd3c56ab903bbb # v1.7.3
         with: { version: "2.117.0" }
+      # Mailpit stays: invite and reset e2e read their links from it.
       - working-directory: .
         run: >-
           supabase start
-          -x realtime,storage-api,imgproxy,mailpit,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+          -x realtime,storage-api,imgproxy,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
       # Local-only, well-known keys of the throwaway stack (not secrets).
       - name: Export local Supabase keys
         working-directory: .
@@ -158,11 +159,12 @@ jobs:
       # Same CLI version as local dev; the v3 upgrade is a separate PR.
       - uses: supabase/setup-cli@1dedf2c611547ede7232d26866dd3c56ab903bbb # v1.7.3
         with: { version: "2.117.0" }
-      # Postgres + Auth (GoTrue behind Kong) only: applies roles.sql and all
-      # migrations to a fresh database; auth is needed for the API integration tests.
+      # Postgres + Auth (GoTrue behind Kong) + PostgREST: applies roles.sql and all
+      # migrations to a fresh database; Auth and the Data API (the admin tool's RPC)
+      # are needed for the API integration tests.
       - run: >-
           supabase start
-          -x realtime,storage-api,imgproxy,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+          -x realtime,storage-api,imgproxy,mailpit,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
       # Local-only, well-known keys of the throwaway stack (not secrets).
       - name: Export local Supabase keys for integration tests
         run: |
