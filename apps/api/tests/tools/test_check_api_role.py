@@ -190,6 +190,16 @@ def test_cli_without_a_terminal_is_an_error(
     assert "interactive terminal" in capsys.readouterr().err
 
 
+def test_cli_confirms_the_paste_without_content(capsys: pytest.CaptureFixture[str]) -> None:
+    pasted = "aws-0-us-east-1.pooler.supabase.com\r\n"  # a wrong, partial paste
+
+    assert tool.main([], prompt=lambda _msg: pasted) == 1
+
+    out = capsys.readouterr()
+    assert "received 35 chars, starts with postgresql://: no" in out.out
+    assert "pooler.supabase.com" not in out.out
+
+
 def test_cli_never_prints_the_password(capsys: pytest.CaptureFixture[str]) -> None:
     code = tool.main([], prompt=lambda _msg: "postgresql://postgres:hunter2@h/postgres")
 

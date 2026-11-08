@@ -38,12 +38,16 @@ Never run `supabase db push --include-roles` against a hosted project: it would 
 
 ## 4. The API role `po_api` (A2)
 Migrations create `po_api` **without a password**, so it can't log in until you set one.
-1. Generate a strong password in the password manager: 24–72 printable ASCII characters, no spaces.
-2. **Don't type it in the SQL editor**: Supabase saves editor queries as snippets, and logs may record the statement (`sec` M2). From `apps/api`:
+1. **Don't type the password in the SQL editor**: Supabase saves editor queries as snippets, and logs may record the statement (`sec` M2).
+2. From `apps/api`, let the tool generate it:
    ```powershell
-   uv run python -m tools.set_api_role_password
+   uv run python -m tools.set_api_role_password --generate --ca-file <path to prod-ca-2021.crt>
    ```
-   It asks (hidden) for the `postgres` session-pooler connection string (the same one as `SUPABASE_DB_URL`) and the new password twice. It computes the SCRAM-SHA-256 verifier on your machine and sends only that.
+   - It asks (hidden) only for the `postgres` session-pooler connection string, the same one as `SUPABASE_DB_URL`.
+   - After the paste it prints just `received N chars, starts with postgresql://: yes`, never the content. If it says `no`, or the length looks wrong, the paste didn't arrive whole; nothing has been sent yet.
+   - It generates a 40-character password (letters and digits, so nothing needs encoding). It computes the SCRAM-SHA-256 verifier on your machine and sends only that.
+   - It prints the password and the ready `po_api` connection string **once**, at the end. Save both in the password manager, then clear the screen and scrollback with `cls`.
+   - Without `--generate` it asks for a password twice (24–72 printable ASCII characters, no spaces) and confirms only the length of each input.
 3. The API's `DATABASE_URL` (Railway only, 0.5c) is the **session pooler** URL for user `po_api.<ref>` with that password: Supavisor session mode, port 5432, works over IPv4. The direct connection is IPv6-only.
 4. Check it:
    ```powershell

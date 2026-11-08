@@ -261,7 +261,11 @@ def main(argv: list[str] | None = None, prompt: Callable[[str], str] | None = No
             raise ToolError(
                 "Run this in an interactive terminal: it asks for the connection string."
             )
-        target = parse_target(ask("po_api connection string (input hidden): "), args.ca_file)
+        raw = ask("po_api connection string (input hidden): ").strip()
+        # Hidden prompts are easy to mis-paste: confirm what arrived, never its content.
+        starts = "yes" if raw.startswith(("postgresql://", "postgres://")) else "no"
+        print(f"received {len(raw)} chars, starts with postgresql://: {starts}")
+        target = parse_target(raw, args.ca_file)
         results = asyncio.run(run_checks(target))
     except ToolError as error:
         print(f"error: {error}", file=sys.stderr)
