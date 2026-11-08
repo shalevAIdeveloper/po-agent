@@ -12,7 +12,8 @@ test("home page renders and resolves the API status", async ({ page }) => {
     .getByRole("status")
     .filter({ hasText: "API is up" })
     .or(page.getByRole("alert").filter({ hasText: "API unreachable" }));
-  await expect(resolved).toBeVisible();
+  // Longer than the API client's 5 s timeout, so a hung API still resolves (W4).
+  await expect(resolved).toBeVisible({ timeout: 10_000 });
 });
 
 test("unknown route shows the not-found state", async ({ page }) => {

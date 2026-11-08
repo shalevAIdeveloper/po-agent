@@ -6,6 +6,7 @@ from typing import Any
 from uuid import uuid4
 
 import pytest
+import structlog
 from sqlalchemy.exc import DBAPIError
 
 from app import db
@@ -159,3 +160,19 @@ async def test_timeouts_become_busy_and_are_not_retried(
         await db.run_as_user(USER.claims, work)
     assert len(fake_transactions) == 1
     assert excinfo.value.__cause__ is None
+
+
+@pytest.mark.parametrize(
+    ("sqlstate", "event", "level"),
+    [("57014", "db.statement_timeout", "error"), ("55P03", "db.lock_timeout", "warning")],
+)
+async def test_statement_and_lock_timeouts_are_logged_apart(
+    fake_transactions: list[Mapping[str, Any]], sqlstate: str, event: str, level: str
+) -> None:
+    async def work(_session: Any) -> str:
+        raise _db_error(sqlstate)
+
+    with structlog.testing.capture_logs() as logs, pytest.raises(db.DatabaseBusyError):
+        await db.run_as_user(USER.claims, work)
+
+    assert [(entry["event"], entry["log_level"]) for entry in logs] == [(event, level)]

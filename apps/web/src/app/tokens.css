@@ -29,7 +29,8 @@
   --muted-foreground: oklch(0.556 0 0);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  /* Focus indicator: >= 3:1 against the background (WCAG 1.4.11); used at full opacity. */
+  --ring: oklch(0.556 0 0);
 
   /* ---- actions ---- */
   /* --primary is THE brand accent (SPEC §12: one confident accent; M3 picks it). */

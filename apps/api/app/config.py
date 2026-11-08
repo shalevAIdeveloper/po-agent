@@ -1,7 +1,7 @@
+import re
 from enum import StrEnum
 from functools import lru_cache
 from typing import Literal, Self
-from urllib.parse import urlsplit
 
 from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -23,6 +23,7 @@ LogLevel = Literal["DEBUG", "INFO", "WARNING", "ERROR"]
 _LABEL = r"[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?"
 _ORIGIN_PATTERN = rf"^https?://{_LABEL}(?:\.{_LABEL})*(:\d{{1,5}})?$"
 _MAX_PORT = 65535
+_PORT_SUFFIX = re.compile(r":(\d{1,5})$")
 
 # Outside local these must use TLS: the JWKS fetched over plain http could be
 # swapped in transit, letting anyone on the path mint valid tokens.
@@ -70,8 +71,12 @@ class Settings(BaseSettings):
     @field_validator("supabase_url", "web_origin")
     @classmethod
     def _port_in_range(cls, value: str | None) -> str | None:
-        if value is not None and (port := urlsplit(value).port) is not None and port > _MAX_PORT:
-            raise ValueError("port out of range")
+        # The pattern already limits the port to 1-5 digits; read it from the string
+        # rather than urlsplit(), whose `.port` raises on out-of-range values (A8).
+        if value is not None and (match := _PORT_SUFFIX.search(value)):
+            port = int(match.group(1))
+            if not 1 <= port <= _MAX_PORT:
+                raise ValueError("port out of range")
         return value
 
     @model_validator(mode="after")

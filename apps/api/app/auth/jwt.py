@@ -62,7 +62,11 @@ class JwksClient:
         self._lock = asyncio.Lock()
 
     async def get_key(self, kid: str) -> jwt.PyJWK | None:
-        if self._should_refresh(kid, _monotonic()):
+        # Also wait when a refresh is already in flight and we lack this kid: it may be
+        # the first fetch (no keys yet → would be a 503) or a rotation bringing the kid
+        # (→ would be a 401). Callers with a known kid never wait (A7 covers the rest).
+        in_flight = self._lock.locked() and kid not in self._keys
+        if in_flight or self._should_refresh(kid, _monotonic()):
             async with self._lock:
                 # Re-check: a concurrent caller may have refreshed while we waited.
                 if self._should_refresh(kid, _monotonic()):

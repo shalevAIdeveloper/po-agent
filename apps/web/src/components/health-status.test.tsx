@@ -30,7 +30,7 @@ describe("HealthStatus", () => {
   });
 
   it("shows an error state on an unexpected response", async () => {
-    vi.spyOn(api, "getHealth").mockRejectedValue(new ApiError("invalid_response", 200));
+    vi.spyOn(api, "getHealth").mockRejectedValue(new ApiError("invalid_response", { status: 200 }));
 
     render(await HealthStatus());
 
@@ -38,7 +38,7 @@ describe("HealthStatus", () => {
   });
 
   it("shows the HTTP status when the API answers with an error", async () => {
-    vi.spyOn(api, "getHealth").mockRejectedValue(new ApiError("http", 503));
+    vi.spyOn(api, "getHealth").mockRejectedValue(new ApiError("http", { status: 503 }));
 
     render(await HealthStatus());
 

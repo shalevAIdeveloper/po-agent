@@ -52,6 +52,8 @@ def test_cloud_env_accepts_complete_settings(monkeypatch: pytest.MonkeyPatch) ->
         "https://-h.example",
         "https://h.example:99999",
         "https://h.example:65536",
+        "https://h.example:0",
+        "https://h.example:00000",
         "HTTPS://h.example",
     ],
 )
