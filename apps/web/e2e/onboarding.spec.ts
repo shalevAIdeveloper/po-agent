@@ -154,6 +154,10 @@ test.describe("invite, onboarding, reset (real Supabase + API + Mailpit)", () =>
 
     await page.goto("/login");
     await page.getByRole("link", { name: "Forgot your password?" }).click();
+    // Wait for the client-side navigation: /login has an Email field too, and filling
+    // it before the page switches submits an empty reset form (seen in CI).
+    await expect(page).toHaveURL(/\/forgot-password$/);
+    await expect(page.getByRole("heading", { level: 1, name: "Reset your password" })).toBeVisible();
     await page.getByLabel("Email").fill(user.email);
     await page.getByRole("button", { name: "Send reset link" }).click();
     await expect(page.locator("form").getByRole("status").filter({ hasText: "If an account exists" })).toBeVisible();
