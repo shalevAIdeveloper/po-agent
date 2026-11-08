@@ -88,7 +88,11 @@ jobs:
       - run: pnpm build
       # W5: browsers cached per Playwright version; OS deps are still installed each run.
       - id: pw
-        run: echo "version=$(pnpm exec playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+        # Fail on an empty version: the key would collapse to "playwright-Linux-".
+        run: |
+          v=$(pnpm exec playwright --version | awk '{print $2}')
+          test -n "$v"
+          echo "version=$v" >> "$GITHUB_OUTPUT"
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/ms-playwright
@@ -148,7 +152,11 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - id: pw
-        run: echo "version=$(pnpm exec playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+        # Fail on an empty version: the key would collapse to "playwright-Linux-".
+        run: |
+          v=$(pnpm exec playwright --version | awk '{print $2}')
+          test -n "$v"
+          echo "version=$v" >> "$GITHUB_OUTPUT"
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/ms-playwright
@@ -226,6 +234,7 @@ jobs:
   # failed, every other job is skipped and that must not count as green).
   ci-ok:
     if: always()
+    # Every job must be listed here, or it isn't covered by the required check.
     needs: [changes, api, web, e2e-auth, db, evals]
     runs-on: ubuntu-latest
     steps:

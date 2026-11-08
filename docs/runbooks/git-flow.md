@@ -36,7 +36,9 @@ Merge only after `ci-ok` is green and you have clicked through dev. Prod migrati
 ## Branch protection (0.5a, GitHub Pro)
 `dev` and `main`:
 - Changes only through pull requests; 0 approvals required (solo developer).
-- Required status check: **`ci-ok`** only. It aggregates every CI job and treats path-filtered (skipped) jobs as passing, so the required check list never needs to change when jobs are added.
+- Required status check: **`ci-ok`** only, pinned to the GitHub Actions app (id 15368). It aggregates the CI jobs and treats path-filtered (skipped) jobs as passing, so the protection rule never changes. **Every new job must be added to `ci-ok.needs`** in `ci.yml`, or it isn't covered.
+- A PR runs its own copy of the workflow, so a PR could weaken `ci-ok`. Review every PR that touches `.github/**` line by line; agents must never weaken CI (CLAUDE.md).
+- Emergency (protection blocks a fix you must ship): turn protection off for that branch, push, turn it back on with the same JSON, and note it in `docs/progress.md`.
 - No force pushes, no branch deletion; rules apply to admins too.
 
 Check: `gh api repos/shalevAIdeveloper/po-agent/branches/dev/protection`. A direct `git push origin dev` must be rejected.
