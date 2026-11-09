@@ -83,7 +83,8 @@ for path in /docs /openapi.json /redoc; do
     || fail "$path must be 404 outside local"
 done
 curl -s -o /dev/null "http://127.0.0.1:18080/me?token_hash=SECRET-QUERY"
-docker logs po-smoke-api 2>&1 | grep -q '"event": "http.request"' || fail "no request log"
+# Wait for the last request's log line (the log driver can lag), then check for leaks.
+wait_log po-smoke-api '"path": "/me"' || fail "no request log"
 docker logs po-smoke-api 2>&1 | grep -E "$LEAK|SECRET-QUERY" && fail "secret in api logs"
 
 echo "--- worker: starts, stops cleanly on SIGTERM"
