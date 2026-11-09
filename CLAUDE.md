@@ -58,6 +58,7 @@ The developer uses **Windows + PowerShell**. Give commands in PowerShell syntax 
 
 ## Code conventions
 - Python: type hints everywhere, Pydantic models at API boundaries, no business logic in route handlers (use `app/services/`), async DB access, `structlog` JSON logs, no PII or document contents in logs.
+- SQL in the API is always schema-qualified (`public.organizations`, `public.create_organization(...)`), never relying on `search_path` (a temp table could shadow a name; A4). Only `text(...)` with literals or module-constant f-strings; enforced by `apps/api/tests/test_sql_schema_qualified.py`.
 - TypeScript: strict, no `any`, server components by default, data fetching through a typed API client, Zod for form validation.
 - UI: use design tokens only (no hard-coded colors/spacing); every screen has loading, empty, and error states; keyboard accessible.
 - Env vars: documented in `.env.example`. Never commit secrets. Service-role key only on the server.
