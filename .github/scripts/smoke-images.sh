@@ -104,15 +104,28 @@ docker build -t "$WEB_IMAGE" \
   apps/web
 echo "::endgroup::"
 
+# Builds that must be refused by the Dockerfile's guard. The expected text only exists
+# in the guard's real output ("build refused: NAME ..."), never in the echoed RUN line.
+expect_refused_build() { # api_url supabase_url key expected_name
+  if docker build --progress=plain -t po-agent-web:refused \
+    --build-arg "NEXT_PUBLIC_API_URL=$1" \
+    --build-arg "NEXT_PUBLIC_SUPABASE_URL=$2" \
+    --build-arg "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$3" \
+    apps/web >/tmp/web-refused.log 2>&1; then
+    fail "web built with API_URL='$1' SUPABASE_URL='$2' KEY='$3'"
+  fi
+  grep -q "build refused: $4 " /tmp/web-refused.log || fail "web build failed for another reason ($4)"
+}
+
 echo "--- web image: a secret key as the publishable key fails the build"
-if docker build -q -t po-agent-web:bad-key \
-  --build-arg NEXT_PUBLIC_API_URL=https://api.example.test \
-  --build-arg NEXT_PUBLIC_SUPABASE_URL=https://ref.supabase.co \
-  --build-arg NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_secret_not-a-real-key \
-  apps/web >/tmp/web-bad-key.log 2>&1; then
-  fail "web built with an sb_secret_ key"
-fi
-grep -q "must be an sb_publishable_ key" /tmp/web-bad-key.log || fail "unexpected web build error"
+expect_refused_build https://api.example.test https://ref.supabase.co sb_secret_not-a-real-key \
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+
+echo "--- web image: a missing or unresolved URL fails the build"
+for bad in "" "https://" 'https://${{api.RAILWAY_PUBLIC_DOMAIN}}' "http://api.example.test"; do
+  expect_refused_build "$bad" https://ref.supabase.co sb_publishable_placeholder NEXT_PUBLIC_API_URL
+done
+expect_refused_build https://api.example.test "" sb_publishable_placeholder NEXT_PUBLIC_SUPABASE_URL
 
 echo "--- web image: contents"
 docker run --rm --entrypoint sh "$WEB_IMAGE" -c '
@@ -120,6 +133,10 @@ docker run --rm --entrypoint sh "$WEB_IMAGE" -c '
   test -f /app/server.js || { echo "no standalone server"; exit 1; }
   ! test -w /app/server.js || { echo "runtime user can rewrite server.js"; exit 1; }
   test -w /app/.next/cache || { echo ".next/cache must be writable"; exit 1; }
+  # The build args must really be inlined: NEXT_PUBLIC_* are fixed at build time. Today
+  # both are used by server code only (no browser Supabase client yet, ADR 0007).
+  grep -rqF "https://api.example.test" /app/.next/server || { echo "API URL not in the build"; exit 1; }
+  grep -rqF "https://ref.supabase.co" /app/.next/server || { echo "Supabase URL not in the build"; exit 1; }
   if find /app -path /app/node_modules -prune -o \( -name ".env*" -o -name "*.test.*" -o -name e2e \) -print | grep -q .; then
     echo "unexpected files"; exit 1
   fi

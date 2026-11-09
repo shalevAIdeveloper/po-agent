@@ -19,11 +19,22 @@ COPY . .
 ARG NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_SUPABASE_URL
 ARG NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-# Refuse before building: a secret key here would ship to every browser.
-RUN case "$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY" in \
+# Refuse before building: a secret key here would ship to every browser, and a missing
+# or unresolved URL (empty, bare "https://", or a literal "${{api.RAILWAY_PUBLIC_DOMAIN}}"
+# when the api domain doesn't exist yet) would bake a broken API address into the bundle.
+# (Messages are printf-formatted so the smoke test matches real output, not the
+# command text Docker echoes on failure.)
+RUN refuse() { printf 'build refused: %s %s\n' "$1" "$2" >&2; exit 1; }; \
+    case "$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY" in \
       sb_publishable_*) ;; \
-      *) echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY must be an sb_publishable_ key" >&2; exit 1 ;; \
-    esac
+      *) refuse NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY "must be an sb_publishable_ key" ;; \
+    esac; \
+    for pair in "NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL" \
+                "NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL"; do \
+      name="${pair%%=*}"; value="${pair#*=}"; \
+      printf '%s' "$value" | grep -Eq '^https://[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+(:[0-9]{1,5})?$' \
+        || refuse "$name" "must be an https:// origin (is the domain generated?)"; \
+    done
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
     NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL \
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY \
