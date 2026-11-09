@@ -11,13 +11,12 @@ describe("HealthStatus", () => {
     vi.restoreAllMocks();
   });
 
-  it("shows env and version when the API is up", async () => {
-    vi.spyOn(api, "getHealth").mockResolvedValue({ status: "ok", env: "dev", version: "0.1.0" });
+  it("shows that the API is up", async () => {
+    vi.spyOn(api, "getHealth").mockResolvedValue({ status: "ok" });
 
     render(await HealthStatus());
 
-    expect(screen.getByRole("status")).toHaveTextContent("API is up");
-    expect(screen.getByText("dev · v0.1.0")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent(/^API is up$/);
   });
 
   it("shows an error state when the API is unreachable", async () => {

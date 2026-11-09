@@ -1,15 +1,6 @@
 {
   "components": {
     "schemas": {
-      "AppEnv": {
-        "enum": [
-          "local",
-          "dev",
-          "prod"
-        ],
-        "title": "AppEnv",
-        "type": "string"
-      },
       "ErrorResponse": {
         "description": "Every handled error: `detail` is a fixed message or a stable code, never data.",
         "properties": {
@@ -39,23 +30,14 @@
       },
       "HealthResponse": {
         "properties": {
-          "env": {
-            "$ref": "#/components/schemas/AppEnv"
-          },
           "status": {
             "const": "ok",
             "title": "Status",
             "type": "string"
-          },
-          "version": {
-            "title": "Version",
-            "type": "string"
           }
         },
         "required": [
-          "status",
-          "env",
-          "version"
+          "status"
         ],
         "title": "HealthResponse",
         "type": "object"
@@ -212,7 +194,7 @@
   "paths": {
     "/health": {
       "get": {
-        "description": "Liveness only: never touches the database or external services.",
+        "description": "Liveness only: never touches the database or external services.\n\nUnauthenticated, so it reveals nothing about the deployment (no env, no version; L8).",
         "operationId": "health_health_get",
         "responses": {
           "200": {

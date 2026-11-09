@@ -1,0 +1,28 @@
+# Same guard as the root .railwayignore, relative to this directory, in case the CLI
+# only reads ignore files inside the uploaded path (`railway up apps/api`).
+.env
+.env.*
+**/.env
+**/.env.*
+*.pem
+*.key
+*.p12
+*.jwk
+*.crt
+*.pfx
+**/certs/
+**/.envrc
+**/.npmrc
+**/id_rsa*
+**/id_ed25519*
+**/*service-account*.json
+**/signing_keys.json
+.venv/
+**/__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.log
+tools/
+tests/
+evals/

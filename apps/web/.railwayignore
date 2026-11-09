@@ -1,0 +1,28 @@
+# Same guard as the root .railwayignore, relative to this directory, in case the CLI
+# only reads ignore files inside the uploaded path (`railway up apps/web`).
+.env
+.env.*
+**/.env
+**/.env.*
+*.pem
+*.key
+*.p12
+*.jwk
+*.crt
+*.pfx
+**/certs/
+**/.envrc
+**/.npmrc
+**/id_rsa*
+**/id_ed25519*
+**/*service-account*.json
+**/signing_keys.json
+node_modules/
+.next/
+playwright-report/
+test-results/
+*.tsbuildinfo
+*.log
+e2e/
+**/*.test.ts
+**/*.test.tsx

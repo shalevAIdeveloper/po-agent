@@ -2,14 +2,15 @@ import { connection } from "next/server";
 
 import { ErrorState } from "@/components/states/error-state";
 import { LoadingState } from "@/components/states/loading-state";
-import { api, ApiError, type ApiErrorKind, type Health } from "@/lib/api/client";
+import { api, ApiError, type ApiErrorKind } from "@/lib/api/client";
 
 type HealthFailure = { ok: false; kind: ApiErrorKind | "unknown"; status?: number };
-type HealthResult = { ok: true; health: Health } | HealthFailure;
+type HealthResult = { ok: true } | HealthFailure;
 
 async function loadHealth(): Promise<HealthResult> {
   try {
-    return { ok: true, health: await api.getHealth() };
+    await api.getHealth();
+    return { ok: true };
   } catch (error) {
     return error instanceof ApiError
       ? { ok: false, kind: error.kind, status: error.status }
@@ -46,9 +47,6 @@ export async function HealthStatus() {
     >
       <span aria-hidden="true" className="size-2 rounded-full bg-status-success" />
       <span>API is up</span>
-      <span className="font-mono text-muted-foreground tabular-nums">
-        {result.health.env} · v{result.health.version}
-      </span>
     </div>
   );
 }

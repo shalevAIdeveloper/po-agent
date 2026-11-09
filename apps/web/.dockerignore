@@ -1,0 +1,16 @@
+# Allow-list: only what `next build` needs. .env*, node_modules, build output,
+# test reports, e2e and unit tests never enter the build context.
+*
+!package.json
+!pnpm-lock.yaml
+!pnpm-workspace.yaml
+!next.config.ts
+!tsconfig.json
+!postcss.config.*
+!components.json
+!src/
+!public/
+src/**/*.test.ts
+src/**/*.test.tsx
+src/**/.env
+src/**/.env.*

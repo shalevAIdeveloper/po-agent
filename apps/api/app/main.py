@@ -42,14 +42,20 @@ def create_app(settings: Settings | None = None, *, jwks: KeySource | None = Non
     settings = settings or get_settings()
     configure_logging(settings.log_level)
 
-    is_prod = settings.app_env is AppEnv.PROD
+    # Interactive docs and the schema only locally (L5); the web's types come from the
+    # committed openapi.json, never from a deployed API.
+    is_local = settings.app_env is AppEnv.LOCAL
     app = FastAPI(
         title="PO Agent API",
         version=__version__,
         lifespan=lifespan,
-        docs_url=None if is_prod else "/docs",
+        docs_url="/docs" if is_local else None,
         redoc_url=None,
-        openapi_url=None if is_prod else "/openapi.json",
+        openapi_url="/openapi.json" if is_local else None,
+        # Behind Railway's proxy the app sees http; a trailing-slash redirect would point
+        # at http:// and a script client could resend its bearer token in clear (L4, 0.5c
+        # `sec`). Wrong paths get a plain 404 instead.
+        redirect_slashes=False,
     )
     app.state.settings = settings
     # Tests inject a static key source; otherwise keys come from the project's JWKS.

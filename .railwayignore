@@ -1,0 +1,51 @@
+# What `railway up <app dir>` must never upload (it also honours .gitignore).
+# The Docker builds use their own allow-lists (apps/*/.dockerignore); this file guards
+# the upload itself. Check the list before every upload (docs/runbooks/railway.md).
+
+# secrets and local config
+.env
+.env.*
+**/.env
+**/.env.*
+*.pem
+*.key
+*.p12
+*.jwk
+*.crt
+*.pfx
+**/certs/
+.envrc
+**/.envrc
+**/.npmrc
+**/id_rsa*
+**/id_ed25519*
+**/*service-account*.json
+**/signing_keys.json
+supabase/roles.sql
+supabase/signing_keys.json
+supabase/
+
+# dependencies, caches, build output
+**/node_modules/
+**/.venv/
+**/__pycache__/
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+**/.next/
+**/playwright-report/
+**/test-results/
+*.tsbuildinfo
+*.log
+
+# not part of any image: operator tools, tests, evals (customer POs), docs, CI
+apps/api/tools/
+apps/api/tests/
+apps/api/evals/
+apps/web/e2e/
+**/*.test.ts
+**/*.test.tsx
+docs/
+.github/
+.claude/
+.railway/

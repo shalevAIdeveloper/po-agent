@@ -101,4 +101,4 @@ supabase config push                   # confirms each resource
 ## Notes
 - Never edit a migration that is already in `dev`; add a new one.
 - `admin_add_member` and the audit log come with the migrations; the operator steps are in `invite-pilot-user.md`.
-- The API's `DATABASE_URL` must use TLS (no weak `sslmode`), verified against the Supabase CA where the driver allows it (0.5c).
+- The API's `DATABASE_URL` must use TLS (no weak `sslmode`), verified against the Supabase CA — enforced since 0.5c: outside local the API requires `DATABASE_CA_CERT` and connects verify-full (ADR 0008, `railway.md` §4).

@@ -50,6 +50,26 @@ def test_db_job_runs_pgtap_and_integration_tests_with_a_database(workflow: str) 
     assert re.search(r"pytest -m integration\b.*-rs", db_job)
 
 
+def test_every_job_is_covered_by_ci_ok(workflow: str) -> None:
+    jobs_section = workflow.split("\njobs:\n", 1)[1]
+    # A job header may carry trailing spaces or a comment (`  deploy:  # prod`).
+    jobs = set(re.findall(r"^  ([\w-]+):[ \t]*(?:#.*)?\n", jobs_section, re.MULTILINE))
+    needs = re.search(r"^  ci-ok:\n(?:.*\n)*?    needs: \[([^\]]+)\]", jobs_section, re.MULTILINE)
+
+    assert needs, "ci-ok must list its needs inline"
+    assert {"api", "web", "db", "images"} <= jobs
+    assert {job.strip() for job in needs.group(1).split(",")} == jobs - {"ci-ok"}
+
+
+def test_images_job_builds_and_smoke_tests_the_deploy_images(workflow: str) -> None:
+    images_job = workflow.split("\n  images:\n", 1)[1].split("\n  evals:\n", 1)[0]
+
+    assert "bash .github/scripts/smoke-images.sh" in images_job
+    assert "pnpm typecheck" in images_job
+    # Deploy-relevant paths must trigger it, including the IaC file.
+    assert re.search(r"images: \[.*'apps/api/\*\*'.*'apps/web/\*\*'.*'\.railway/\*\*'", workflow)
+
+
 def test_web_job_checks_generated_api_types_are_committed_and_current(workflow: str) -> None:
     web_job = workflow.split("\n  web:\n", 1)[1].split("\n  db:\n", 1)[0]
 

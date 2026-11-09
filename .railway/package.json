@@ -1,0 +1,14 @@
+{
+  "name": "po-agent-railway-iac",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.1",
+    "railway": "3.16.0",
+    "typescript": "5.9.3"
+  },
+  "packageManager": "pnpm@12.18.0"
+}
