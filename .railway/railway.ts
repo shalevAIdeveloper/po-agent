@@ -11,10 +11,12 @@ import { defineRailway, github, preserve, project, service } from "railway/iac";
 
 const REPO = "shalevAIdeveloper/po-agent";
 
-// false until the Dockerfiles are on `dev` (0.5c): services are created without a
-// source and deployed with `railway up <app dir>`. A follow-up PR flips this to true:
-// then every push to `dev` deploys, only after CI (`checkSuites`) has passed.
-const GITHUB_AUTODEPLOY = false;
+// Each service tracks the branch named like the Railway environment (`dev`) and
+// deploys a push only after every GitHub check suite on that commit passed
+// (`checkSuites`; incl. CI `ci-ok`, and `migrate` when that commit changes
+// migrations), and only when its watch paths changed. Was false until the
+// Dockerfiles were on `dev` (0.5c, PR #11). Runbook §6: gate check, emergency stop.
+const GITHUB_AUTODEPLOY = true;
 
 // Per Railway environment: the Supabase project and the API's APP_ENV (apps/api
 // AppEnv: dev | prod; Railway's `production` is APP_ENV=prod). Only `dev` exists until

@@ -70,6 +70,29 @@ def test_images_job_builds_and_smoke_tests_the_deploy_images(workflow: str) -> N
     assert re.search(r"images: \[.*'apps/api/\*\*'.*'apps/web/\*\*'.*'\.railway/\*\*'", workflow)
 
 
+def test_runs_on_deploy_branches_are_never_cancelled(workflow: str) -> None:
+    # Railway deploys a dev push only after its CI passed (checkSuites); a cancelled
+    # run would skip that commit's deploy for good (sec, PR #12).
+    concurrency = re.search(r"^concurrency:\n((?:  .*\n)+)", workflow, re.MULTILINE)
+
+    assert concurrency
+    assert re.search(
+        r"^  cancel-in-progress: \$\{\{ github\.event_name == 'pull_request' \}\}$",
+        concurrency.group(1),
+        re.MULTILINE,
+    )
+
+
+def test_every_push_gets_a_ci_run(workflow: str) -> None:
+    # No workflow-level path filters: Railway's checkSuites gate needs a CI suite on
+    # every dev push, or it deploys without waiting (sec, PR #12).
+    block = workflow.split("\non:\n", 1)[1].split("\n\n", 1)[0]
+    triggers = [line for line in block.splitlines() if not line.lstrip().startswith("#")]
+
+    assert "  push:" in triggers
+    assert not [line for line in triggers if "paths" in line]
+
+
 def test_web_job_checks_generated_api_types_are_committed_and_current(workflow: str) -> None:
     web_job = workflow.split("\n  web:\n", 1)[1].split("\n  db:\n", 1)[0]
 

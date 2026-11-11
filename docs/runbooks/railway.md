@@ -14,6 +14,7 @@ Nothing in Railway is created, changed or deployed without the owner approving t
 2. Workspace → Usage: usage limit + alert.
 3. GitHub: install the **Railway** GitHub app with access to **`po-agent` only** (needed before autodeploy, step 6).
 4. `railway login` in your own terminal; check with `railway whoami`.
+5. Project → Settings → Environments: **PR Environments off** and **Bot PR Environments off**. Railway creates those environments itself (`railway.ts` can't refuse them), copies `dev`'s variables into them (incl. `DATABASE_URL`) and deploys PR branches that haven't passed `ci-ok`. Recheck after §6.
 
 ## 2. Project and environment (Claude, after approval)
 ```powershell
@@ -71,12 +72,29 @@ cd ..\po-agent; git worktree remove ..\po-agent-deploy
 ```
 A deploy counts only when that deployment reports `SUCCESS` (not when the upload returns).
 
+**After §6 this section is not used:** with autodeploy on, `railway up` would put code that hasn't passed CI into `dev` (and the next push silently replaces it). Use it again only after the Undo in §6. Rollback = Redeploy of an earlier deployment (Notes).
+
 **Ignore rules are gitignore syntax.** A pattern like `supabase/` (no leading `/`) matches a folder of that name at *any* depth. In 0.5c it silently dropped `apps/web/src/lib/supabase/` and the web build failed with `Module not found '@/lib/supabase/proxy'`. Root-only folders in the root `.railwayignore` are therefore anchored (`/supabase/`, `/docs/`, …). `apps/api/tests/test_railway_upload.py` checks the rules against the tracked files in CI.
 
 **`railway config plan/apply` on Windows with the npm-installed CLI:** the IaC SDK runs `railway --version` itself and fails on the npm `.cmd` shim ("requires CLI 5.42.1"). Point it at the real binary for that shell: `$env:_ = "$env:APPDATA\npm\node_modules\@railway\cli\bin\railway.exe"` and call that exe directly.
 
 ## 6. Autodeploy from `dev` (after the PR is merged)
-Small PR: `GITHUB_AUTODEPLOY = true` in `.railway/railway.ts` → plan → owner approves → apply. From then on a push to `dev` deploys each service whose watch paths changed, after CI passed (`checkSuites`).
+Small PR: `GITHUB_AUTODEPLOY = true` in `.railway/railway.ts` → CI green → merge → `config plan` **from `dev`** (must match the plan shown in the PR) → owner approves → apply. Apply only after the merge: before it, Railway would track `dev` while `dev`'s file still says `false`, and the next plan from `dev` would try to undo it. From then on a push to `dev` deploys each service whose watch paths changed, only after every GitHub check suite on that commit passed (`checkSuites`: CI incl. `ci-ok`, and `migrate` when it runs — a failed migration blocks the deploy).
+
+**Right after apply:**
+- Connecting the repo may deploy `dev`'s head right away, possibly without waiting for CI. Treat it as a deploy: each service reaches `SUCCESS`, then §7.
+- `config plan` should show 0 changes. Before apply it already showed `build.builder` (null → `DOCKERFILE`) and `deploy.restartPolicyType` (null → `ON_FAILURE`) on all three services. If they still show, don't wave them through: check the latest build log of each service (it must build from the Dockerfile) and Service → Settings (builder Dockerfile, restart policy On Failure). Only when both are right, record them here as a known display-only diff.
+- Project → Settings → Environments: PR Environments and Bot PR Environments still off (§1).
+
+**Mandatory gate check on the first autodeploy** (the first merge to `dev` that touches a watched path; changes only under `.railway/` or `docs/` match no watch pattern and deploy nothing, this PR's own merge included). While CI runs on that commit, the service's new deployment must show **WAITING**; it may start building only after `ci-ok` completed, and must then reach **SUCCESS**. Services whose paths didn't change get no deployment. Record what you saw (deployment id, WAITING seen, CI finish time vs. build start) in `docs/progress.md`. If it builds while CI is still running, the gate doesn't work: emergency stop (below) and fix before any other merge to `dev`.
+
+**When a deploy is skipped** (CI or `migrate` failed on that commit): after the fix is merged, its commit may touch no watched path (e.g. a migration-only fix), so the skipped code never deploys. Check each service's latest deployment against `dev`'s head; if one is behind, Railway → service → **Deploy latest commit**, then `SUCCESS` and §7. CI runs on `dev` are never cancelled (`cancel-in-progress` is PR-only in `ci.yml`), so a quick follow-up merge can't skip a deploy that way.
+
+**Merge = deploy.** Only the owner merges PRs to `dev` (CLAUDE.md).
+
+**Emergency stop:** Railway → each service → Settings → Source → **Disconnect** (stops new deploys at once; running deployments keep running). Then the Undo PR, so the next plan is clean.
+
+**Undo:** set the flag back to `false` in a PR, plan, apply (services lose their GitHub source; deploy with `railway up` again, §5).
 
 ## 7. Verify
 - `curl https://<api-domain>/health` → `{"status":"ok"}`; `/docs` → 404.
@@ -90,6 +108,6 @@ Small PR: `GITHUB_AUTODEPLOY = true` in `.railway/railway.ts` → plan → owner
 - **Every variable must be declared in `.railway/railway.ts`** (`preserve()` for secrets): `railway config apply` removes variables that exist only in the dashboard. Adding a secret = add `NAME: preserve()` in a PR, apply, then set the value in the dashboard.
 - Railway project membership: owner only, at least until A18 is checked.
 - Migrations are not run by Railway; `migrate.yml` owns them (expand/contract, ADR 0008).
-- Rollback: Railway → service → Deployments → the last good one → Redeploy. Schema changes are not rolled back by this.
+- Rollback: Railway → service → Deployments → the last good one → Redeploy (never `railway up` once §6 is on). Schema changes are not rolled back by this.
 - `.railway/railway.ts` refuses any environment except `dev` until P1.
 - Local integration tests (A6): GoTrue allows 30 sign-ins / 5 min / IP, so repeated runs can fail with 429 — wait 5 minutes. After laptop sleep, Docker's clock can drift > 30 s and tokens look expired: `supabase stop; supabase start`.

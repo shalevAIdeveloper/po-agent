@@ -44,6 +44,7 @@ The developer uses **Windows + PowerShell**. Give commands in PowerShell syntax 
 - Run lint + typecheck + tests locally before every push.
 - PR `feature/* → dev`. CI must pass. Then PR `dev → main` for release.
 - Never push directly to `dev` or `main`. Never force-push shared branches.
+- Agents never run `gh pr merge` (or merge any other way): only the owner merges. A merge to `dev` deploys to Railway.
 - Conventional Commits: `feat:`, `fix:`, `chore:`, `docs:`, `test:`, `refactor:`.
 - Never edit an applied migration; add a new one.
 - Never weaken CI to make it pass (removing jobs from `ci-ok.needs`, loosening its check, skipping steps, `continue-on-error`). Fix the cause; any intended CI change is called out explicitly in the PR.
