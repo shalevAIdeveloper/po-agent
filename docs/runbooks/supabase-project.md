@@ -90,6 +90,10 @@ supabase config push                   # confirms each resource
   - Until P2: Resend's test sender. Host `smtp.resend.com`, port `465`, username `resend`, password = a Resend API key (sending access only), sender `onboarding@resend.dev`, name `PO Agent (dev)`. The test sender only delivers to the Resend account's own address, which is enough to test invites and resets in dev.
   - At P2: sender on `mail.<domain>` after SPF / DKIM / DMARC are verified in Resend, in both projects.
 - On new Free projects, custom email templates work only with custom SMTP (A11): without SMTP, invite links won't reach `/auth/confirm`.
+- **Email templates are pasted by hand in the dashboard** (Authentication → Email Templates) until `config push` with `[remotes.<env>]` is in use. Invite, Reset Password and Magic Link must match `supabase/templates/*.html` (body without the HTML comments; subjects from `config.toml`). Any change to those files = paste it again in every hosted project.
+  - Symptom of the **default** templates still in place (seen in 0.5c): the email link goes through `…supabase.co/auth/v1/verify` and lands on `<site_url>/#error=access_denied&error_code=otp_expired`. The default link spends the token on GET (scanners can use it up) and redirects to the Site URL. Ours links straight to `<site_url>/auth/confirm?token_hash=…`.
+- **URL Configuration** (until `[remotes.<env>]`): Site URL = the exact web origin (`https://web-dev-3fce.up.railway.app` for dev; no trailing slash, no path). Check it is still there after saving: in 0.5c it wasn't saved the first time. The app sends no `redirectTo` (templates build the link), so Redirect URLs only needs that same origin; no wildcards.
+- Dev emails from `onboarding@resend.dev` land in spam (expected); fixed by the P2 sender domain.
 - **Leaked password protection (A10):** Pro feature. Record "not available" for dev and enable it at P1.
 - **Password minimum (A19):** Auth counts bytes, not characters; the web enforces 12 characters.
 
