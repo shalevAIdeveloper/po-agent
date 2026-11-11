@@ -76,7 +76,12 @@ A deploy counts only when that deployment reports `SUCCESS` (not when the upload
 **`railway config plan/apply` on Windows with the npm-installed CLI:** the IaC SDK runs `railway --version` itself and fails on the npm `.cmd` shim ("requires CLI 5.42.1"). Point it at the real binary for that shell: `$env:_ = "$env:APPDATA\npm\node_modules\@railway\cli\bin\railway.exe"` and call that exe directly.
 
 ## 6. Autodeploy from `dev` (after the PR is merged)
-Small PR: `GITHUB_AUTODEPLOY = true` in `.railway/railway.ts` → plan → owner approves → apply. From then on a push to `dev` deploys each service whose watch paths changed, after CI passed (`checkSuites`).
+Small PR: `GITHUB_AUTODEPLOY = true` in `.railway/railway.ts` → CI green → merge → `config plan` **from `dev`** (must match the plan shown in the PR) → owner approves → apply. Apply only after the merge: before it, Railway would track `dev` while `dev`'s file still says `false`, and the next plan from `dev` would try to undo it. From then on a push to `dev` deploys each service whose watch paths changed, only after every GitHub check suite on that commit passed (`checkSuites`: CI incl. `ci-ok`, and `migrate` when it runs — a failed migration blocks the deploy).
+
+- Connecting the repo may start a deploy of `dev`'s head right away; that is the code already running.
+- Changes only under `.railway/` or `docs/` match no watch pattern and deploy nothing (this PR's own merge included). The first real check is the next PR that touches app code: only the services whose paths changed deploy, after `ci-ok`, and reach `SUCCESS`.
+- After apply, `config plan` should show 0 changes. Before this PR the plan already showed `build.builder` (null → `DOCKERFILE`) and `deploy.restartPolicyType` (null → `ON_FAILURE`) on all three services; if these still show after apply, Railway reports default values as `null` (a display-only diff), so note it here and ignore it.
+- Undo: set the flag back to `false` in a PR, plan, apply (services lose their GitHub source; deploy with `railway up` again, §5).
 
 ## 7. Verify
 - `curl https://<api-domain>/health` → `{"status":"ok"}`; `/docs` → 404.
