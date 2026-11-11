@@ -21,9 +21,13 @@
 **/id_ed25519*
 **/*service-account*.json
 **/signing_keys.json
-supabase/roles.sql
-supabase/signing_keys.json
-supabase/
+# Root-only folders are anchored with a leading "/": in gitignore syntax a bare
+# "supabase/" matches a folder of that name at ANY depth, and it once dropped
+# apps/web/src/lib/supabase/ from the upload (0.5c, failed web build).
+# Guarded by apps/api/tests/test_railway_upload.py.
+/supabase/roles.sql
+/supabase/signing_keys.json
+/supabase/
 
 # dependencies, caches, build output
 **/node_modules/
@@ -45,7 +49,7 @@ apps/api/evals/
 apps/web/e2e/
 **/*.test.ts
 **/*.test.tsx
-docs/
-.github/
-.claude/
-.railway/
+/docs/
+/.github/
+/.claude/
+/.railway/

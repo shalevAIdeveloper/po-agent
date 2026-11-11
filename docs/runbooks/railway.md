@@ -46,26 +46,34 @@ Upload from a **clean worktree of the PR's commit**: it contains only tracked fi
 ```powershell
 git worktree add ..\po-agent-deploy <PR head commit>     # detached, tracked files only
 cd ..\po-agent-deploy
+railway link --project <project id> --environment dev    # the worktree has its own link
 ```
-Print the exact upload list and check it (must not contain `.env*`, keys/certs, `supabase/roles.sql`, `node_modules`, `tools/`, `tests/`, `evals/`); the owner sees it before the upload:
+Print the exact upload list and check it both ways: it must **not** contain `.env*`, keys/certs, `supabase/roles.sql`, `node_modules`, `tools/`, `tests/`, `evals/`, and it **must** contain the code the build needs (for web: all of `src/`, including `src/lib/supabase/`). The owner sees it before the upload:
 ```bash
-# Git Bash, from the worktree root; approximates Railway's filter: .gitignore + .railwayignore
+# Git Bash, from the worktree root; approximates Railway's filter: .gitignore + root and
+# per-app .railwayignore (the same model as apps/api/tests/test_railway_upload.py)
 for app in apps/api apps/web; do
+  cat .railwayignore "$app/.railwayignore" > "$TEMP/railwayignore-combined"
   all=$(find "$app" -type f | sort)
   comm -23 <(printf '%s\n' "$all") \
-    <(printf '%s\n' "$all" | git -c core.excludesFile=.railwayignore check-ignore --no-index --stdin | sort)
+    <(printf '%s\n' "$all" | git -c core.excludesFile="$TEMP/railwayignore-combined" check-ignore --no-index --stdin | sort)
 done
 ```
-Then, from the worktree:
+Then, from the worktree. The path must be **absolute** (a relative one fails with "prefix not found"):
 ```powershell
 railway --version                                  # IaC needs ≥ 5.42.1 (0.5c used 5.71.0)
-railway up apps/api --service api --environment dev --detach -m "0.5c first deploy"
-railway up apps/api --service worker --environment dev --detach -m "0.5c first deploy"
-railway up apps/web --service web --environment dev --detach -m "0.5c first deploy"
+railway up C:\dev\po-agent-deploy\apps\api --service api --environment dev --detach -m "0.5c first deploy"
+railway up C:\dev\po-agent-deploy\apps\api --service worker --environment dev --detach -m "0.5c first deploy"
+railway up C:\dev\po-agent-deploy\apps\web --service web --environment dev --detach -m "0.5c first deploy"
 railway deployment list --service api --json     # follow the deployment id until SUCCESS
+railway unlink                                     # still in the worktree
 cd ..\po-agent; git worktree remove ..\po-agent-deploy
 ```
 A deploy counts only when that deployment reports `SUCCESS` (not when the upload returns).
+
+**Ignore rules are gitignore syntax.** A pattern like `supabase/` (no leading `/`) matches a folder of that name at *any* depth. In 0.5c it silently dropped `apps/web/src/lib/supabase/` and the web build failed with `Module not found '@/lib/supabase/proxy'`. Root-only folders in the root `.railwayignore` are therefore anchored (`/supabase/`, `/docs/`, …). `apps/api/tests/test_railway_upload.py` checks the rules against the tracked files in CI.
+
+**`railway config plan/apply` on Windows with the npm-installed CLI:** the IaC SDK runs `railway --version` itself and fails on the npm `.cmd` shim ("requires CLI 5.42.1"). Point it at the real binary for that shell: `$env:_ = "$env:APPDATA\npm\node_modules\@railway\cli\bin\railway.exe"` and call that exe directly.
 
 ## 6. Autodeploy from `dev` (after the PR is merged)
 Small PR: `GITHUB_AUTODEPLOY = true` in `.railway/railway.ts` → plan → owner approves → apply. From then on a push to `dev` deploys each service whose watch paths changed, after CI passed (`checkSuites`).

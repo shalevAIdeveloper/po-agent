@@ -34,7 +34,8 @@ jobs:
         uses: dorny/paths-filter@0e4a8c6effa4802afeda77dc8d303f8176d7dfad # v3.0.4
         with:
           filters: |
-            api: ['apps/api/**', 'supabase/**', '.github/workflows/**']
+            # apps/web + ignore files: tests/test_railway_upload.py checks the upload filter
+            api: ['apps/api/**', 'supabase/**', '.github/workflows/**', 'apps/web/**', '**/.railwayignore', '**/.gitignore']
             web: ['apps/web/**', 'apps/api/openapi.json', '.github/workflows/**']
             db: ['supabase/**', 'apps/api/**', '.github/workflows/**']
             evals: ['apps/api/app/prompts/**', 'apps/api/app/extraction/**']
