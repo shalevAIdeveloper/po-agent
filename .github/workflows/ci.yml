@@ -4,14 +4,19 @@ on:
     branches: [dev, main]
   push:
     branches: [dev, main]
+# No workflow-level paths/paths-ignore: Railway's checkSuites gate needs a CI suite on
+# every push to dev, or it deploys without waiting (jobs filter paths themselves).
 
 # Least privilege: jobs only read the repo unless a job asks for more.
 permissions:
   contents: read
 
+# Cancel superseded runs on PRs only. A cancelled run on dev/main would make Railway
+# skip that commit's deploy (checkSuites), and a later commit that touches no watched
+# path would never deploy it.
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 # Third-party actions are pinned to full commit SHAs (tag in the trailing comment).
 jobs:

@@ -13,8 +13,9 @@ const REPO = "shalevAIdeveloper/po-agent";
 
 // Each service tracks the branch named like the Railway environment (`dev`) and
 // deploys a push only after every GitHub check suite on that commit passed
-// (`checkSuites`; incl. CI `ci-ok` and `migrate`), and only when its watch paths
-// changed. Was false until the Dockerfiles were on `dev` (0.5c, PR #11).
+// (`checkSuites`; incl. CI `ci-ok`, and `migrate` when that commit changes
+// migrations), and only when its watch paths changed. Was false until the
+// Dockerfiles were on `dev` (0.5c, PR #11). Runbook §6: gate check, emergency stop.
 const GITHUB_AUTODEPLOY = true;
 
 // Per Railway environment: the Supabase project and the API's APP_ENV (apps/api
