@@ -197,9 +197,31 @@ def test_request_log_has_request_id_and_no_token(settings: Settings) -> None:
     assert "secret-token" not in output
     assert "someone@example.com" not in output
     [line] = [entry for entry in _lines(stream) if entry["event"] == "http.request"]
-    assert line["request_id"] == "req-1"
+    # L7: our id is always generated; the caller's id is kept apart.
+    assert line["client_request_id"] == "req-1"
+    assert line["request_id"] != "req-1"
+    assert len(line["request_id"]) == 32
     assert line["path"] == "/health"
     assert line["status"] == 200
+
+
+@pytest.mark.parametrize("incoming", ["bad id\nforged=1", "x" * 65, "a;b"])
+def test_malformed_client_request_id_is_not_logged(settings: Settings, incoming: str) -> None:
+    # L7: only a well-formed caller id is kept, and it never carries over to the next request.
+    app = create_app(settings)
+    stream = io.StringIO()
+    configure_logging(stream=stream)
+
+    with TestClient(app) as client:
+        client.get("/health", headers={"x-request-id": "req-1"})
+        client.get("/health", headers={"x-request-id": incoming})
+        client.get("/health")
+
+    assert incoming not in stream.getvalue()
+    first, malformed, absent = [e for e in _lines(stream) if e["event"] == "http.request"]
+    assert first["client_request_id"] == "req-1"
+    assert "client_request_id" not in malformed
+    assert "client_request_id" not in absent
 
 
 # ----- L2: key fragments, nested values, PII keys -----

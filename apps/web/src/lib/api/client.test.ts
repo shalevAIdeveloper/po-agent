@@ -149,13 +149,11 @@ describe("resolveApiUrl", () => {
 
 describe("createApiClient().getHealth", () => {
   it("returns parsed health and calls /health", async () => {
-    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(
-      jsonResponse({ status: "ok", env: "local", version: "0.1.0" }),
-    );
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(jsonResponse({ status: "ok" }));
 
     const health = await createApiClient(BASE_URL, fetchMock).getHealth();
 
-    expect(health).toEqual({ status: "ok", env: "local", version: "0.1.0" });
+    expect(health).toEqual({ status: "ok" });
     const [url, init] = fetchMock.mock.calls[0] ?? [];
     expect(String(url)).toBe("http://api.test/health");
     expect(init?.cache).toBe("no-store");
@@ -164,9 +162,7 @@ describe("createApiClient().getHealth", () => {
   });
 
   it("keeps a path prefix in the base URL", async () => {
-    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(
-      jsonResponse({ status: "ok", env: "dev", version: "0.1.0" }),
-    );
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(jsonResponse({ status: "ok" }));
 
     await createApiClient("http://api.test/v1", fetchMock).getHealth();
 

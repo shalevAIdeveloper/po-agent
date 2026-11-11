@@ -5,7 +5,7 @@ from functools import lru_cache
 from typing import Any
 
 import structlog
-from sqlalchemy import text
+from sqlalchemy import URL, make_url, text
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
@@ -14,7 +14,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from app.config import get_settings
+from app.config import Settings, database_ssl_context, get_settings, is_tls_url_param
 
 _ASYNC_DRIVER = "postgresql+asyncpg://"
 _PLAIN_SCHEMES = ("postgres://", "postgresql://")
@@ -64,14 +64,27 @@ def to_async_url(url: str) -> str:
     raise ValueError("DATABASE_URL must start with postgres:// or postgresql://")
 
 
+def engine_url_and_connect_args(settings: Settings) -> tuple[URL, dict[str, Any]]:
+    """The asyncpg URL and connect args; outside local always TLS verify-full."""
+    if settings.database_url is None:
+        raise RuntimeError("DATABASE_URL is not configured")
+    url = make_url(to_async_url(settings.database_url.get_secret_value()))
+    context = database_ssl_context(settings)
+    if context is None:
+        return url, {}
+    # libpq-style TLS options (any case: sslmode, SSLMODE, sslnegotiation, ...) would reach
+    # asyncpg as unknown keywords; TLS comes only from the context (L1, 0.5c `sec`).
+    tls_params = [key for key in url.query if is_tls_url_param(key)]
+    return url.difference_update_query(tls_params), {"ssl": context}
+
+
 @lru_cache
 def get_engine() -> AsyncEngine:
     """Created on first use so /health and tests never need a database."""
-    database_url = get_settings().database_url
-    if database_url is None:
-        raise RuntimeError("DATABASE_URL is not configured")
+    url, connect_args = engine_url_and_connect_args(get_settings())
     return create_async_engine(
-        to_async_url(database_url.get_secret_value()),
+        url,
+        connect_args=connect_args,
         pool_pre_ping=True,
         # Keep bound values (PO lines, prices, addresses) out of exception messages and logs.
         hide_parameters=True,

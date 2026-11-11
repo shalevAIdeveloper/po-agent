@@ -14,6 +14,8 @@ export interface paths {
         /**
          * Health
          * @description Liveness only: never touches the database or external services.
+         *
+         *     Unauthenticated, so it reveals nothing about the deployment (no env, no version; L8).
          */
         get: operations["health_health_get"];
         put?: never;
@@ -93,11 +95,6 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         /**
-         * AppEnv
-         * @enum {string}
-         */
-        AppEnv: "local" | "dev" | "prod";
-        /**
          * ErrorResponse
          * @description Every handled error: `detail` is a fixed message or a stable code, never data.
          */
@@ -112,14 +109,11 @@ export interface components {
         };
         /** HealthResponse */
         HealthResponse: {
-            env: components["schemas"]["AppEnv"];
             /**
              * Status
              * @constant
              */
             status: "ok";
-            /** Version */
-            version: string;
         };
         /** MeResponse */
         MeResponse: {

@@ -1,10 +1,18 @@
+import os
 import re
+import ssl
 from enum import StrEnum
 from functools import lru_cache
+from pathlib import Path
 from typing import Literal, Self
+from urllib.parse import parse_qsl, urlsplit
 
 from pydantic import Field, SecretStr, field_validator, model_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import (
+    BaseSettings,
+    PydanticBaseSettingsSource,
+    SettingsConfigDict,
+)
 
 
 class AppEnv(StrEnum):
@@ -14,7 +22,33 @@ class AppEnv(StrEnum):
 
 
 # Settings that may be empty locally but must be set in every cloud environment.
-REQUIRED_OUTSIDE_LOCAL: tuple[str, ...] = ("database_url", "supabase_url", "web_origin")
+REQUIRED_OUTSIDE_LOCAL: tuple[str, ...] = (
+    "database_url",
+    "supabase_url",
+    "web_origin",
+    "database_ca_cert",
+)
+
+# sslmode values that allow an unencrypted connection (libpq semantics).
+WEAK_SSLMODES = frozenset({"disable", "allow", "prefer"})
+# Query parameters DATABASE_URL may carry outside local, besides TLS options. TLS
+# options (ssl*, direct_tls) are dropped by db.py: TLS always comes from DATABASE_CA_CERT.
+# Anything else would reach asyncpg.connect() as an unknown keyword and fail at the
+# first query, after the deploy already looked healthy.
+ALLOWED_DB_URL_PARAMS = frozenset({"application_name"})
+
+
+def is_tls_url_param(key: str) -> bool:
+    lowered = key.lower()
+    return lowered.startswith("ssl") or lowered == "direct_tls"
+
+
+def is_deployed() -> bool:
+    """True inside the deploy image (PO_DEPLOYED=1) or on Railway (M1, 0.5c `sec`)."""
+    return os.environ.get("PO_DEPLOYED", "").strip() == "1" or bool(
+        os.environ.get("RAILWAY_ENVIRONMENT_ID", "").strip()
+    )
+
 
 LogLevel = Literal["DEBUG", "INFO", "WARNING", "ERROR"]
 
@@ -30,6 +64,24 @@ _PORT_SUFFIX = re.compile(r":(\d{1,5})$")
 HTTPS_OUTSIDE_LOCAL: tuple[str, ...] = ("supabase_url", "web_origin")
 
 
+# .env files are found from this file, not from the working directory (L4):
+# the repo-root .env first, then apps/api/.env.
+_API_DIR = Path(__file__).resolve().parents[1]
+ENV_FILES: tuple[Path, ...] = (_API_DIR.parent.parent / ".env", _API_DIR / ".env")
+
+
+def reads_env_files() -> bool:
+    """.env files are a local convenience only (L4).
+
+    In a deployed environment (APP_ENV set to anything but `local` in the real
+    environment, or running in the deploy image / on Railway), a .env file that
+    slipped into an image must never be read.
+    """
+    if is_deployed():
+        return False
+    return os.environ.get("APP_ENV", AppEnv.LOCAL).strip().lower() == AppEnv.LOCAL
+
+
 def _is_blank(value: SecretStr | str | None) -> bool:
     if isinstance(value, SecretStr):
         value = value.get_secret_value()
@@ -38,8 +90,8 @@ def _is_blank(value: SecretStr | str | None) -> bool:
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        # Repo-root .env first, then apps/api/.env; real env vars win over both.
-        env_file=("../../.env", ".env"),
+        # Real env vars win over both files; files are skipped outside local (L4).
+        env_file=ENV_FILES,
         env_file_encoding="utf-8",
         extra="ignore",
         # `DATABASE_URL=` (as in .env.example) counts as unset, not as an empty value.
@@ -53,12 +105,28 @@ class Settings(BaseSettings):
 
     # The API connects as `po_api` (ADR 0003); the worker as a bypass role.
     database_url: SecretStr | None = None
+    # PEM of the Supabase CA (Dashboard → Database → SSL). Public, not a secret. Outside
+    # local the DB connection always uses TLS and verifies chain + hostname against it.
+    database_ca_cert: str | None = None
     # e.g. http://127.0.0.1:54321; JWT issuer and JWKS are derived from it.
     supabase_url: str | None = Field(default=None, pattern=_ORIGIN_PATTERN)
     # The only browser origin allowed by CORS, e.g. http://localhost:3000.
     web_origin: str | None = Field(default=None, pattern=_ORIGIN_PATTERN)
 
     worker_poll_interval_seconds: float = Field(default=1.0, gt=0)
+
+    @classmethod
+    def settings_customise_sources(
+        cls,
+        settings_cls: type[BaseSettings],
+        init_settings: PydanticBaseSettingsSource,
+        env_settings: PydanticBaseSettingsSource,
+        dotenv_settings: PydanticBaseSettingsSource,
+        file_secret_settings: PydanticBaseSettingsSource,
+    ) -> tuple[PydanticBaseSettingsSource, ...]:
+        if reads_env_files():
+            return init_settings, env_settings, dotenv_settings, file_secret_settings
+        return init_settings, env_settings, file_secret_settings
 
     @property
     def jwt_issuer(self) -> str | None:
@@ -82,6 +150,11 @@ class Settings(BaseSettings):
     @model_validator(mode="after")
     def _require_cloud_settings(self) -> Self:
         if self.app_env is AppEnv.LOCAL:
+            if is_deployed():
+                # An empty APP_ENV also lands here (env_ignore_empty → default local).
+                raise ValueError(
+                    "APP_ENV must be dev or prod in a deployed image (empty or local refused)"
+                )
             return self
         missing = [name for name in REQUIRED_OUTSIDE_LOCAL if _is_blank(getattr(self, name))]
         if missing:
@@ -98,7 +171,37 @@ class Settings(BaseSettings):
             raise ValueError(
                 f"https is required outside local for: {', '.join(n.upper() for n in insecure)}"
             )
+        url = self.database_url.get_secret_value() if self.database_url else ""
+        # parse_qsl decodes %-escapes, so `ssl%6Dode=disable` is seen as sslmode.
+        for key, value in parse_qsl(urlsplit(url).query, keep_blank_values=True):
+            if key.lower() == "sslmode" and value.lower() in WEAK_SSLMODES:
+                # Only a known weak mode is named; the URL is never echoed.
+                raise ValueError(f"DATABASE_URL: sslmode={value.lower()} would allow plain text")
+            if not is_tls_url_param(key) and key not in ALLOWED_DB_URL_PARAMS:
+                raise ValueError(
+                    "DATABASE_URL has a query parameter that is not allowed "
+                    f"(allowed: {', '.join(sorted(ALLOWED_DB_URL_PARAMS))} and TLS options)"
+                )
+        try:
+            database_ssl_context(self)
+        except (ssl.SSLError, ValueError):
+            raise ValueError("DATABASE_CA_CERT is not a valid PEM certificate") from None
         return self
+
+
+def database_ssl_context(settings: Settings) -> ssl.SSLContext | None:
+    """TLS for the DB connection: none locally, verify-full everywhere else.
+
+    Without this, asyncpg defaults to `prefer`, which silently falls back to plain text.
+    """
+    if settings.app_env is AppEnv.LOCAL:
+        return None
+    if not settings.database_ca_cert or "BEGIN CERTIFICATE" not in settings.database_ca_cert:
+        raise ValueError("DATABASE_CA_CERT is required outside local")
+    # create_default_context verifies the chain and the hostname (CERT_REQUIRED).
+    context = ssl.create_default_context(cadata=settings.database_ca_cert)
+    context.minimum_version = ssl.TLSVersion.TLSv1_2
+    return context
 
 
 @lru_cache

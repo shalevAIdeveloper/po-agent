@@ -10,8 +10,6 @@ type Schemas = components["schemas"];
 // if they drift from the generated types.
 const healthSchema = z.object({
   status: z.literal("ok"),
-  env: z.enum(["local", "dev", "prod"]),
-  version: z.string(),
 }) satisfies z.ZodType<Schemas["HealthResponse"]>;
 
 const organizationSchema = z.object({

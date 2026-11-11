@@ -1,14 +1,14 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter
 
-from app import __version__
-from app.config import Settings
 from app.schemas.health import HealthResponse
 
 router = APIRouter(tags=["health"])
 
 
 @router.get("/health", response_model=HealthResponse)
-async def health(request: Request) -> HealthResponse:
-    """Liveness only: never touches the database or external services."""
-    settings: Settings = request.app.state.settings
-    return HealthResponse(status="ok", env=settings.app_env, version=__version__)
+async def health() -> HealthResponse:
+    """Liveness only: never touches the database or external services.
+
+    Unauthenticated, so it reveals nothing about the deployment (no env, no version; L8).
+    """
+    return HealthResponse(status="ok")

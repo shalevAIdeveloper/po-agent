@@ -25,6 +25,7 @@ jobs:
       web: ${{ steps.f.outputs.web }}
       db: ${{ steps.f.outputs.db }}
       evals: ${{ steps.f.outputs.evals }}
+      images: ${{ steps.f.outputs.images }}
     steps:
       # Full history: on push, paths-filter diffs commits locally and cannot fetch without creds.
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
@@ -33,10 +34,12 @@ jobs:
         uses: dorny/paths-filter@0e4a8c6effa4802afeda77dc8d303f8176d7dfad # v3.0.4
         with:
           filters: |
-            api: ['apps/api/**', 'supabase/**', '.github/workflows/**']
+            # apps/web + ignore files: tests/test_railway_upload.py checks the upload filter
+            api: ['apps/api/**', 'supabase/**', '.github/workflows/**', 'apps/web/**', '**/.railwayignore', '**/.gitignore']
             web: ['apps/web/**', 'apps/api/openapi.json', '.github/workflows/**']
             db: ['supabase/**', 'apps/api/**', '.github/workflows/**']
             evals: ['apps/api/app/prompts/**', 'apps/api/app/extraction/**']
+            images: ['apps/api/**', 'apps/web/**', '.railway/**', '.railwayignore', '.github/**']
 
   api:
     needs: changes
@@ -212,6 +215,30 @@ jobs:
           uv sync --frozen
           uv run pytest -m integration -q -rs
 
+  # Deploy images (0.5c, ADR 0008): Railway builds the same Dockerfiles after merge, so
+  # a broken image must fail here first. Also typechecks the Railway IaC file.
+  images:
+    needs: changes
+    if: needs.changes.outputs.images == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with: { persist-credentials: false }
+      - name: Build images and check how they start
+        run: bash .github/scripts/smoke-images.sh
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+        with: { package_json_file: .railway/package.json }
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: apps/web/.nvmrc
+          cache: pnpm
+          cache-dependency-path: .railway/pnpm-lock.yaml
+      - name: Railway IaC typechecks
+        working-directory: .railway
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm typecheck
+
   evals:
     needs: changes
     if: needs.changes.outputs.evals == 'true' && github.event_name == 'pull_request'
@@ -235,7 +262,7 @@ jobs:
   ci-ok:
     if: always()
     # Every job must be listed here, or it isn't covered by the required check.
-    needs: [changes, api, web, e2e-auth, db, evals]
+    needs: [changes, api, web, e2e-auth, db, images, evals]
     runs-on: ubuntu-latest
     steps:
       - name: All jobs succeeded or were skipped

@@ -1,0 +1,14 @@
+# Allow-list: the image gets only what it runs. Everything else (.env*, tools/,
+# tests/, evals/, keys, caches) never enters the build context (L4, A17).
+*
+!pyproject.toml
+!uv.lock
+!app/
+# ...and nothing secret or generated inside app/ either.
+app/**/__pycache__/
+app/**/.env
+app/**/.env.*
+app/**/*.pem
+app/**/*.key
+app/**/*.p12
+app/**/*.jwk
