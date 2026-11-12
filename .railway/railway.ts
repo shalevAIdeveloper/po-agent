@@ -12,7 +12,7 @@ import { defineRailway, github, preserve, project, service } from "railway/iac";
 const REPO = "shalevAIdeveloper/po-agent";
 
 // Each service tracks the branch named like the Railway environment (`dev`) and
-// deploys a push only after every GitHub check suite on that commit passed
+// deploys a push only after the GitHub Actions runs on that commit passed
 // (`checkSuites`; incl. CI `ci-ok`, and `migrate` when that commit changes
 // migrations), and only when its watch paths changed. Was false until the
 // Dockerfiles were on `dev` (0.5c, PR #11). Runbook §6: gate check, emergency stop.
