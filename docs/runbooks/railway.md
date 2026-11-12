@@ -113,9 +113,13 @@ After the first deploy of the limiter, after any change to `apps/web/src/lib/rat
 cd C:\dev\po-agent\apps\web
 $env:DEPLOYED_WEB_URL="https://web-dev-3fce.up.railway.app"; pnpm test:deployed
 ```
-- **Pass:** 11 attempts, each with a different forged `X-Real-IP` / `X-Forwarded-For`, and the 11th is refused ("Too many attempts"). The edge replaced the forged headers with the real IP.
-- **Fail (11th says "expired"):** the forged header was trusted, so the per-IP limits can be dodged. Pilot gate A13 is open again; stop and fix before inviting anyone.
-- Checked to work both ways against a local production server (2026-11-12): forged IPs trusted → fails; one fixed IP → passes.
+- **Pass:** 11 attempts, each with a different forged `X-Real-IP` / `X-Forwarded-For`; 1–10 say "expired" (answered by Auth), the 11th is refused **by our limiter** (`[app limit]`). The forged headers didn't create new buckets.
+- **Fail, 11th says "expired":** the forged header was trusted, so the per-IP limits can be dodged. Pilot gate A13 is open again; stop and fix before inviting anyone.
+- **Fail, an early attempt says "Too many":** your IP was still limited from a run in the last 5 minutes, or Auth's own shared bucket was busy. Wait 5 minutes and re-run.
+- A pass proves one shared bucket, not that it is **your** bucket. Two more checks, right after:
+  1. `railway logs --service web --lines 200` (or the dashboard) has **no `rate_limit.ip_unknown`** event. One means the edge stopped sending a usable `X-Real-IP` and every user shares one bucket.
+  2. Within 5 minutes, run the same command from **another network** (phone hotspot). It must pass too (its attempt 1 is not refused). If it fails at attempt 1, everyone is in one bucket.
+- Checked to work both ways against a local production server (2026-11-12/13): forged IPs trusted → fails; one fixed IP → passes.
 - Afterwards your IP is limited on `/auth/confirm` for 5 minutes.
 
 ## Notes

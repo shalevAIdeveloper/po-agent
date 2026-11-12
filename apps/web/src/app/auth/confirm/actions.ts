@@ -3,11 +3,19 @@
 import { redirect } from "next/navigation";
 
 import { parseEmailLink } from "@/lib/auth/email-link";
-import { allowEmailLinkCheck, requestIpKey } from "@/lib/auth/rate-limits";
+import { allowEmailLinkCheck, requestIp } from "@/lib/auth/rate-limits";
 import { type FormState, formString, nextAttempt } from "@/lib/forms/form-state";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-export type ConfirmState = FormState<never> & { expired?: boolean };
+export type ConfirmState = FormState<never> & {
+  expired?: boolean;
+  /**
+   * Refused by our own limit (ADR 0009), not by Auth. Same message as Auth's 429; only
+   * exposed as a data attribute so the deployed check (`pnpm test:deployed`) can tell
+   * the two apart. Says nothing about any account.
+   */
+  limited?: boolean;
+};
 
 const TOO_MANY_ATTEMPTS = "Too many attempts. Wait a few minutes and try again.";
 
@@ -25,8 +33,8 @@ export async function confirmEmailLink(
     return { attempt, expired: true, error: "This link is not valid." };
   }
   // Per client IP (A13): Auth's `token_verifications` limit only sees this server's IP.
-  if (!allowEmailLinkCheck(await requestIpKey())) {
-    return { attempt, error: TOO_MANY_ATTEMPTS };
+  if (!allowEmailLinkCheck(await requestIp())) {
+    return { attempt, error: TOO_MANY_ATTEMPTS, limited: true };
   }
 
   const supabase = await createSupabaseServerClient();

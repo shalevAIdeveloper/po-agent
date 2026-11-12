@@ -3,7 +3,7 @@ import "server-only";
 import { createHmac, randomBytes } from "node:crypto";
 import { headers } from "next/headers";
 
-import { clientIpKey } from "@/lib/rate-limit/client-ip";
+import { type ClientIp, parseClientIp } from "@/lib/rate-limit/client-ip";
 import { type RateRule, SlidingWindowLimiter } from "@/lib/rate-limit/limiter";
 
 /**
@@ -15,25 +15,28 @@ import { type RateRule, SlidingWindowLimiter } from "@/lib/rate-limit/limiter";
 const MINUTE = 60_000;
 
 export const AUTH_RATE_RULES = {
-  /** Sign-in attempts per client IP. */
+  /** Sign-in attempts per client IP (IPv4 address or IPv6 /64). */
   loginIp: { limit: 10, windowMs: 5 * MINUTE },
-  /** Failed sign-ins per account; cleared by a successful sign-in. */
+  /** Sign-in attempts per IPv6 /48. */
+  loginIpWide: { limit: 30, windowMs: 5 * MINUTE },
+  /** Sign-in attempts per account that didn't succeed; cleared by a successful sign-in. */
   loginEmailFailures: { limit: 5, windowMs: 15 * MINUTE },
   /** Email-link verifications (`/auth/confirm` POST) per client IP. */
   confirmIp: { limit: 10, windowMs: 5 * MINUTE },
+  /** Email-link verifications per IPv6 /48. */
+  confirmIpWide: { limit: 30, windowMs: 5 * MINUTE },
   /** Password-reset requests per client IP. */
   resetIp: { limit: 5, windowMs: 15 * MINUTE },
+  /** Password-reset requests per IPv6 /48. */
+  resetIpWide: { limit: 15, windowMs: 15 * MINUTE },
   /** Password-reset requests per address. */
   resetEmail: { limit: 3, windowMs: 60 * MINUTE },
 } as const satisfies Record<string, RateRule>;
 
-const limiters = {
-  loginIp: new SlidingWindowLimiter(AUTH_RATE_RULES.loginIp),
-  loginEmailFailures: new SlidingWindowLimiter(AUTH_RATE_RULES.loginEmailFailures),
-  confirmIp: new SlidingWindowLimiter(AUTH_RATE_RULES.confirmIp),
-  resetIp: new SlidingWindowLimiter(AUTH_RATE_RULES.resetIp),
-  resetEmail: new SlidingWindowLimiter(AUTH_RATE_RULES.resetEmail),
-};
+type RuleName = keyof typeof AUTH_RATE_RULES;
+const limiters = Object.fromEntries(
+  Object.entries(AUTH_RATE_RULES).map(([name, rule]) => [name, new SlidingWindowLimiter(rule)]),
+) as Record<RuleName, SlidingWindowLimiter>;
 
 // Emails are keyed by HMAC so the limiter never holds an address (PII). The key is
 // random per process: the counters live in this process too, so nothing needs to agree
@@ -45,21 +48,47 @@ export function emailKey(email: string): string {
   return createHmac("sha256", EMAIL_KEY).update(email.trim().toLowerCase()).digest("base64url");
 }
 
-/** The caller's IP key; requests without a trusted IP share one bucket. */
-export async function requestIpKey(): Promise<string> {
-  return clientIpKey(await headers()) ?? "unknown";
+/** Requests without a trusted client IP all share this key. */
+const UNKNOWN_IP: ClientIp = { key: "unknown", wide: null };
+let lastUnknownLog = 0;
+
+/**
+ * The caller's IP keys. Without a trusted IP the request goes to one shared bucket and
+ * an event is logged (at most once a minute, without the header's value): on Railway
+ * every public request has `X-Real-IP`, so this event means the edge contract changed
+ * and every user now shares one bucket (runbook railway.md, "Rate limit check").
+ */
+export async function requestIp(): Promise<ClientIp> {
+  const ip = parseClientIp(await headers());
+  if ("key" in ip) return ip;
+
+  const now = Date.now();
+  if (now - lastUnknownLog >= MINUTE) {
+    lastUnknownLog = now;
+    console.warn(JSON.stringify({ level: "warning", event: "rate_limit.ip_unknown", header: ip.reason }));
+  }
+  return UNKNOWN_IP;
 }
 
-/** Counts a sign-in attempt; false if this IP or this account must wait. */
-export function allowLogin(ip: string, email: string): boolean {
+/** One attempt against an action's IP limits (the address or /64, then the /48). */
+function takeIp(narrow: RuleName, wide: RuleName, ip: ClientIp): boolean {
+  if (!limiters[narrow].take(ip.key)) return false;
+  return ip.wide === null || limiters[wide].take(ip.wide);
+}
+
+/**
+ * Counts a sign-in attempt; false if this IP or this account must wait.
+ *
+ * The account slot is reserved here, before Auth is called, so parallel requests can't
+ * all pass the check before any failure is recorded. Afterwards the caller either keeps
+ * it (wrong credentials), clears the account (success: `recordLoginSuccess`) or gives it
+ * back (`releaseLoginAttempt`: Auth was down or rate-limited, which isn't the account's
+ * fault).
+ */
+export function allowLogin(ip: ClientIp, email: string): boolean {
   // The IP attempt is counted even when the account is locked.
-  if (!limiters.loginIp.take(ip)) return false;
-  return !limiters.loginEmailFailures.isLimited(emailKey(email));
-}
-
-/** Wrong credentials for this account. */
-export function recordLoginFailure(email: string): void {
-  limiters.loginEmailFailures.hit(emailKey(email));
+  if (!takeIp("loginIp", "loginIpWide", ip)) return false;
+  return limiters.loginEmailFailures.take(emailKey(email));
 }
 
 /** Signed in: earlier failures no longer count. */
@@ -67,13 +96,19 @@ export function recordLoginSuccess(email: string): void {
   limiters.loginEmailFailures.reset(emailKey(email));
 }
 
+/** The attempt didn't test the credentials (Auth outage or Auth's own 429). */
+export function releaseLoginAttempt(email: string): void {
+  limiters.loginEmailFailures.release(emailKey(email));
+}
+
 /** Counts an email-link verification; false if this IP must wait. */
-export function allowEmailLinkCheck(ip: string): boolean {
-  return limiters.confirmIp.take(ip);
+export function allowEmailLinkCheck(ip: ClientIp): boolean {
+  return takeIp("confirmIp", "confirmIpWide", ip);
 }
 
 /** Counts a reset request; false if this IP or this address must wait. */
-export function allowPasswordReset(ip: string, email: string): boolean {
-  if (!limiters.resetIp.take(ip)) return false;
+export function allowPasswordReset(ip: ClientIp, email: string): boolean {
+  // IP first: a blocked IP must not use up the address's budget.
+  if (!takeIp("resetIp", "resetIpWide", ip)) return false;
   return limiters.resetEmail.take(emailKey(email));
 }

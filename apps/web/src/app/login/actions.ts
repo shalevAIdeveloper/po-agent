@@ -6,9 +6,9 @@ import { loginErrorMessage } from "@/lib/auth/login-errors";
 import { type LoginState, parseLoginForm } from "@/lib/auth/login-schema";
 import {
   allowLogin,
-  recordLoginFailure,
   recordLoginSuccess,
-  requestIpKey,
+  releaseLoginAttempt,
+  requestIp,
 } from "@/lib/auth/rate-limits";
 import { safeNextPath } from "@/lib/auth/next-path";
 import { nextAttempt } from "@/lib/forms/form-state";
@@ -25,18 +25,18 @@ export async function login(previous: LoginState, formData: FormData): Promise<L
   // Our limits per client IP and per account (A13): Auth's own per-IP limit only sees
   // this server's IP. Same message as Auth's 429, so a locked account looks like any
   // other rate limit.
-  if (!allowLogin(await requestIpKey(), email)) {
+  if (!allowLogin(await requestIp(), email)) {
     return { attempt, error: loginErrorMessage({ status: 429 }), values: { email } };
   }
 
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) {
-    // Only a rejected email/password counts against the account (not Auth outages or
-    // Auth's own 429). Nothing about the attempt is logged: the email is PII.
-    if (error.status && error.status >= 400 && error.status < 500 && error.status !== 429) {
-      recordLoginFailure(email);
-    }
+    // The attempt was reserved against the account; only a rejected email/password
+    // keeps it (not Auth outages or Auth's own 429). Nothing about the attempt is
+    // logged: the email is PII.
+    const rejected = Boolean(error.status && error.status >= 400 && error.status < 500 && error.status !== 429);
+    if (!rejected) releaseLoginAttempt(email);
     return { attempt, error: loginErrorMessage(error), values: { email } };
   }
   recordLoginSuccess(email);

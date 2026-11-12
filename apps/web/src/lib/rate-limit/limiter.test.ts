@@ -78,6 +78,43 @@ describe("SlidingWindowLimiter", () => {
     expect(limiter.size).toBe(0);
   });
 
+  it("release gives back the newest event only", () => {
+    const time = clock();
+    const limiter = new SlidingWindowLimiter({ limit: 2, windowMs: 1000 }, time.now);
+
+    limiter.take("a");
+    time.advance(600);
+    limiter.take("a");
+    limiter.release("a");
+    expect(limiter.count("a")).toBe(1);
+
+    time.advance(400); // the older (kept) event leaves the window
+    expect(limiter.count("a")).toBe(0);
+
+    limiter.release("nobody"); // no-op
+    expect(limiter.size).toBe(0);
+  });
+
+  it("release of the only event drops the key", () => {
+    const limiter = new SlidingWindowLimiter({ limit: 2, windowMs: 1000 }, clock().now);
+
+    limiter.take("a");
+    limiter.release("a");
+    expect(limiter.size).toBe(0);
+  });
+
+  it("a refused key counts as recently used, so a key under attack isn't evicted first", () => {
+    const limiter = new SlidingWindowLimiter({ limit: 1, windowMs: 1000 }, clock().now, 2);
+
+    limiter.take("victim");
+    limiter.take("b");
+    expect(limiter.take("victim")).toBe(false); // refused, but now the most recent
+    limiter.take("c"); // evicts "b", not "victim"
+
+    expect(limiter.isLimited("victim")).toBe(true);
+    expect(limiter.isLimited("b")).toBe(false);
+  });
+
   it("holds at most maxKeys keys, evicting the least recently hit", () => {
     const limiter = new SlidingWindowLimiter({ limit: 1, windowMs: 1000 }, clock().now, 2);
 
@@ -93,12 +130,10 @@ describe("SlidingWindowLimiter", () => {
   });
 
   it("keeps at most `limit` timestamps per key", () => {
-    const time = clock();
-    const limiter = new SlidingWindowLimiter({ limit: 2, windowMs: 1000 }, time.now);
+    const limiter = new SlidingWindowLimiter({ limit: 2, windowMs: 1000 }, clock().now);
 
     for (let i = 0; i < 10; i++) limiter.hit("a");
-    time.advance(1000);
-    expect(limiter.isLimited("a")).toBe(false);
+    expect(limiter.count("a")).toBe(2);
   });
 
   it.each([

@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 
-import { allowPasswordReset, requestIpKey } from "@/lib/auth/rate-limits";
+import { allowPasswordReset, requestIp } from "@/lib/auth/rate-limits";
 import { type FormState, formString, nextAttempt } from "@/lib/forms/form-state";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -31,7 +31,7 @@ export async function requestPasswordReset(
 
   // Per client IP and per address (A13): over the limit, the same notice and no email,
   // so the answer still says nothing about whether the account exists.
-  if (!allowPasswordReset(await requestIpKey(), email)) {
+  if (!allowPasswordReset(await requestIp(), email)) {
     return { attempt, notice: RESET_SENT_NOTICE, values: { email } };
   }
 

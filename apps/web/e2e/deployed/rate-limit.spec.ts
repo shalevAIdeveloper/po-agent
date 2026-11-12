@@ -15,6 +15,11 @@ import { expect, test } from "@playwright/test";
  *
  * No account is needed and no email is sent; Auth sees 10 failed verifications.
  * Afterwards the caller's IP is limited on /auth/confirm for 5 minutes.
+ *
+ * A pass proves the 11 requests shared ONE bucket, not that it is the caller's own: if
+ * the edge stopped sending X-Real-IP, everyone would share the "unknown" bucket and this
+ * would still pass. The runbook adds the two checks for that: no `rate_limit.ip_unknown`
+ * in the web logs, and a second run from another network starts fresh.
  */
 const baseURL = process.env.DEPLOYED_WEB_URL;
 const FAKE_TOKEN = "0".repeat(56);
@@ -35,10 +40,13 @@ test("forged forwarding headers don't give a new rate-limit bucket", async ({ pa
     await page.getByRole("button", { name: /continue|accept|reset/i }).click();
     const alert = page.locator("form").getByRole("alert");
     await expect(alert).not.toBeEmpty();
-    results.push((await alert.textContent()) ?? "");
+    const limitedByApp = (await page.locator("form").getAttribute("data-rate-limited")) === "app";
+    results.push(`${(await alert.textContent()) ?? ""}${limitedByApp ? " [app limit]" : ""}`);
   }
 
-  // Attempts 1–10 reached Auth (made-up token → "expired"); the 11th must not.
-  expect(results.slice(0, 10).every((text) => !text.includes("Too many"))).toBe(true);
-  expect(results[10]).toBe(TOO_MANY);
+  // Attempts 1–10 reached Auth and were answered by it (made-up token → "expired"; an
+  // Auth 429 here would mean its shared bucket is busy: wait and re-run).
+  expect(results.slice(0, 10)).toEqual(Array(10).fill("This link has expired or has already been used."));
+  // The 11th was refused by OUR limiter (not Auth's 429, which has the same text).
+  expect(results[10]).toBe(`${TOO_MANY} [app limit]`);
 });

@@ -357,8 +357,97 @@ describe("rate limits (A13)", () => {
 
     const state = await confirmEmailLink({ attempt: 0 }, form({ type: "invite", token_hash: HASH }));
 
-    expect(state).toEqual({ attempt: 1, error: "Too many attempts. Wait a few minutes and try again." });
+    expect(state).toEqual({
+      attempt: 1,
+      error: "Too many attempts. Wait a few minutes and try again.",
+      limited: true,
+    });
     expect(auth.verifyOtp).toHaveBeenCalledTimes(10);
+  });
+
+  it("confirm: Auth's own 429 is not marked as our limit", async () => {
+    auth.verifyOtp.mockResolvedValue({ error: { status: 429 } });
+
+    const state = await confirmEmailLink({ attempt: 0 }, form({ type: "invite", token_hash: HASH }));
+
+    expect(state.error).toMatch(/Too many attempts/);
+    expect(state.limited).toBeUndefined();
+  });
+
+  it("login: parallel guesses can't all pass before a failure is recorded", async () => {
+    const email = freshEmail();
+    let release: () => void = () => {};
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    auth.signInWithPassword.mockImplementation(async () => {
+      await gate;
+      return wrongPassword;
+    });
+
+    const states = Array.from({ length: 6 }, () => {
+      fromIp(freshIp());
+      return login({ attempt: 0 }, form({ email, password: "guess" }));
+    });
+    release();
+    const results = await Promise.all(states);
+
+    expect(auth.signInWithPassword).toHaveBeenCalledTimes(5);
+    expect(results.filter((state) => state.error === TOO_MANY_SIGN_INS)).toHaveLength(1);
+  });
+
+  it("login: invalid forms are refused before the limiter and don't use it up", async () => {
+    for (let i = 0; i < 20; i++) await login({ attempt: 0 }, form({ email: "nope", password: "" }));
+    auth.signInWithPassword.mockResolvedValue(wrongPassword);
+
+    await login({ attempt: 0 }, form({ email: freshEmail(), password: "pw" }));
+
+    expect(auth.signInWithPassword).toHaveBeenCalledTimes(1);
+  });
+
+  it("login: attempts on a locked account still count against the IP", async () => {
+    const locked = freshEmail();
+    auth.signInWithPassword.mockResolvedValue(wrongPassword);
+    for (let i = 0; i < 5; i++) {
+      fromIp(freshIp());
+      await login({ attempt: 0 }, form({ email: locked, password: "wrong" }));
+    }
+
+    fromIp(freshIp());
+    for (let i = 0; i < 10; i++) await login({ attempt: 0 }, form({ email: locked, password: "wrong" }));
+    const state = await login({ attempt: 0 }, form({ email: freshEmail(), password: "pw" }));
+
+    expect(state.error).toBe(TOO_MANY_SIGN_INS);
+    expect(auth.signInWithPassword).toHaveBeenCalledTimes(5);
+  });
+
+  it("login and confirm have separate IP budgets", async () => {
+    auth.signInWithPassword.mockResolvedValue(wrongPassword);
+    auth.verifyOtp.mockResolvedValue({ error: { status: 403, code: "otp_expired" } });
+    for (let i = 0; i < 10; i++) await login({ attempt: 0 }, form({ email: freshEmail(), password: "pw" }));
+
+    await confirmEmailLink({ attempt: 0 }, form({ type: "invite", token_hash: HASH }));
+    expect(auth.verifyOtp).toHaveBeenCalledTimes(1);
+
+    fromIp(freshIp());
+    for (let i = 0; i < 10; i++) await confirmEmailLink({ attempt: 0 }, form({ type: "invite", token_hash: HASH }));
+    await login({ attempt: 0 }, form({ email: freshEmail(), password: "pw" }));
+    expect(auth.signInWithPassword).toHaveBeenCalledTimes(11);
+  });
+
+  it("login: one IPv6 /48 gets 30 attempts in 5 minutes across its /64s", async () => {
+    auth.signInWithPassword.mockResolvedValue(wrongPassword);
+    const block = `2001:db8:${(request.ips += 1).toString(16)}`;
+    for (let i = 0; i < 30; i++) {
+      fromIp(`${block}:${i.toString(16)}::1`); // a new /64 each time
+      await login({ attempt: 0 }, form({ email: freshEmail(), password: "pw" }));
+    }
+
+    fromIp(`${block}:ff::1`);
+    const state = await login({ attempt: 0 }, form({ email: freshEmail(), password: "pw" }));
+
+    expect(state.error).toBe(TOO_MANY_SIGN_INS);
+    expect(auth.signInWithPassword).toHaveBeenCalledTimes(30);
   });
 
   it("confirm: malformed links are refused before the limiter and don't use it up", async () => {
@@ -381,11 +470,38 @@ describe("rate limits (A13)", () => {
     }
 
     fromIp(freshIp());
-    const state = await requestPasswordReset({ attempt: 0 }, form({ email: ` ${email.toUpperCase()} ` }));
+    const typed = ` ${email.toUpperCase()} `;
+    const state = await requestPasswordReset({ attempt: 0 }, form({ email: typed }));
 
-    expect(state.notice).toMatch(/If an account exists for that email/);
-    expect(state.error).toBeUndefined();
+    expect(state).toEqual({
+      attempt: 1,
+      notice: expect.stringMatching(/If an account exists for that email/),
+      values: { email: typed.trim() },
+    });
     expect(auth.resetPasswordForEmail).toHaveBeenCalledTimes(3);
+  });
+
+  it("reset: invalid emails are refused before the limiter and don't use it up", async () => {
+    for (let i = 0; i < 10; i++) await requestPasswordReset({ attempt: 0 }, form({ email: "nope" }));
+    auth.resetPasswordForEmail.mockResolvedValue({ error: null });
+
+    await requestPasswordReset({ attempt: 0 }, form({ email: freshEmail() }));
+
+    expect(auth.resetPasswordForEmail).toHaveBeenCalledTimes(1);
+  });
+
+  it("reset: a blocked IP does not use up an address's budget", async () => {
+    const email = freshEmail();
+    auth.resetPasswordForEmail.mockResolvedValue({ error: null });
+    for (let i = 0; i < 5; i++) await requestPasswordReset({ attempt: 0 }, form({ email: freshEmail() }));
+    await requestPasswordReset({ attempt: 0 }, form({ email })); // blocked by the IP limit
+    expect(auth.resetPasswordForEmail).toHaveBeenCalledTimes(5);
+
+    for (let i = 0; i < 3; i++) {
+      fromIp(freshIp());
+      await requestPasswordReset({ attempt: 0 }, form({ email }));
+    }
+    expect(auth.resetPasswordForEmail).toHaveBeenCalledTimes(8);
   });
 
   it("reset: the 6th request from one IP in 15 minutes gets the same notice and sends nothing", async () => {
@@ -399,6 +515,7 @@ describe("rate limits (A13)", () => {
   });
 
   it("without a trusted client IP, requests share one bucket (never unlimited)", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
     auth.verifyOtp.mockResolvedValue({ error: { status: 403, code: "otp_expired" } });
     for (let i = 0; i < 10; i++) {
       // A spoofable header varies; it must not create new buckets.

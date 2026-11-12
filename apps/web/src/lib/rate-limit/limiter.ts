@@ -36,17 +36,37 @@ export class SlidingWindowLimiter {
 
   /**
    * Records one event if the key is under its limit and returns true; otherwise returns
-   * false and records nothing (a blocked caller can't grow the state).
+   * false and records nothing (a blocked caller can't grow the state). A refused key
+   * still counts as recently used, so a key under attack isn't the first one evicted.
    */
   take(key: string): boolean {
-    if (this.isLimited(key)) return false;
-    this.hit(key);
+    const recent = this.recent(key);
+    if (recent.length >= this.rule.limit) {
+      this.store(key, recent);
+      return false;
+    }
+    recent.push(this.now());
+    this.store(key, recent);
     return true;
+  }
+
+  /** Gives back the newest event (a reserved slot that turned out not to count). */
+  release(key: string): void {
+    const recent = this.recent(key);
+    if (recent.length === 0) return;
+    recent.pop();
+    if (recent.length === 0) this.hits.delete(key);
+    else this.store(key, recent);
   }
 
   /** Forgets the key (e.g. failures after a successful sign-in). */
   reset(key: string): void {
     this.hits.delete(key);
+  }
+
+  /** Events of the key still inside the window. */
+  count(key: string): number {
+    return this.recent(key).length;
   }
 
   /** Number of keys held; for tests. */

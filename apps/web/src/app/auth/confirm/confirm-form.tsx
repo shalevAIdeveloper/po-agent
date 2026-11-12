@@ -22,6 +22,7 @@ export function ConfirmForm({ link, actionLabel }: { link: EmailLink; actionLabe
       ref={formRef}
       action={formAction}
       aria-busy={pending}
+      data-rate-limited={state.limited ? "app" : undefined}
       onSubmit={(event) => {
         if (pending) event.preventDefault();
       }}
