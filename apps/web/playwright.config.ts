@@ -11,6 +11,8 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "http://127.0.0.1:54
 
 export default defineConfig({
   testDir: "./e2e",
+  // Run against a deployed URL only (playwright.deployed.config.ts).
+  testIgnore: "deployed/**",
   fullyParallel: true,
   forbidOnly: isCI,
   retries: isCI ? 1 : 0,

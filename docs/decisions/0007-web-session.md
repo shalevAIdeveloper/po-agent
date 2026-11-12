@@ -19,7 +19,7 @@
 - **Sign-out:** `signOut({ scope: "local" })` — ends this browser's session; "sign out everywhere" is a later feature.
 - **Active org:** not stored yet; `/app` lists the user's orgs from `GET /me`. The `X-Org-Id` cookie + switcher arrive with onboarding (0.4c-2) / M3.
 
-- **Open:** sign-in calls Auth from the web server, so Auth's per-IP limit (30 / 5 min) is one bucket shared by all users (`sec` M, 0.4c-1). See Follow-up A13: decided to fix in a separate PR with 0.5c (limiter in the login action per client IP + email hash); a mandatory gate before the pilot.
+- **Rate limits (A13):** sign-in calls Auth from the web server, so Auth's per-IP limit (30 / 5 min) is one bucket shared by all users (`sec` M, 0.4c-1). Sign-in, `/auth/confirm` and reset requests are therefore limited in the web app per client IP (`X-Real-IP` from Railway's edge) and per account; see ADR 0009.
 
 ## Consequences
 - Protected pages are dynamic per request and are not prefetched; acceptable for an authenticated workspace.

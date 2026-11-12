@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./support/test";
 
 // E2E_AUTH=1 starts the real API (playwright.config.ts), so the smoke test must see
 // it up; without it nothing listens and the error state is the expected outcome (W2).

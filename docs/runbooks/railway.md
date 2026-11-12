@@ -107,7 +107,23 @@ Small PR: `GITHUB_AUTODEPLOY = true` in `.railway/railway.ts` → CI green → m
 - Supabase Auth (A14): `site_url` and redirect URLs point at the web domain (`supabase-project.md` §5).
 - Cloud sign-in: invite yourself (`invite-pilot-user.md`), set a password, create an org, see it in `/app`.
 
+### Rate limit check (A13, ADR 0009)
+After the first deploy of the limiter, after any change to `apps/web/src/lib/rate-limit/` or `lib/auth/rate-limits.ts`, and after Railway networking changes (custom domain, CDN). From the owner's machine (no account, no email; Auth sees 10 failed verifications):
+```powershell
+cd C:\dev\po-agent\apps\web
+$env:DEPLOYED_WEB_URL="https://web-dev-3fce.up.railway.app"; pnpm test:deployed
+```
+- **Pass:** 11 attempts, each with a different forged `X-Real-IP` / `X-Forwarded-For`; 1–10 say "expired" (answered by Auth), the 11th is refused **by our limiter** (`[app limit]`). The forged headers didn't create new buckets.
+- **Fail, 11th says "expired":** the forged header was trusted, so the per-IP limits can be dodged. Pilot gate A13 is open again; stop and fix before inviting anyone.
+- **Fail, an early attempt says "Too many":** your IP was still limited from a run in the last 5 minutes, or Auth's own shared bucket was busy. Wait 5 minutes and re-run.
+- A pass proves one shared bucket, not that it is **your** bucket. Two more checks, right after:
+  1. `railway logs --service web --lines 200` (or the dashboard) has **no `rate_limit.ip_unknown`** event. One means the edge stopped sending a usable `X-Real-IP` and every user shares one bucket.
+  2. Within 5 minutes, run the same command from **another network** (phone hotspot). It must pass too (its attempt 1 is not refused). If it fails at attempt 1, everyone is in one bucket.
+- Checked to work both ways against a local production server (2026-11-12/13): forged IPs trusted → fails; one fixed IP → passes.
+- Afterwards your IP is limited on `/auth/confirm` for 5 minutes.
+
 ## Notes
+- **The web service must stay at one replica** while the auth rate limits are in memory (ADR 0009). Before raising `replicas` for `web`, move the limiter to a shared store.
 - **Every variable must be declared in `.railway/railway.ts`** (`preserve()` for secrets): `railway config apply` removes variables that exist only in the dashboard. Adding a secret = add `NAME: preserve()` in a PR, apply, then set the value in the dashboard.
 - Railway project membership: owner only, at least until A18 is checked.
 - Migrations are not run by Railway; `migrate.yml` owns them (expand/contract, ADR 0008).
