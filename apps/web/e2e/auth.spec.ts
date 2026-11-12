@@ -1,5 +1,3 @@
-import { expect, type Page, test } from "@playwright/test";
-
 import {
   createOrganization,
   createUser,
@@ -7,6 +5,7 @@ import {
   e2eEnv,
   type TestUser,
 } from "./support/supabase-admin";
+import { expect, type Page, test } from "./support/test";
 
 const env = e2eEnv();
 const ORG_NAME = "Acme Supply E2E";
@@ -112,5 +111,31 @@ test.describe("auth (real Supabase + API)", () => {
     await signIn(page, owner);
 
     await expect(page).toHaveURL(/^http:\/\/localhost:3100\/app$/);
+  });
+
+  test("after 5 wrong passwords the account waits, even with the right one (A13)", async ({ page }) => {
+    // Its own user: the lock lasts 15 minutes in this server process.
+    const locked = await createUser(env!, "locked");
+    try {
+      // The alert keeps the same text between attempts, so it can't tell attempts apart.
+      // The form clears the password when an answer renders: wait for that, or the next
+      // `fill` can land first, get wiped, and submit an empty password.
+      const password = page.getByLabel("Password");
+
+      await page.goto("/login");
+      for (let i = 0; i < 5; i++) {
+        await signIn(page, locked, `wrong-password-${i}`);
+        await expect(password).toHaveValue("");
+        await expect(formAlert(page)).toHaveText("The email or password is incorrect.");
+      }
+
+      await signIn(page, locked);
+      await expect(password).toHaveValue("");
+
+      await expect(formAlert(page)).toHaveText("Too many sign-in attempts. Wait a few minutes and try again.");
+      await expect(page).toHaveURL(/\/login$/);
+    } finally {
+      await deleteUser(env!, locked);
+    }
   });
 });

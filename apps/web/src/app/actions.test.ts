@@ -21,8 +21,12 @@ const auth = vi.hoisted(() => ({
 }));
 const apiMock = vi.hoisted(() => ({ createOrganization: vi.fn(), getMe: vi.fn() }));
 const requireUser = vi.hoisted(() => vi.fn());
+// The request's headers; each test gets its own client IP (the limiters' state is
+// module-level and outlives a test).
+const request = vi.hoisted(() => ({ headers: new Headers(), ips: 0 }));
 
 vi.mock("server-only", () => ({}));
+vi.mock("next/headers", () => ({ headers: async () => request.headers }));
 vi.mock("next/navigation", () => ({
   redirect: (to: string) => {
     throw new Redirect(to);
@@ -65,8 +69,18 @@ async function redirectOf(promise: Promise<unknown>): Promise<string> {
   return (error as Redirect).to;
 }
 
+function freshIp(): string {
+  request.ips += 1;
+  return `10.0.${request.ips >> 8}.${request.ips & 255}`;
+}
+
+function fromIp(ip: string): void {
+  request.headers = new Headers({ "x-real-ip": ip });
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
+  fromIp(freshIp());
   requireUser.mockResolvedValue(USER);
   auth.getClaims.mockResolvedValue({ data: null, error: null });
   auth.signOut.mockResolvedValue({ error: null });
@@ -263,6 +277,140 @@ describe("requestPasswordReset", () => {
 
     expect(state.fieldErrors?.email).toBe("Enter a valid email address.");
     expect(auth.resetPasswordForEmail).not.toHaveBeenCalled();
+  });
+});
+
+describe("rate limits (A13)", () => {
+  const TOO_MANY_SIGN_INS = "Too many sign-in attempts. Wait a few minutes and try again.";
+  let emails = 0;
+  const freshEmail = () => `rl-${++emails}@acme.test`;
+  const wrongPassword = { error: { status: 400, code: "invalid_credentials" } };
+
+  it("login: the 11th attempt from one IP in 5 minutes is refused without calling Auth", async () => {
+    auth.signInWithPassword.mockResolvedValue(wrongPassword);
+    for (let i = 0; i < 10; i++) {
+      // A different account each time, so only the IP limit applies.
+      const state = await login({ attempt: 0 }, form({ email: freshEmail(), password: "pw" }));
+      expect(state.error).toBe("The email or password is incorrect.");
+    }
+
+    const email = freshEmail();
+    const state = await login({ attempt: 0 }, form({ email, password: "pw" }));
+
+    expect(state).toEqual({ attempt: 1, error: TOO_MANY_SIGN_INS, values: { email } });
+    expect(auth.signInWithPassword).toHaveBeenCalledTimes(10);
+
+    fromIp(freshIp()); // another client is not affected
+    expect((await login({ attempt: 0 }, form({ email, password: "pw" }))).error).not.toBe(TOO_MANY_SIGN_INS);
+  });
+
+  it("login: after 5 failures an account is locked from every IP, even with the right password", async () => {
+    const email = freshEmail();
+    auth.signInWithPassword.mockResolvedValue(wrongPassword);
+    for (let i = 0; i < 5; i++) {
+      fromIp(freshIp());
+      await login({ attempt: 0 }, form({ email, password: "wrong" }));
+    }
+
+    fromIp(freshIp());
+    auth.signInWithPassword.mockResolvedValue({ error: null });
+    const state = await login({ attempt: 0 }, form({ email: email.toUpperCase(), password: "right" }));
+
+    expect(state.error).toBe(TOO_MANY_SIGN_INS);
+    expect(auth.signInWithPassword).toHaveBeenCalledTimes(5);
+  });
+
+  it("login: a successful sign-in clears the account's failures", async () => {
+    const email = freshEmail();
+    auth.signInWithPassword.mockResolvedValue(wrongPassword);
+    for (let i = 0; i < 4; i++) await login({ attempt: 0 }, form({ email, password: "wrong" }));
+    auth.signInWithPassword.mockResolvedValueOnce({ error: null });
+    await redirectOf(login({ attempt: 0 }, form({ email, password: "right" })));
+
+    fromIp(freshIp());
+    for (let i = 0; i < 4; i++) {
+      const state = await login({ attempt: 0 }, form({ email, password: "wrong" }));
+      expect(state.error).toBe("The email or password is incorrect.");
+    }
+  });
+
+  it.each([
+    ["Auth's own 429", { status: 429 }],
+    ["an Auth outage", { status: 503 }],
+    ["a network failure", { status: 0 }],
+  ])("login: %s does not count against the account", async (_name, error) => {
+    const email = freshEmail();
+    auth.signInWithPassword.mockResolvedValue({ error });
+    for (let i = 0; i < 6; i++) {
+      fromIp(freshIp());
+      await login({ attempt: 0 }, form({ email, password: "pw" }));
+    }
+
+    expect(auth.signInWithPassword).toHaveBeenCalledTimes(6);
+  });
+
+  it("confirm: the 11th link check from one IP is refused without calling Auth", async () => {
+    auth.verifyOtp.mockResolvedValue({ error: { status: 403, code: "otp_expired" } });
+    for (let i = 0; i < 10; i++) {
+      await confirmEmailLink({ attempt: 0 }, form({ type: "invite", token_hash: HASH }));
+    }
+
+    const state = await confirmEmailLink({ attempt: 0 }, form({ type: "invite", token_hash: HASH }));
+
+    expect(state).toEqual({ attempt: 1, error: "Too many attempts. Wait a few minutes and try again." });
+    expect(auth.verifyOtp).toHaveBeenCalledTimes(10);
+  });
+
+  it("confirm: malformed links are refused before the limiter and don't use it up", async () => {
+    for (let i = 0; i < 20; i++) {
+      await confirmEmailLink({ attempt: 0 }, form({ type: "signup", token_hash: HASH }));
+    }
+    auth.verifyOtp.mockResolvedValue({ error: null });
+
+    expect(await redirectOf(confirmEmailLink({ attempt: 0 }, form({ type: "invite", token_hash: HASH })))).toBe(
+      "/set-password",
+    );
+  });
+
+  it("reset: the 4th request for one address in an hour gets the same notice and sends nothing", async () => {
+    const email = freshEmail();
+    auth.resetPasswordForEmail.mockResolvedValue({ error: null });
+    for (let i = 0; i < 3; i++) {
+      fromIp(freshIp());
+      await requestPasswordReset({ attempt: 0 }, form({ email }));
+    }
+
+    fromIp(freshIp());
+    const state = await requestPasswordReset({ attempt: 0 }, form({ email: ` ${email.toUpperCase()} ` }));
+
+    expect(state.notice).toMatch(/If an account exists for that email/);
+    expect(state.error).toBeUndefined();
+    expect(auth.resetPasswordForEmail).toHaveBeenCalledTimes(3);
+  });
+
+  it("reset: the 6th request from one IP in 15 minutes gets the same notice and sends nothing", async () => {
+    auth.resetPasswordForEmail.mockResolvedValue({ error: null });
+    for (let i = 0; i < 5; i++) await requestPasswordReset({ attempt: 0 }, form({ email: freshEmail() }));
+
+    const state = await requestPasswordReset({ attempt: 0 }, form({ email: freshEmail() }));
+
+    expect(state.notice).toMatch(/If an account exists for that email/);
+    expect(auth.resetPasswordForEmail).toHaveBeenCalledTimes(5);
+  });
+
+  it("without a trusted client IP, requests share one bucket (never unlimited)", async () => {
+    auth.verifyOtp.mockResolvedValue({ error: { status: 403, code: "otp_expired" } });
+    for (let i = 0; i < 10; i++) {
+      // A spoofable header varies; it must not create new buckets.
+      request.headers = new Headers({ "x-forwarded-for": `198.51.100.${i}` });
+      await confirmEmailLink({ attempt: 0 }, form({ type: "invite", token_hash: HASH }));
+    }
+
+    request.headers = new Headers();
+    const state = await confirmEmailLink({ attempt: 0 }, form({ type: "invite", token_hash: HASH }));
+
+    expect(state.error).toMatch(/Too many attempts/);
+    expect(auth.verifyOtp).toHaveBeenCalledTimes(10);
   });
 });
 

@@ -93,6 +93,8 @@ export default defineRailway((ctx) => {
       "/apps/web/public/**", "/apps/web/postcss.config.*", "/apps/web/components.json"]),
     healthcheck: "/healthz",
     healthcheckTimeout: 60,
+    // One replica: the auth rate limits are in memory (ADR 0009). Move them to a shared
+    // store before raising this.
     replicas: { [REGION]: 1 },
     deploy: { restartPolicyType: "ON_FAILURE", restartPolicyMaxRetries: 5, drainingSeconds: 15 },
     // Public values only (inlined into the browser bundle at build time).

@@ -12,6 +12,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "test:deployed": "playwright test --config playwright.deployed.config.ts",
     "gen:api": "openapi-typescript ../api/openapi.json -o src/lib/api/schema.d.ts"
   },
   "dependencies": {
