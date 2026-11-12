@@ -88,19 +88,30 @@ cd C:\dev\po-agent                     # on an up-to-date `dev` that contains th
 supabase config diff --project-ref ynscpsuhflxyklsfhdei --exit-code
                                        # paste the output for review before anything is pushed
 ```
-The ref must be one that has a `[remotes.*]` block: for any other ref the base values (localhost, 1s) are diffed and pushed. Review every line of the diff:
-- the remote values must appear: `site_url` → `https://web-dev-3fce.up.railway.app` (**if it shows localhost, stop**), the redirect URL, `max_frequency` → `60s`;
-- **stop on any `[auth.email.smtp]` section or `host` / `port` / `user` / `pass` / `admin_email` / `sender_name` line** (SMTP lives in the dashboard; a push must not disable or overwrite it);
-- expected/acceptable from the base file: `[api]` `schemas` / `extra_search_path` / `max_rows = 1000`, `[storage]` `file_size_limit = 50MiB`, `storage.s3_protocol.enabled = true` (no keys are created), the auth hardening values, TOTP, the template subjects/content (pushing them replaces the hand-pasted copies with the files);
-- anything else (`db.network_restrictions`, pooler, other MFA factors, providers) → stop and ask.
+The ref must be one that has a `[remotes.*]` block: for any other ref the base values (localhost, 1s) are compared (first output line: `Comparing against project … using [remotes.dev]` — if it doesn't say `[remotes.dev]`, stop).
 
-Only after the diff is approved:
-```powershell
-supabase config push --project-ref ynscpsuhflxyklsfhdei
-                                       # one prompt per resource: type n to anything not approved — Enter means yes
-supabase config diff --project-ref ynscpsuhflxyklsfhdei --exit-code
-                                       # must now show nothing left to push (exit code 0)
-```
+**dev: the diff is a check, not a push (decided 2026-11-12).** `config push` works per resource (auth, pooler, storage, …) and would also offer to push local pooler and storage defaults (Enter = yes). So Auth differences are fixed **by hand in the dashboard**, and `config diff` is re-run until only the accepted differences below remain. Exit code 2 is expected because of them.
+
+**Accepted differences on `po-agent-dev`** (13, checked 2026-11-12; `class` as printed by the JSON output):
+
+| Path | Class | Why it stays |
+|---|---|---|
+| `auth.email.smtp.{enabled, host, port, user, admin_email, sender_name}` | remote_only | SMTP lives in the dashboard (Resend); the file declares none of it, so nothing compares or pushes it |
+| `auth.password_requirements` | local_only | `""` locally, unset in the cloud: both mean no composition rules (D6) |
+| `auth.sms.twilio.enabled` | update (local false, remote true) | Twilio is the selected SMS provider, but phone sign-in is off (`auth.sms.enable_signup` matches `false`; Phone provider off in the dashboard) |
+| `db.pooler.default_pool_size` / `max_client_conn` | update (20/100 local, 15/200 remote) | Supabase sets these per compute size; the file's values are local defaults |
+| `storage.vector.enabled` | update (true local, false remote) | Vector buckets aren't used; not on the Free plan |
+| `storage.vector.max_buckets` / `max_indexes` | local_only | Same |
+
+**Stop and ask on anything else**, in particular:
+- any `auth.*` difference not in the table (fix it in the dashboard, then re-run the diff);
+- `site_url` showing localhost;
+- an `auth.email.smtp.*` line whose class is **not** `remote_only` (the file would be overwriting SMTP);
+- `db.network_restrictions`, MFA factors, providers, `[api]`.
+
+`auth.rate_limit.email_sent` is not compared (listed as unmanaged): check it in the dashboard (30/h).
+
+`config push` stays for later (e.g. prod at P1, with matching remote overrides for pooler/storage so only Auth differs). If it is ever used: the owner only, interactively, typing `n` to every resource not approved, then the diff again.
 - **SMTP is set in the dashboard, not in `config.toml`** (Authentication → Emails → SMTP settings), by the owner:
   - Until P2: Resend's test sender. Host `smtp.resend.com`, port `465`, username `resend`, password = a Resend API key (sending access only), sender `onboarding@resend.dev`, name `PO Agent (dev)`. The test sender only delivers to the Resend account's own address, which is enough to test invites and resets in dev.
   - At P2: sender on `mail.<domain>` after SPF / DKIM / DMARC are verified in Resend, in both projects.
@@ -115,7 +126,7 @@ supabase config diff --project-ref ynscpsuhflxyklsfhdei --exit-code
 ## 6. Verify
 - `migrate` run green: histories match, advisors show no errors.
 - `check_api_role`: all PASS.
-- After 0.5c: `supabase config diff` shows nothing left to push; invite yourself (dashboard → Users → Invite) → the email arrives → the link opens `/auth/confirm` on the deployed web.
+- After 0.5c: `supabase config diff` shows only the accepted differences of §5; invite yourself (dashboard → Users → Invite) → the email arrives → the link opens `/auth/confirm` on the deployed web.
 
 ## Notes
 - Never edit a migration that is already in `dev`; add a new one.
