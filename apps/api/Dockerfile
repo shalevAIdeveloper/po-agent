@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1
+# syntax=docker/dockerfile:1.27@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e
 # One image for the API and the worker; the worker's start command is set in
 # .railway/railway.ts. Build context: apps/api.
 # Base images are pinned by digest (tag kept for readability): a re-pushed tag must
