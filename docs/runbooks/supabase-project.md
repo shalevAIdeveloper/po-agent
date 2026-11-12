@@ -68,31 +68,46 @@ Migrations create `po_api` **without a password**, so it can't log in until you 
 5. The rejection check makes one deliberate failed login. Running it many times in a row can get your IP banned by Supabase: Dashboard → Database → Network bans (or `supabase network-bans`) to lift it.
 
 ## 5. Auth settings (A14, D6)
-`supabase/config.toml` holds the Auth settings: sign-up off, confirmations on, minimum 12, `secure_password_change`, `otp_length = 8`, TOTP enabled, the invite / recovery / magic-link templates. **Don't run `supabase config push` until `config.toml` has a `[remotes.<env>]` block** (0.5c, `sec` M4):
+`supabase/config.toml` holds the Auth settings: sign-up off, confirmations on, minimum 12, `secure_password_change`, `otp_length = 8`, TOTP enabled, the invite / recovery / magic-link templates. **`supabase config push` only for a project that has a `[remotes.<env>]` block** (`sec` M4):
 - `config push` sends every property the file declares, local values included, and doesn't ask when run non-interactively.
 - Without the overrides it would push `site_url` / redirect URLs pointing to `localhost`, so invite and reset links would go to localhost.
 - It would also push `max_frequency = "1s"` with `email_sent = 2` per hour, so a few reset requests would use up the email quota.
 
-The `[remotes.<env>]` block sets:
+The `[remotes.<env>]` block (dev: `[remotes.dev]`, added in A14; prod: add `[remotes.prod]` at P1) sets only:
 - `project_id = "<ref>"`;
-- `auth.site_url` and `auth.additional_redirect_urls`: the exact deployed web URLs only (no localhost, no wildcards);
-- `auth.email.max_frequency = "60s"`;
-- a deliberate `auth.rate_limit.email_sent`.
+- `auth.site_url` and `auth.additional_redirect_urls`: the exact deployed web origin only (https, no localhost, no wildcards, no trailing slash);
+- `auth.email.max_frequency = "60s"`.
 
-Then:
+**The hosted email rate limit is set by hand**, not by the file: the CLI pushes `auth.rate_limit.email_sent` only when `[auth.email.smtp]` is enabled in `config.toml`, and SMTP stays in the dashboard. Dashboard → Authentication → Rate Limits → "emails sent per hour" = **30** (needs custom SMTP); check it is still there after saving.
+
+`apps/api/tests/test_supabase_config.py` pins this: the base hardening values; no `[auth.email.smtp]`, no hooks, no other sign-in providers / phone MFA / OAuth server in the base file (all of it would be pushed); the exact dev origin; and that a remote block overrides nothing but the URLs and `max_frequency` (so signup, confirmations, password and OTP rules can't be weakened per environment).
+
+Then, **the owner, in their own terminal** — never an agent session, never with `--yes` (a non-interactive push proceeds without asking). No `link` needed: `--project-ref` targets the project directly. If the CLI says you are not logged in, run `supabase login` first (browser).
 ```powershell
-supabase link --project-ref <ref>      # owner, in their own terminal; asks for the DB password (hidden)
-supabase config diff                   # review every line: the remote overrides must appear; no smtp_* lines,
-                                       # no storage.s3_protocol / db.network_restrictions changes
-supabase config push                   # confirms each resource
+cd C:\dev\po-agent                     # on an up-to-date `dev` that contains the remote block
+supabase config diff --project-ref ynscpsuhflxyklsfhdei --exit-code
+                                       # paste the output for review before anything is pushed
+```
+The ref must be one that has a `[remotes.*]` block: for any other ref the base values (localhost, 1s) are diffed and pushed. Review every line of the diff:
+- the remote values must appear: `site_url` → `https://web-dev-3fce.up.railway.app` (**if it shows localhost, stop**), the redirect URL, `max_frequency` → `60s`;
+- **stop on any `[auth.email.smtp]` section or `host` / `port` / `user` / `pass` / `admin_email` / `sender_name` line** (SMTP lives in the dashboard; a push must not disable or overwrite it);
+- expected/acceptable from the base file: `[api]` `schemas` / `extra_search_path` / `max_rows = 1000`, `[storage]` `file_size_limit = 50MiB`, `storage.s3_protocol.enabled = true` (no keys are created), the auth hardening values, TOTP, the template subjects/content (pushing them replaces the hand-pasted copies with the files);
+- anything else (`db.network_restrictions`, pooler, other MFA factors, providers) → stop and ask.
+
+Only after the diff is approved:
+```powershell
+supabase config push --project-ref ynscpsuhflxyklsfhdei
+                                       # one prompt per resource: type n to anything not approved — Enter means yes
+supabase config diff --project-ref ynscpsuhflxyklsfhdei --exit-code
+                                       # must now show nothing left to push (exit code 0)
 ```
 - **SMTP is set in the dashboard, not in `config.toml`** (Authentication → Emails → SMTP settings), by the owner:
   - Until P2: Resend's test sender. Host `smtp.resend.com`, port `465`, username `resend`, password = a Resend API key (sending access only), sender `onboarding@resend.dev`, name `PO Agent (dev)`. The test sender only delivers to the Resend account's own address, which is enough to test invites and resets in dev.
   - At P2: sender on `mail.<domain>` after SPF / DKIM / DMARC are verified in Resend, in both projects.
 - On new Free projects, custom email templates work only with custom SMTP (A11): without SMTP, invite links won't reach `/auth/confirm`.
-- **Email templates are pasted by hand in the dashboard** (Authentication → Email Templates) until `config push` with `[remotes.<env>]` is in use. Invite, Reset Password and Magic Link must match `supabase/templates/*.html` (body without the HTML comments; subjects from `config.toml`). Any change to those files = paste it again in every hosted project.
+- **Email templates:** pushed by `config push` from `supabase/templates/*.html` once the remote block is in use (dev after A14). Before that (and for any project without a remote block) they are pasted by hand in the dashboard (Authentication → Email Templates). Invite, Reset Password and Magic Link must match `supabase/templates/*.html` (body without the HTML comments; subjects from `config.toml`). Any change to those files = paste it again in every hosted project.
   - Symptom of the **default** templates still in place (seen in 0.5c): the email link goes through `…supabase.co/auth/v1/verify` and lands on `<site_url>/#error=access_denied&error_code=otp_expired`. The default link spends the token on GET (scanners can use it up) and redirects to the Site URL. Ours links straight to `<site_url>/auth/confirm?token_hash=…`.
-- **URL Configuration** (until `[remotes.<env>]`): Site URL = the exact web origin (`https://web-dev-3fce.up.railway.app` for dev; no trailing slash, no path). Check it is still there after saving: in 0.5c it wasn't saved the first time. The app sends no `redirectTo` (templates build the link), so Redirect URLs only needs that same origin; no wildcards.
+- **URL Configuration** (set by `config push` from the remote block; by hand only for a project without one): Site URL = the exact web origin (`https://web-dev-3fce.up.railway.app` for dev; no trailing slash, no path). Check it is still there after saving: in 0.5c it wasn't saved the first time. The app sends no `redirectTo` (templates build the link), so Redirect URLs only needs that same origin; no wildcards.
 - Dev emails from `onboarding@resend.dev` land in spam (expected); fixed by the P2 sender domain.
 - **Leaked password protection (A10):** Pro feature. Record "not available" for dev and enable it at P1.
 - **Password minimum (A19):** Auth counts bytes, not characters; the web enforces 12 characters.

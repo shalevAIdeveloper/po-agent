@@ -431,3 +431,23 @@ enabled = true
 # formatted with uppercase keywords, indent 2, max width 180, trailing commas,
 # and column/key alignment. Set to "null" to emit raw, unformatted SQL.
 # format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":180,\"commaStyle\":\"trailing\"}"
+
+# Hosted overrides (A14; sec M4). Used only when the CLI is linked to this project ref,
+# e.g. `supabase config diff` / `config push` (runbook supabase-project.md §5). Everything
+# not listed here is pushed with the values above, so the values above must be right for
+# the hosted project too (signup off, confirmations, min 12, otp_length 8, templates).
+# No localhost and no wildcards here: Auth builds every email link from site_url.
+# Pinned by apps/api/tests/test_supabase_config.py.
+[remotes.dev]
+project_id = "ynscpsuhflxyklsfhdei"
+
+[remotes.dev.auth]
+site_url = "https://web-dev-3fce.up.railway.app"
+additional_redirect_urls = ["https://web-dev-3fce.up.railway.app"]
+
+[remotes.dev.auth.email]
+# Locally 1s so e2e can send several emails quickly; hosted, one email per minute per user.
+max_frequency = "60s"
+# The hosted email rate limit (`auth.rate_limit.email_sent`) is NOT set here: the CLI only
+# pushes it when `[auth.email.smtp]` is enabled in this file, and SMTP must stay in the
+# dashboard. It is set by hand (dashboard → Authentication → Rate Limits; runbook §5).
