@@ -17,18 +17,21 @@ const MINUTE = 60_000;
 export const AUTH_RATE_RULES = {
   /** Sign-in attempts per client IP (IPv4 address or IPv6 /64). */
   loginIp: { limit: 10, windowMs: 5 * MINUTE },
-  /** Sign-in attempts per IPv6 /48. */
-  loginIpWide: { limit: 30, windowMs: 5 * MINUTE },
+  /**
+   * Sign-in attempts per IPv6 /48. Generous: carriers and cloud/VPN providers give
+   * unrelated customers /64s from one /48, which all share this bucket.
+   */
+  loginIpWide: { limit: 100, windowMs: 5 * MINUTE },
   /** Sign-in attempts per account that didn't succeed; cleared by a successful sign-in. */
   loginEmailFailures: { limit: 5, windowMs: 15 * MINUTE },
   /** Email-link verifications (`/auth/confirm` POST) per client IP. */
   confirmIp: { limit: 10, windowMs: 5 * MINUTE },
   /** Email-link verifications per IPv6 /48. */
-  confirmIpWide: { limit: 30, windowMs: 5 * MINUTE },
+  confirmIpWide: { limit: 100, windowMs: 5 * MINUTE },
   /** Password-reset requests per client IP. */
   resetIp: { limit: 5, windowMs: 15 * MINUTE },
   /** Password-reset requests per IPv6 /48. */
-  resetIpWide: { limit: 15, windowMs: 15 * MINUTE },
+  resetIpWide: { limit: 50, windowMs: 15 * MINUTE },
   /** Password-reset requests per address. */
   resetEmail: { limit: 3, windowMs: 60 * MINUTE },
 } as const satisfies Record<string, RateRule>;
@@ -85,20 +88,24 @@ function takeIp(narrow: RuleName, wide: RuleName, ip: ClientIp): boolean {
  * back (`releaseLoginAttempt`: Auth was down or rate-limited, which isn't the account's
  * fault).
  */
-export function allowLogin(ip: ClientIp, email: string): boolean {
+export function allowLogin(ip: ClientIp, email: string): LoginAttempt | null {
   // The IP attempt is counted even when the account is locked.
-  if (!takeIp("loginIp", "loginIpWide", ip)) return false;
-  return limiters.loginEmailFailures.take(emailKey(email));
+  if (!takeIp("loginIp", "loginIpWide", ip)) return null;
+  const stamp = limiters.loginEmailFailures.reserve(emailKey(email));
+  return stamp === null ? null : { email, stamp };
 }
 
+/** A sign-in attempt that passed the limits; its account slot is reserved. */
+export type LoginAttempt = { readonly email: string; readonly stamp: number };
+
 /** Signed in: earlier failures no longer count. */
-export function recordLoginSuccess(email: string): void {
-  limiters.loginEmailFailures.reset(emailKey(email));
+export function recordLoginSuccess(attempt: LoginAttempt): void {
+  limiters.loginEmailFailures.reset(emailKey(attempt.email));
 }
 
 /** The attempt didn't test the credentials (Auth outage or Auth's own 429). */
-export function releaseLoginAttempt(email: string): void {
-  limiters.loginEmailFailures.release(emailKey(email));
+export function releaseLoginAttempt(attempt: LoginAttempt): void {
+  limiters.loginEmailFailures.release(emailKey(attempt.email), attempt.stamp);
 }
 
 /** Counts an email-link verification; false if this IP must wait. */

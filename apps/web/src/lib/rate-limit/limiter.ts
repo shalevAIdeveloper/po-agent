@@ -40,21 +40,35 @@ export class SlidingWindowLimiter {
    * still counts as recently used, so a key under attack isn't the first one evicted.
    */
   take(key: string): boolean {
+    return this.reserve(key) !== null;
+  }
+
+  /**
+   * Like `take`, but returns the recorded event (its timestamp), so exactly that event
+   * can be given back with `release`; null when the key is at its limit.
+   */
+  reserve(key: string): number | null {
     const recent = this.recent(key);
     if (recent.length >= this.rule.limit) {
       this.store(key, recent);
-      return false;
+      return null;
     }
-    recent.push(this.now());
+    const stamp = this.now();
+    recent.push(stamp);
     this.store(key, recent);
-    return true;
+    return stamp;
   }
 
-  /** Gives back the newest event (a reserved slot that turned out not to count). */
-  release(key: string): void {
+  /**
+   * Gives back one event reserved with `reserve` (a slot that turned out not to count).
+   * Removes that event, not the newest one, so it can't undo another request's event;
+   * does nothing if it is already gone (expired or reset).
+   */
+  release(key: string, stamp: number): void {
     const recent = this.recent(key);
-    if (recent.length === 0) return;
-    recent.pop();
+    const index = recent.lastIndexOf(stamp);
+    if (index === -1) return;
+    recent.splice(index, 1);
     if (recent.length === 0) this.hits.delete(key);
     else this.store(key, recent);
   }

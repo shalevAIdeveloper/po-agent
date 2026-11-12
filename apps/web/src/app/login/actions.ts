@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 
-import { loginErrorMessage } from "@/lib/auth/login-errors";
+import { isCredentialRejection, loginErrorMessage } from "@/lib/auth/login-errors";
 import { type LoginState, parseLoginForm } from "@/lib/auth/login-schema";
 import {
   allowLogin,
@@ -25,7 +25,8 @@ export async function login(previous: LoginState, formData: FormData): Promise<L
   // Our limits per client IP and per account (A13): Auth's own per-IP limit only sees
   // this server's IP. Same message as Auth's 429, so a locked account looks like any
   // other rate limit.
-  if (!allowLogin(await requestIp(), email)) {
+  const allowed = allowLogin(await requestIp(), email);
+  if (!allowed) {
     return { attempt, error: loginErrorMessage({ status: 429 }), values: { email } };
   }
 
@@ -33,13 +34,12 @@ export async function login(previous: LoginState, formData: FormData): Promise<L
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) {
     // The attempt was reserved against the account; only a rejected email/password
-    // keeps it (not Auth outages or Auth's own 429). Nothing about the attempt is
-    // logged: the email is PII.
-    const rejected = Boolean(error.status && error.status >= 400 && error.status < 500 && error.status !== 429);
-    if (!rejected) releaseLoginAttempt(email);
+    // keeps it (not Auth outages or Auth's own rate limit). Nothing about the attempt
+    // is logged: the email is PII.
+    if (!isCredentialRejection(error)) releaseLoginAttempt(allowed);
     return { attempt, error: loginErrorMessage(error), values: { email } };
   }
-  recordLoginSuccess(email);
+  recordLoginSuccess(allowed);
 
   // Session cookies were written by the server client; `next` is re-validated here
   // because the hidden field is user-controlled.

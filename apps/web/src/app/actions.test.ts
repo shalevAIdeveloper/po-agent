@@ -435,19 +435,30 @@ describe("rate limits (A13)", () => {
     expect(auth.signInWithPassword).toHaveBeenCalledTimes(11);
   });
 
-  it("login: one IPv6 /48 gets 30 attempts in 5 minutes across its /64s", async () => {
+  it("login: one IPv6 /48 gets 100 attempts in 5 minutes across its /64s", async () => {
     auth.signInWithPassword.mockResolvedValue(wrongPassword);
     const block = `2001:db8:${(request.ips += 1).toString(16)}`;
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 100; i++) {
       fromIp(`${block}:${i.toString(16)}::1`); // a new /64 each time
       await login({ attempt: 0 }, form({ email: freshEmail(), password: "pw" }));
     }
 
-    fromIp(`${block}:ff::1`);
+    fromIp(`${block}:ffff::1`);
     const state = await login({ attempt: 0 }, form({ email: freshEmail(), password: "pw" }));
 
     expect(state.error).toBe(TOO_MANY_SIGN_INS);
-    expect(auth.signInWithPassword).toHaveBeenCalledTimes(30);
+    expect(auth.signInWithPassword).toHaveBeenCalledTimes(100);
+  });
+
+  it("login: Auth's rate-limit code without a 429 status gives the slot back too", async () => {
+    const email = freshEmail();
+    auth.signInWithPassword.mockResolvedValue({ error: { status: 400, code: "over_request_rate_limit" } });
+    for (let i = 0; i < 6; i++) {
+      fromIp(freshIp());
+      await login({ attempt: 0 }, form({ email, password: "pw" }));
+    }
+
+    expect(auth.signInWithPassword).toHaveBeenCalledTimes(6);
   });
 
   it("confirm: malformed links are refused before the limiter and don't use it up", async () => {

@@ -72,12 +72,12 @@ describe("AUTH_RATE_RULES", () => {
 
     expect(table).toEqual({
       loginIp: [10, 5],
-      loginIpWide: [30, 5],
+      loginIpWide: [100, 5],
       loginEmailFailures: [5, 15],
       confirmIp: [10, 5],
-      confirmIpWide: [30, 5],
+      confirmIpWide: [100, 5],
       resetIp: [5, 15],
-      resetIpWide: [15, 15],
+      resetIpWide: [50, 15],
       resetEmail: [3, 60],
     });
   });

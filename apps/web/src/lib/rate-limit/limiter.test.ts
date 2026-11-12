@@ -78,28 +78,42 @@ describe("SlidingWindowLimiter", () => {
     expect(limiter.size).toBe(0);
   });
 
-  it("release gives back the newest event only", () => {
+  it("release gives back exactly the reserved event, not a newer one", () => {
+    const time = clock();
+    const limiter = new SlidingWindowLimiter({ limit: 3, windowMs: 1000 }, time.now);
+
+    const mine = limiter.reserve("a");
+    time.advance(300);
+    limiter.take("a"); // someone else's event, newer than mine
+    limiter.release("a", mine!);
+    expect(limiter.count("a")).toBe(1);
+
+    time.advance(700); // mine would have left the window now; the other one is kept
+    expect(limiter.count("a")).toBe(1);
+  });
+
+  it("release does nothing once the event is gone", () => {
     const time = clock();
     const limiter = new SlidingWindowLimiter({ limit: 2, windowMs: 1000 }, time.now);
 
+    const mine = limiter.reserve("a")!;
+    limiter.reset("a");
+    time.advance(1); // later events have other timestamps than the reset one
     limiter.take("a");
-    time.advance(600);
     limiter.take("a");
-    limiter.release("a");
-    expect(limiter.count("a")).toBe(1);
+    limiter.release("a", mine);
+    expect(limiter.count("a")).toBe(2);
 
-    time.advance(400); // the older (kept) event leaves the window
-    expect(limiter.count("a")).toBe(0);
-
-    limiter.release("nobody"); // no-op
-    expect(limiter.size).toBe(0);
+    limiter.release("nobody", mine);
+    expect(limiter.size).toBe(1);
   });
 
-  it("release of the only event drops the key", () => {
-    const limiter = new SlidingWindowLimiter({ limit: 2, windowMs: 1000 }, clock().now);
+  it("reserve returns null at the limit; releasing the only event drops the key", () => {
+    const limiter = new SlidingWindowLimiter({ limit: 1, windowMs: 1000 }, clock().now);
 
-    limiter.take("a");
-    limiter.release("a");
+    const mine = limiter.reserve("a")!;
+    expect(limiter.reserve("a")).toBeNull();
+    limiter.release("a", mine);
     expect(limiter.size).toBe(0);
   });
 
