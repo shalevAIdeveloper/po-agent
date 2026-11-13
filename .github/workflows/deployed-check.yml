@@ -1,0 +1,52 @@
+name: Deployed check
+# A13 / ADR 0009: run `pnpm test:deployed` against the deployed dev web from GitHub's
+# network, as the second client of the rate-limit check (runbook railway.md, "Rate limit
+# check"). By hand only; not part of CI or `ci-ok`.
+#
+# Run it only after the web deploy of the current `dev` commit has finished: a dispatched
+# run is a check suite on that commit, and Railway's checkSuites gate waits for those.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deployed-check
+  cancel-in-progress: false
+
+jobs:
+  rate-limit:
+    # The code that runs is the reviewed code on dev, never a branch's.
+    if: github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults: { run: { working-directory: apps/web } }
+    env:
+      # Fixed target, not an input: the workflow can't be pointed at another site.
+      DEPLOYED_WEB_URL: https://web-dev-3fce.up.railway.app
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with: { persist-credentials: false }
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+        with: { package_json_file: apps/web/package.json }
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: apps/web/.nvmrc
+          cache: pnpm
+          cache-dependency-path: apps/web/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - id: pw
+        # Fail on an empty version: the key would collapse to "playwright-Linux-".
+        run: |
+          v=$(pnpm exec playwright --version | awk '{print $2}')
+          test -n "$v"
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+      # Restore only: this workflow never writes the cache CI uses.
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:deployed
