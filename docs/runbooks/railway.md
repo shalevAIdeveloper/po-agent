@@ -129,6 +129,7 @@ $env:DEPLOYED_WEB_URL="https://web-dev-3fce.up.railway.app"; pnpm test:deployed
      "ip_unknown events: $(@($app | Select-String 'ip_unknown').Count)"
      "refused buckets (key_tag): $(@($app | ForEach-Object { [regex]::Match($_.Line, '"key_tag":"([0-9a-f]+)"').Groups[1].Value } | Where-Object { $_ } | Sort-Object -Unique).Count)"
      ```
+     Tags compare only within one process: **no deploy or restart of `web` between the two runs** (`railway deployment list --service web --environment dev` shows the same active deployment before and after; if not, repeat both runs).
      **Pass:** 22 POSTs, **2** distinct source IPs, 0 `ip_unknown`, **2** refused buckets (each run's 11th attempt, `family` v4 or v6). One source IP → the runs weren't on two networks: repeat step 1. Two source IPs but one bucket, or any `ip_unknown` → the app isn't keying on the real client IP: A13 open, stop.
   - `rate_limit.refused` lines carry the action, the limit (`ip`, `ip_wide`, `account`, `address`), the address family and, for IP limits only, `key_tag`: a 12-hex salted HMAC of the bucket key (per process: tags compare only within one deployment's lifetime; never the IP). At most 60 lines a minute; `dropped` counts the rest.
 - Checked to work both ways against a local production server (2026-11-12/13): forged IPs trusted → fails; one fixed IP → passes.
