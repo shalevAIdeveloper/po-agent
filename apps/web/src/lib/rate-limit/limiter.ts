@@ -14,7 +14,7 @@ export class SlidingWindowLimiter {
 
   constructor(
     private readonly rule: RateRule,
-    private readonly now: () => number = Date.now,
+    private readonly now: () => number = () => Date.now(),
     private readonly maxKeys = 50_000,
   ) {
     if (!Number.isSafeInteger(rule.limit) || rule.limit < 1 || !(rule.windowMs > 0)) {

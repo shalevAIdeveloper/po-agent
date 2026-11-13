@@ -7,7 +7,8 @@ const request = vi.hoisted(() => ({ headers: new Headers() }));
 vi.mock("server-only", () => ({}));
 vi.mock("next/headers", () => ({ headers: async () => request.headers }));
 
-const { AUTH_RATE_RULES, emailKey, requestIp } = await import("./rate-limits");
+const { AUTH_RATE_RULES, allowEmailLinkCheck, allowLogin, allowPasswordReset, emailKey, logTag, requestIp } =
+  await import("./rate-limits");
 
 afterEach(() => {
   vi.useRealTimers();
@@ -60,6 +61,90 @@ describe("requestIp", () => {
       { level: "warning", event: "rate_limit.ip_unknown", header: "missing" },
     ]);
     expect(JSON.stringify(warn.mock.calls)).not.toContain("198.51.100.7");
+  });
+});
+
+describe("rate_limit.refused log", () => {
+  // Each test moves the clock on, so the 60-a-minute log budget starts fresh.
+  let minute = 0;
+  function nextMinute() {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(Date.UTC(2026, 10, 13, 12, (minute += 2))));
+  }
+  function events(spy: { mock: { calls: unknown[][] } }) {
+    return spy.mock.calls.map(([line]) => JSON.parse(String(line)) as Record<string, unknown>);
+  }
+
+  it("an IP refusal logs the action, family and a tag of the bucket, never the IP", () => {
+    nextMinute();
+    const info = vi.spyOn(console, "info").mockImplementation(() => {});
+    const ip = { key: "203.0.113.50", wide: null };
+
+    for (let i = 0; i < 11; i++) allowEmailLinkCheck(ip);
+
+    expect(events(info)).toEqual([
+      { level: "info", event: "rate_limit.refused", action: "confirm", limit: "ip", family: "v4", key_tag: logTag(ip.key) },
+    ]);
+    expect(JSON.stringify(info.mock.calls)).not.toContain("203.0.113");
+  });
+
+  it("tags are stable per bucket, differ between buckets, and are not a plain hash", () => {
+    expect(logTag("203.0.113.50")).toBe(logTag("203.0.113.50"));
+    expect(logTag("203.0.113.50")).not.toBe(logTag("203.0.113.51"));
+    expect(logTag("203.0.113.50")).toMatch(/^[0-9a-f]{12}$/);
+    const plain = createHash("sha256").update("203.0.113.50").digest("hex").slice(0, 12);
+    expect(logTag("203.0.113.50")).not.toBe(plain);
+  });
+
+  it("an IPv6 /48 refusal is tagged by the /48 and marked v6", () => {
+    nextMinute();
+    const info = vi.spyOn(console, "info").mockImplementation(() => {});
+    for (let i = 0; i < 101; i++) {
+      allowEmailLinkCheck({ key: `2001:db8:77:${i.toString(16)}::/64`, wide: "2001:db8:77::/48" });
+    }
+
+    expect(events(info)).toEqual([
+      expect.objectContaining({ action: "confirm", limit: "ip_wide", family: "v6", key_tag: logTag("2001:db8:77::/48") }),
+    ]);
+  });
+
+  it("account and address refusals carry no tag (it would identify a person)", () => {
+    nextMinute();
+    const info = vi.spyOn(console, "info").mockImplementation(() => {});
+
+    for (let i = 0; i < 6; i++) allowLogin({ key: `198.51.100.${i}`, wide: null }, "locked@acme.test");
+    for (let i = 0; i < 4; i++) allowPasswordReset({ key: `192.0.2.${i}`, wide: null }, "reset@acme.test");
+
+    expect(events(info)).toEqual([
+      { level: "info", event: "rate_limit.refused", action: "login", limit: "account" },
+      { level: "info", event: "rate_limit.refused", action: "reset", limit: "address" },
+    ]);
+    expect(JSON.stringify(info.mock.calls)).not.toMatch(/acme|locked|reset@/);
+  });
+
+  it("the shared bucket without a trusted IP is logged as family unknown", () => {
+    nextMinute();
+    const info = vi.spyOn(console, "info").mockImplementation(() => {});
+    for (let i = 0; i < 11; i++) allowEmailLinkCheck({ key: "unknown", wide: null });
+
+    expect(events(info)).toEqual([expect.objectContaining({ family: "unknown", key_tag: logTag("unknown") })]);
+  });
+
+  it("logs at most 60 refusals a minute and reports how many were dropped", () => {
+    nextMinute();
+    const info = vi.spyOn(console, "info").mockImplementation(() => {});
+    const ip = { key: "203.0.113.99", wide: null };
+    for (let i = 0; i < 10; i++) allowEmailLinkCheck(ip);
+    for (let i = 0; i < 75; i++) allowEmailLinkCheck(ip); // all refused
+
+    expect(info).toHaveBeenCalledTimes(60);
+
+    vi.setSystemTime(Date.now() + 60_000);
+    allowEmailLinkCheck({ key: "203.0.113.98", wide: null }); // allowed, no log
+    for (let i = 0; i < 10; i++) allowEmailLinkCheck({ key: "203.0.113.98", wide: null });
+
+    expect(info).toHaveBeenCalledTimes(61);
+    expect(events(info).at(-1)).toMatchObject({ dropped: 15 });
   });
 });
 

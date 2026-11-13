@@ -73,10 +73,56 @@ export async function requestIp(): Promise<ClientIp> {
   return UNKNOWN_IP;
 }
 
+type Action = "login" | "confirm" | "reset";
+type LimitKind = "ip" | "ip_wide" | "account" | "address";
+
+// Log tags are HMACs with their own random per-process key, so a tag can't be turned
+// back into an IP (no rainbow table over the IPv4 space) and only compares within one
+// process lifetime, which is all the deployed check needs (runbook railway.md).
+const LOG_TAG_KEY = randomBytes(32);
+// An attacker can make every request a refusal; at most this many lines a minute.
+const refusedLogBudget = new SlidingWindowLimiter({ limit: 60, windowMs: MINUTE });
+let refusedLogsDropped = 0;
+
+/** Short, salted tag of a limiter key, for comparing buckets in logs. Never the key. */
+export function logTag(key: string): string {
+  return createHmac("sha256", LOG_TAG_KEY).update(key).digest("hex").slice(0, 12);
+}
+
+/**
+ * One `rate_limit.refused` event (ADR 0009). IP limits carry the address family and a
+ * tag of the bucket key, so two runs can be checked against Railway's own request log
+ * (same tag = same bucket). Account/address limits carry no tag: that would be a
+ * pseudonymous identifier of a person.
+ */
+function logRefused(action: Action, limit: LimitKind, ip?: { key: string }): void {
+  if (!refusedLogBudget.take("refused")) {
+    refusedLogsDropped += 1;
+    return;
+  }
+  const event: Record<string, string | number> = { level: "info", event: "rate_limit.refused", action, limit };
+  if (ip) {
+    event.family = ip.key === UNKNOWN_IP.key ? "unknown" : ip.key.includes(":") ? "v6" : "v4";
+    event.key_tag = logTag(ip.key);
+  }
+  if (refusedLogsDropped > 0) {
+    event.dropped = refusedLogsDropped;
+    refusedLogsDropped = 0;
+  }
+  console.info(JSON.stringify(event));
+}
+
 /** One attempt against an action's IP limits (the address or /64, then the /48). */
-function takeIp(narrow: RuleName, wide: RuleName, ip: ClientIp): boolean {
-  if (!limiters[narrow].take(ip.key)) return false;
-  return ip.wide === null || limiters[wide].take(ip.wide);
+function takeIp(action: Action, narrow: RuleName, wide: RuleName, ip: ClientIp): boolean {
+  if (!limiters[narrow].take(ip.key)) {
+    logRefused(action, "ip", ip);
+    return false;
+  }
+  if (ip.wide !== null && !limiters[wide].take(ip.wide)) {
+    logRefused(action, "ip_wide", { key: ip.wide });
+    return false;
+  }
+  return true;
 }
 
 /**
@@ -90,9 +136,13 @@ function takeIp(narrow: RuleName, wide: RuleName, ip: ClientIp): boolean {
  */
 export function allowLogin(ip: ClientIp, email: string): LoginAttempt | null {
   // The IP attempt is counted even when the account is locked.
-  if (!takeIp("loginIp", "loginIpWide", ip)) return null;
+  if (!takeIp("login", "loginIp", "loginIpWide", ip)) return null;
   const stamp = limiters.loginEmailFailures.reserve(emailKey(email));
-  return stamp === null ? null : { email, stamp };
+  if (stamp === null) {
+    logRefused("login", "account");
+    return null;
+  }
+  return { email, stamp };
 }
 
 /** A sign-in attempt that passed the limits; its account slot is reserved. */
@@ -110,12 +160,16 @@ export function releaseLoginAttempt(attempt: LoginAttempt): void {
 
 /** Counts an email-link verification; false if this IP must wait. */
 export function allowEmailLinkCheck(ip: ClientIp): boolean {
-  return takeIp("confirmIp", "confirmIpWide", ip);
+  return takeIp("confirm", "confirmIp", "confirmIpWide", ip);
 }
 
 /** Counts a reset request; false if this IP or this address must wait. */
 export function allowPasswordReset(ip: ClientIp, email: string): boolean {
   // IP first: a blocked IP must not use up the address's budget.
-  if (!takeIp("resetIp", "resetIpWide", ip)) return false;
-  return limiters.resetEmail.take(emailKey(email));
+  if (!takeIp("reset", "resetIp", "resetIpWide", ip)) return false;
+  if (!limiters.resetEmail.take(emailKey(email))) {
+    logRefused("reset", "address");
+    return false;
+  }
+  return true;
 }

@@ -116,9 +116,22 @@ $env:DEPLOYED_WEB_URL="https://web-dev-3fce.up.railway.app"; pnpm test:deployed
 - **Pass:** 11 attempts, each with a different forged `X-Real-IP` / `X-Forwarded-For`; 1–10 say "expired" (answered by Auth), the 11th is refused **by our limiter** (`[app limit]`). The forged headers didn't create new buckets.
 - **Fail, 11th says "expired":** the forged header was trusted, so the per-IP limits can be dodged. Pilot gate A13 is open again; stop and fix before inviting anyone.
 - **Fail, an early attempt says "Too many":** your IP was still limited from a run in the last 5 minutes, or Auth's own shared bucket was busy. Wait 5 minutes and re-run.
-- A pass proves one shared bucket, not that it is **your** bucket. Two more checks, right after:
-  1. `railway logs --service web --lines 200` (or the dashboard) has **no `rate_limit.ip_unknown`** event. One means the edge stopped sending a usable `X-Real-IP` and every user shares one bucket.
-  2. Within 5 minutes, run the same command from **another network** (phone hotspot). It must pass too (its attempt 1 is not refused). If it fails at attempt 1, everyone is in one bucket.
+- A pass proves one shared bucket, not that it is **your** bucket. So, within 5 minutes of the first run, a **second run from another network**:
+  1. **Really switch networks:** turn **Wi-Fi and Ethernet off** on the laptop, connect only to the phone's hotspot, and make sure the phone itself is on **mobile data**, not the home Wi-Fi. (2026-11-13: a "hotspot" run left from the same public IP as the home run — Railway saw one source IP for both — so it was refused at attempt 1 and proved nothing.)
+  2. Run the same `pnpm test:deployed`. It must pass too (its attempt 1 is not refused).
+  3. **Verify from the logs** that the two runs were two clients and two buckets (counts only; no IP is printed):
+     ```powershell
+     $since = (Get-Date).AddMinutes(-15)
+     $http = railway logs --service web --environment dev --http --json --lines 500 | ForEach-Object { try { $_ | ConvertFrom-Json } catch {} }
+     $posts = @($http | Where-Object { $_.method -eq 'POST' -and $_.path -like '/auth/confirm*' -and [datetime]$_.timestamp -gt $since })
+     "confirm POSTs: $($posts.Count); distinct source IPs (Railway): $(@($posts | ForEach-Object srcIp | Sort-Object -Unique).Count)"
+     $app = @(railway logs --service web --environment dev --lines 1000 | Select-String 'rate_limit\.(refused|ip_unknown)')
+     "ip_unknown events: $(@($app | Select-String 'ip_unknown').Count)"
+     "refused buckets (key_tag): $(@($app | ForEach-Object { [regex]::Match($_.Line, '"key_tag":"([0-9a-f]+)"').Groups[1].Value } | Where-Object { $_ } | Sort-Object -Unique).Count)"
+     ```
+     Tags compare only within one process: **no deploy or restart of `web` between the two runs** (`railway deployment list --service web --environment dev` shows the same active deployment before and after; if not, repeat both runs).
+     **Pass:** 22 POSTs, **2** distinct source IPs, 0 `ip_unknown`, **2** refused buckets (each run's 11th attempt, `family` v4 or v6). One source IP → the runs weren't on two networks: repeat step 1. Two source IPs but one bucket, or any `ip_unknown` → the app isn't keying on the real client IP: A13 open, stop.
+  - `rate_limit.refused` lines carry the action, the limit (`ip`, `ip_wide`, `account`, `address`), the address family and, for IP limits only, `key_tag`: a 12-hex salted HMAC of the bucket key (per process: tags compare only within one deployment's lifetime; never the IP). At most 60 lines a minute; `dropped` counts the rest.
 - Checked to work both ways against a local production server (2026-11-12/13): forged IPs trusted → fails; one fixed IP → passes.
 - Afterwards your IP is limited on `/auth/confirm` for 5 minutes.
 
