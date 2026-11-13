@@ -121,19 +121,25 @@ $env:DEPLOYED_WEB_URL="https://web-dev-3fce.up.railway.app"; pnpm test:deployed
 
 **A pass proves one shared bucket, not that it is *your* bucket.** That needs a **second client** and the logs:
 1. Run 1: from the owner's machine (above).
-2. Run 2: from **GitHub's network** — Actions → **Deployed check** → Run workflow (branch `dev`), or `gh workflow run deployed-check.yml --ref dev`. It runs the same test from a GitHub runner, against the fixed dev URL, with no secrets (`.github/workflows/deployed-check.yml`). Only after the web deploy of the current `dev` commit has finished (a dispatched run is a check suite on that commit, which Railway's gate waits for). No hotspot needed: 2026-11-13, hotspot runs came out on the home IP or on a carrier's shared IP and were hard to read.
+2. Run 2: from **GitHub's network** — Actions → **Deployed check** → Run workflow (branch `dev`), or `gh workflow run deployed-check.yml --ref dev`. It runs the same test from a GitHub runner, against the fixed dev URL, with no secrets (`.github/workflows/deployed-check.yml`). Only after the web deploy of the current `dev` commit has finished: the workflow's first step refuses to start while CI or `migrate` on that commit is still running (a dispatched run is a check suite on the commit, which Railway's gate waits for), but it can't see the deploy itself. Each run uses 10 of Auth's shared 30 verifications / 5 min: don't run more than two runs within 5 minutes, or `/auth/confirm` is blocked for every dev user for a few minutes. No hotspot needed: 2026-11-13, hotspot runs came out on the home IP or on a carrier's shared IP and were hard to read.
 3. **No deploy or restart of `web` between the two runs:** tags compare only within one process. `railway deployment list --service web --environment dev` shows the same active deployment before and after.
-4. **The logs**, counts only (no IP is printed):
+4. **The logs, per run**: start run 2 at least **3 minutes after** run 1 started, so the two windows don't overlap. Fill in both `run started` times (run 1 from your terminal, run 2 from the Actions log). The snippet prints counts and tags only, never an IP:
    ```powershell
-   $posts = @(railway logs --service web --environment dev --http --method POST --path /auth/confirm --since 30m --json | ForEach-Object { try { $_ | ConvertFrom-Json } catch {} })
-   "confirm POSTs: $($posts.Count); distinct source IPs (Railway): $(@($posts | ForEach-Object srcIp | Sort-Object -Unique).Count)"
-   $app = @(railway logs --service web --environment dev --since 30m | Select-String 'rate_limit\.(refused|ip_unknown)')
-   "ip_unknown events: $(@($app | Select-String 'ip_unknown').Count)"
-   "refused buckets (key_tag): $(@($app | ForEach-Object { [regex]::Match($_.Line, 'key_tag\W+([0-9a-f]{12})').Groups[1].Value } | Where-Object { $_ } | Sort-Object -Unique).Count)"
+   $runs = [ordered]@{ 'run 1' = [datetime]'<run 1 started, e.g. 2026-11-13T12:00:00Z>'; 'run 2' = [datetime]'<run 2 started>' }
+   $posts = @(railway logs --service web --environment dev --http --method POST --path /auth/confirm --since 2h --json | ForEach-Object { try { $_ | ConvertFrom-Json } catch {} })
+   $events = @(railway logs --service web --environment dev --since 2h --json | ForEach-Object { try { $_ | ConvertFrom-Json } catch {} } | Where-Object { $_.event -like 'rate_limit.*' })
+   foreach ($name in $runs.Keys) {
+     $from = $runs[$name]; $to = $from.AddMinutes(3)
+     $inRun = { param($t) ([datetime]$t) -ge $from -and ([datetime]$t) -lt $to }
+     $p = @($posts | Where-Object { & $inRun $_.timestamp })
+     $tags = @($events | Where-Object { $_.event -eq 'rate_limit.refused' -and (& $inRun $_.timestamp) } | ForEach-Object key_tag | Sort-Object -Unique)
+     $unknown = @($events | Where-Object { $_.event -eq 'rate_limit.ip_unknown' -and (& $inRun $_.timestamp) }).Count
+     "${name}: POSTs $($p.Count), source IPs $(@($p | ForEach-Object srcIp | Sort-Object -Unique).Count), ip_unknown $unknown, refused tags [$($tags -join ', ')]"
+   }
+   "source IPs across both runs: $(@($posts | Where-Object { $t = [datetime]$_.timestamp; $runs.Values | Where-Object { $t -ge $_ -and $t -lt $_.AddMinutes(3) } } | ForEach-Object srcIp | Sort-Object -Unique).Count)"
    ```
-   (Railway shows our JSON log lines as `key="value"` pairs, hence the loose `key_tag` pattern.)
 
-**Pass:** both runs pass; 0 `ip_unknown`; at least **2** distinct source IPs and **2** different `key_tag`s (one per run's 11th attempt, `family` v4 or v6). Timing between the runs doesn't matter: the tags, not the 5-minute window, show whether two clients got two buckets. **Fail:** two source IPs but only one tag, or any `ip_unknown` → the app isn't keying on the real client IP: A13 open, stop.
+**Pass:** both runs pass, and for **each** run: 11 POSTs, 1 source IP, 0 `ip_unknown`, exactly **one** refused tag; the two runs' tags are **different**, and there are 2 source IPs across both runs. Timing between the runs doesn't matter beyond the 3 minutes: the tags, not the 5-minute window, show whether two clients got two buckets. **Fail:** two source IPs but the same tag in both runs, or any `ip_unknown` → the app isn't keying on the real client IP: A13 open, stop. One source IP across both runs → not two networks; repeat run 2.
 
 `rate_limit.refused` lines carry the action, the limit (`ip`, `ip_wide`, `account`, `address`), the address family and, for IP limits only, `key_tag`: a 12-hex salted HMAC of the bucket key (per process: tags compare only within one deployment's lifetime; never the IP). At most 60 lines a minute; `dropped` counts the rest.
 - Checked to work both ways against a local production server (2026-11-12/13): forged IPs trusted → fails; one fixed IP → passes.

@@ -26,6 +26,11 @@ M0 — Foundations (plan: `docs/plans/m0.md`)
     - the second client becomes a GitHub Actions `workflow_dispatch` run (`deployed-check.yml`: fixed dev URL, no secrets, dev only, not in `ci-ok`);
     - the spec fails fast when attempt 1 is already limited, prints its start time and results, and retries a dropped navigation once;
     - the runbook passes on two different tags (not on a 5-minute window), with a working log snippet (the old one couldn't match Railway's `key="value"` format).
+    - `sec`: 0 critical/high. Fixed:
+      - M1: the workflow's first step refuses to start while a GitHub Actions suite on the commit is still running, so it can't join Railway's gate. The Claude app's suite, which stays queued forever, is ignored, like Railway does.
+      - M2: no `cache: pnpm`, so nothing writes the dev cache.
+      - L3/L4: the guard comment and its test.
+      - L5: the pass rule counts per run window (one tag per run, two different tags).
   - Then A13 is closed and M0 is done for dev (prod items at P1).
 
 ## Next
