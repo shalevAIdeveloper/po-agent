@@ -183,7 +183,8 @@ Flow: `feature/*` (from `dev`) → local tests → PR into `dev` → CI → auto
 ## 11. Quality bar
 
 - Python: ruff + mypy (strict on `app/`), pytest. TypeScript: strict, ESLint, Vitest; Playwright for critical flows (login → upload → review → approve → export).
-- CI on every PR: lint, typecheck, unit tests, migration lint. Evals run on PRs that touch `prompts/` or `extraction/`.
+- CI on every PR: lint, typecheck, unit tests, migration lint. Evals run on PRs that touch `prompts/`, `extraction/`, `llm/` or `evals/`, **from recorded model responses: no LLM calls and no API key in CI**. A live eval (manual `workflow_dispatch`, owner-approved) is mandatory before merging any prompt or model change, and its recordings and baseline ship in that PR.
+- Real customer documents never enter git; they live only in the gitignored `apps/api/evals/fixtures/private/`.
 - Definition of Done: tests pass, docs updated (`docs/progress.md`), security subagent reviewed the diff.
 
 ## 12. Design direction
@@ -199,7 +200,7 @@ Goal: **the best-feeling operations tool a CSR has ever used.** Calm, dense, fas
 
 ## 13. Success metrics (pilot)
 
-- Header field accuracy ≥ 97%, line field accuracy ≥ 95% on the eval set.
+- Header field accuracy ≥ 97%, line field accuracy ≥ 95%, measured in the pilot on real POs (M1 records a synthetic baseline and enforces no-regression only).
 - ≥ 80% of lines auto-matched correctly after two weeks with a customer.
 - Median review time ≤ 45 seconds per order (vs. 2–5 minutes manual).
 
