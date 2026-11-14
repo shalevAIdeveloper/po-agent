@@ -46,7 +46,7 @@ M0 — Foundations (plan: `docs/plans/m0.md`)
 - Nothing open for M0 on dev. Before the pilot: P1 (prod), P2 (name, domain, Resend), P3 (MFA enforced).
 
 ## Next
-- **M1 — plan approved** (plan: `docs/plans/m1.md`, 2026-11-14). Owner decisions: Anthropic (Sonnet extraction, Haiku column mapping), M1 stops at `extractions`, baseline + no-regression only (95/97 % in the pilot), CI evals from recordings with a mandatory manual live eval before prompt/model merges (SPEC §11 updated), dedicated `po_worker`, API + minimal upload/JSON page. Next: PR 0b (evals CI bootstrap, so `app/extraction/**` PRs can pass `ci-ok`), PR 1 (schema v1), ADRs 0010–0015.
+- **M1 — plan approved** (plan: `docs/plans/m1.md`, 2026-11-14). Owner decisions: Anthropic (Sonnet extraction, Haiku column mapping), M1 stops at `extractions`, baseline + no-regression only (95/97 % in the pilot), CI evals from recordings with a mandatory manual live eval before prompt/model merges (SPEC §11 updated), dedicated `po_worker`, API + minimal upload/JSON page. Engine work goes through the temporary integration branch `m1/engine` (plan → "Integration branch"): `evals` may be red there only until the baseline (PR 9); the final `m1/engine → dev` must be fully green, with `sec` + `qa` on the whole M1 diff, then the branch is deleted. Next: `ci/m1-engine-branch` (→ dev), create `m1/engine` + its protection, then PR 0b (strict replay evals, never silently green) and PR 1 (schema v1, committed locally on `feature/extraction-schema`), ADRs 0010–0015.
 
 ## Follow-ups
 Low-severity `sec` findings from PR #1, each assigned to the task that should close it.

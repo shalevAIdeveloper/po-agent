@@ -41,6 +41,7 @@ The developer uses **Windows + PowerShell**. Give commands in PowerShell syntax 
 
 ## Git workflow (strict)
 - Branch from `dev`: `feature/<short-name>`, `fix/<short-name>`.
+- **M1 exception (temporary):** M1 engine PRs branch from and target `m1/engine`, not `dev`. Rules in `docs/plans/m1.md` → "Integration branch": no force-push; all checks green except `evals` until PR 9; the final `m1/engine → dev` PR fully green with `sec` + `qa` on the whole M1 diff; then the branch is deleted.
 - Run lint + typecheck + tests locally before every push.
 - PR `feature/* → dev`. CI must pass. Then PR `dev → main` for release.
 - Never push directly to `dev` or `main`. Never force-push shared branches.

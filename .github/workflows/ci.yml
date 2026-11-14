@@ -1,7 +1,13 @@
 name: CI
 on:
   pull_request:
-    branches: [dev, main]
+    # m1/engine: temporary M1 integration branch (docs/plans/m1.md), deleted after it
+    # merges into dev. No push trigger for it: nothing deploys from it.
+    # `edited` re-runs CI when a PR's base changes (m1/engine -> dev, also automatic when
+    # m1/engine is deleted), so a ci-ok computed under the m1/engine evals exception never
+    # stays attached to a PR into dev (sec H1).
+    types: [opened, synchronize, reopened, edited]
+    branches: [dev, main, m1/engine]
   push:
     branches: [dev, main]
 # No workflow-level paths/paths-ignore: Railway's checkSuites gate needs a CI suite on
@@ -31,10 +37,15 @@ jobs:
       db: ${{ steps.f.outputs.db }}
       evals: ${{ steps.f.outputs.evals }}
       images: ${{ steps.f.outputs.images }}
+      evals_baseline: ${{ steps.baseline.outputs.exists }}
     steps:
       # Full history: on push, paths-filter diffs commits locally and cannot fetch without creds.
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with: { persist-credentials: false, fetch-depth: 0 }
+      # Read by ci-ok: the m1/engine evals exception ends once the baseline is committed (M1 PR 9).
+      - id: baseline
+        run: |
+          if [ -f apps/api/evals/baseline.json ]; then echo "exists=true"; else echo "exists=false"; fi >> "$GITHUB_OUTPUT"
       - id: f
         uses: dorny/paths-filter@0e4a8c6effa4802afeda77dc8d303f8176d7dfad # v3.0.4
         with:
@@ -270,12 +281,25 @@ jobs:
     needs: [changes, api, web, e2e-auth, db, images, evals]
     runs-on: ubuntu-latest
     steps:
+      # One explicit, temporary exception (owner decision, docs/plans/m1.md "Integration
+      # branch"): on a PR into m1/engine, and only while apps/api/evals/baseline.json does
+      # not exist, a *failed* evals job is allowed so the engine can be built before any
+      # recording exists. evals still runs and shows red. PRs into dev/main never get it.
       - name: All jobs succeeded or were skipped
         env:
           NEEDS: ${{ toJSON(needs) }}
+          EVALS_MAY_FAIL: ${{ github.event_name == 'pull_request' && github.base_ref == 'm1/engine' && needs.changes.outputs.evals_baseline == 'false' }}
         run: |
+          # Expressions compare case-insensitively; re-check the base ref exactly (sec L4).
+          if [ "$GITHUB_BASE_REF" != "m1/engine" ]; then export EVALS_MAY_FAIL=false; fi
           echo "$NEEDS" | jq -r 'to_entries[] | "\(.key): \(.value.result)"'
           echo "$NEEDS" | jq -e '
             .changes.result == "success"
-            and (to_entries | all(.value.result == "success" or .value.result == "skipped"))
+            and (to_entries | all(
+              .value.result == "success" or .value.result == "skipped"
+              or (.key == "evals" and .value.result == "failure" and env.EVALS_MAY_FAIL == "true")
+            ))
           ' > /dev/null
+          if [ "$EVALS_MAY_FAIL" = "true" ] && echo "$NEEDS" | jq -e '.evals.result == "failure"' > /dev/null; then
+            echo "::warning::evals failed: allowed only on PRs into m1/engine before the eval baseline exists"
+          fi

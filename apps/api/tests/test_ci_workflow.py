@@ -1,6 +1,10 @@
 """Guards the CI hardening in .github/workflows/ci.yml (no YAML dependency on purpose)."""
 
+import json
+import os
 import re
+import shutil
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -59,6 +63,110 @@ def test_every_job_is_covered_by_ci_ok(workflow: str) -> None:
     assert needs, "ci-ok must list its needs inline"
     assert {"api", "web", "db", "images"} <= jobs
     assert {job.strip() for job in needs.group(1).split(",")} == jobs - {"ci-ok"}
+
+
+def _ci_ok_job(workflow: str) -> str:
+    return workflow.split("\n  ci-ok:\n", 1)[1]
+
+
+def _ci_ok_jq_program(workflow: str) -> str:
+    match = re.search(r"jq -e '\n(.*?)\n\s*' > /dev/null", _ci_ok_job(workflow), re.DOTALL)
+    assert match, "ci-ok must check needs with an inline `jq -e '...'` program"
+    return match.group(1)
+
+
+def test_m1_engine_gets_pull_request_ci_but_no_push_trigger(workflow: str) -> None:
+    block = workflow.split("\non:\n", 1)[1].split("\n\n", 1)[0]
+
+    assert re.search(
+        r"^  pull_request:\n(?:    #.*\n)*"
+        r"    types: \[opened, synchronize, reopened, edited\]\n"
+        r"    branches: \[dev, main, m1/engine\]$",
+        block,
+        re.MULTILINE,
+    )
+    assert re.search(r"^  push:\n    branches: \[dev, main\]$", block, re.MULTILINE)
+
+
+def test_base_branch_change_re_runs_ci(workflow: str) -> None:
+    # sec H1: a ci-ok computed for a PR into m1/engine (evals exception on) must not stay
+    # attached when the PR is retargeted to dev; `edited` fires on a base change.
+    block = workflow.split("\non:\n", 1)[1].split("\n  push:\n", 1)[0]
+    types = re.search(r"^    types: \[([^\]]+)\]$", block, re.MULTILINE)
+
+    assert types
+    assert "edited" in {t.strip() for t in types.group(1).split(",")}
+
+
+def test_evals_exception_is_limited_to_m1_engine_before_the_baseline(workflow: str) -> None:
+    ci_ok = _ci_ok_job(workflow)
+    flag = re.findall(r"^\s+EVALS_MAY_FAIL: (.+)$", ci_ok, re.MULTILINE)
+
+    assert flag == [
+        "${{ github.event_name == 'pull_request' && github.base_ref == 'm1/engine' "
+        "&& needs.changes.outputs.evals_baseline == 'false' }}"
+    ]
+    assert "evals_baseline: ${{ steps.baseline.outputs.exists }}" in workflow
+    changes_job = workflow.split("\n  changes:\n", 1)[1].split("\n  api:\n", 1)[0]
+    assert (
+        "      - id: baseline\n"
+        "        run: |\n"
+        '          if [ -f apps/api/evals/baseline.json ]; then echo "exists=true"; '
+        'else echo "exists=false"; fi >> "$GITHUB_OUTPUT"\n'
+    ) in changes_job
+    assert "continue-on-error" not in changes_job
+    # Expressions compare case-insensitively; the shell re-checks the base ref exactly.
+    assert (
+        'if [ "$GITHUB_BASE_REF" != "m1/engine" ]; then export EVALS_MAY_FAIL=false; fi'
+    ) in ci_ok
+    # The exception names evals, a failure only, and the flag; nothing else may be excused.
+    program = _ci_ok_jq_program(workflow)
+    assert program.count("env.EVALS_MAY_FAIL") == 1
+    assert '.key == "evals" and .value.result == "failure"' in program
+
+
+_ALL_GREEN = {"changes": "success", "api": "success", "web": "skipped", "evals": "success"}
+
+
+# Skipped only on a dev machine without jq; in CI (`CI=true`) a missing jq fails the test.
+@pytest.mark.skipif(
+    shutil.which("jq") is None and not os.environ.get("CI"),
+    reason="jq not installed locally (CI runners have it)",
+)
+@pytest.mark.parametrize(
+    ("results", "may_fail", "passes"),
+    [
+        (_ALL_GREEN, "false", True),
+        ({**_ALL_GREEN, "evals": "failure"}, "false", False),  # dev/main, or baseline exists
+        ({**_ALL_GREEN, "evals": "failure"}, "true", True),  # m1/engine before PR 9
+        ({**_ALL_GREEN, "evals": "cancelled"}, "true", False),
+        ({**_ALL_GREEN, "api": "failure"}, "true", False),  # only evals is excused
+        ({**_ALL_GREEN, "changes": "failure"}, "true", False),
+        ({**_ALL_GREEN, "changes": "skipped"}, "true", False),
+        ({k: v for k, v in _ALL_GREEN.items() if k != "changes"}, "true", False),
+        ({**_ALL_GREEN, "evals": "failure", "api": "failure"}, "true", False),
+        ({**_ALL_GREEN, "evals": "failure", "db": "failure"}, "true", False),
+        ({**_ALL_GREEN, "evals": "failure"}, "", False),  # flag must be exactly "true"
+        ({**_ALL_GREEN, "evals": "failure"}, "True", False),
+        ({**_ALL_GREEN, "evals": "skipped"}, "true", True),
+    ],
+)
+def test_ci_ok_verdicts(
+    workflow: str, results: dict[str, str], may_fail: str, passes: bool
+) -> None:
+    needs = json.dumps({job: {"result": result} for job, result in results.items()})
+    jq = shutil.which("jq")
+    assert jq
+    proc = subprocess.run(  # noqa: S603 - fixed jq binary, program from our own workflow
+        [jq, "-e", _ci_ok_jq_program(workflow)],
+        input=needs,
+        capture_output=True,
+        text=True,
+        env={**os.environ, "EVALS_MAY_FAIL": may_fail},
+        check=False,
+    )
+
+    assert (proc.returncode == 0) is passes, proc.stderr
 
 
 def test_images_job_builds_and_smoke_tests_the_deploy_images(workflow: str) -> None:
