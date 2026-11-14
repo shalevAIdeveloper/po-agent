@@ -85,6 +85,86 @@ def test_all_null_header_is_valid() -> None:
     assert all(value is None for value in header.model_dump().values())
 
 
+HEADER_TEXT_FIELDS = [
+    "customer_name",
+    "customer_po_number",
+    "po_date_raw",
+    "requested_ship_date_raw",
+    "payment_terms",
+    "notes",
+]
+LINE_TEXT_FIELDS = ["customer_part_number", "vendor_part_number", "description", "uom"]
+ADDRESS_TEXT_FIELDS = [
+    "name",
+    "attention",
+    "line1",
+    "line2",
+    "city",
+    "state",
+    "postal_code",
+    "country",
+]
+BLANKS = ["", " ", "\t\n"]
+
+
+def an_address(**overrides: Any) -> dict[str, Any]:
+    address: dict[str, Any] = dict.fromkeys(ADDRESS_TEXT_FIELDS)
+    address["raw_text"] = "Acme Test Co, 1 Example St"
+    address.update(overrides)
+    return address
+
+
+# Owner decision (2026-11-14): blank strings are rejected in v1, so "not in the document"
+# has exactly one spelling, null.
+@pytest.mark.parametrize("blank", BLANKS)
+@pytest.mark.parametrize("field", HEADER_TEXT_FIELDS)
+def test_blank_header_text_is_rejected(field: str, blank: str) -> None:
+    with pytest.raises(ValidationError) as exc:
+        PurchaseOrderHeader.model_validate({**null_header(), field: blank})
+
+    assert error_locs(exc) == [(field,)]
+
+
+@pytest.mark.parametrize("blank", BLANKS)
+@pytest.mark.parametrize("field", LINE_TEXT_FIELDS)
+def test_blank_line_text_is_rejected(field: str, blank: str) -> None:
+    with pytest.raises(ValidationError) as exc:
+        PurchaseOrderLine.model_validate(a_line(**{field: blank}))
+
+    assert error_locs(exc) == [(field,)]
+
+
+@pytest.mark.parametrize("blank", BLANKS)
+@pytest.mark.parametrize("field", ADDRESS_TEXT_FIELDS)
+def test_blank_address_text_is_rejected(field: str, blank: str) -> None:
+    with pytest.raises(ValidationError) as exc:
+        Address.model_validate(an_address(**{field: blank}))
+
+    assert error_locs(exc) == [(field,)]
+
+
+def test_text_fields_keep_surrounding_whitespace_as_printed() -> None:
+    line = PurchaseOrderLine.model_validate(a_line(description=" Widget "))
+
+    assert line.description == " Widget "
+
+
+def test_json_schema_requires_non_empty_text_everywhere() -> None:
+    defs = json_schema()["$defs"]
+    expected = {
+        "PurchaseOrderHeader": HEADER_TEXT_FIELDS,
+        "PurchaseOrderLine": [*LINE_TEXT_FIELDS, "raw_text"],
+        "Address": [*ADDRESS_TEXT_FIELDS, "raw_text"],
+    }
+    for model, fields in expected.items():
+        for field in fields:
+            prop = defs[model]["properties"][field]
+            variants = prop.get("anyOf", [prop])
+            strings = [v for v in variants if v.get("type") == "string"]
+            assert strings, (model, field)
+            assert all(v.get("minLength") == 1 for v in strings), (model, field)
+
+
 def test_header_fields_are_exactly_the_approved_set() -> None:
     # SPEC F2 + owner decision Q4 (no buyer contact fields) + Q5 (raw dates).
     assert set(PurchaseOrderHeader.model_fields) == HEADER_FIELDS

@@ -98,7 +98,10 @@ IsoDate = Annotated[
     PlainSerializer(lambda d: d.isoformat(), return_type=str, when_used="json"),
     WithJsonSchema({"type": "string", "format": "date"}),
 ]
-RawText = Annotated[str, Field(min_length=1), AfterValidator(_not_blank)]
+# Every text field is non-blank or null: "" and "   " are rejected, so "not in the document"
+# has exactly one spelling (null) and evals never have to treat "" as null.
+Text = Annotated[str, Field(min_length=1), AfterValidator(_not_blank)]
+RawText = Text
 Confidence = Annotated[float, Field(ge=0, le=1, strict=True, allow_inf_nan=False)]
 CurrencyCode = Annotated[str, Field(pattern=r"^[A-Z]{3}$")]
 
@@ -112,29 +115,29 @@ class _Model(BaseModel):
 
 class Address(_Model):
     raw_text: RawText
-    name: str | None
-    attention: str | None
-    line1: str | None
-    line2: str | None
-    city: str | None
-    state: str | None
-    postal_code: str | None
-    country: str | None
+    name: Text | None
+    attention: Text | None
+    line1: Text | None
+    line2: Text | None
+    city: Text | None
+    state: Text | None
+    postal_code: Text | None
+    country: Text | None
 
 
 class PurchaseOrderHeader(_Model):
-    customer_name: str | None
-    customer_po_number: str | None
-    po_date_raw: str | None
+    customer_name: Text | None
+    customer_po_number: Text | None
+    po_date_raw: Text | None
     po_date: IsoDate | None
-    requested_ship_date_raw: str | None
+    requested_ship_date_raw: Text | None
     requested_ship_date: IsoDate | None
     ship_to: Address | None
     bill_to: Address | None
     order_total: DecimalString | None
     currency: CurrencyCode | None
-    payment_terms: str | None
-    notes: str | None
+    payment_terms: Text | None
+    notes: Text | None
 
     @model_validator(mode="after")
     def _dates_keep_raw_text(self) -> Self:
@@ -148,11 +151,11 @@ class PurchaseOrderLine(_Model):
     raw_text: RawText
     line_no: Annotated[int, Field(strict=True)] | None
     line_type: Literal["product", "charge", "comment"]
-    customer_part_number: str | None
-    vendor_part_number: str | None
-    description: str | None
+    customer_part_number: Text | None
+    vendor_part_number: Text | None
+    description: Text | None
     qty: DecimalString | None
-    uom: str | None
+    uom: Text | None
     unit_price: DecimalString | None
     extended_price: DecimalString | None
     page: Annotated[int, Field(ge=1, strict=True)] | None

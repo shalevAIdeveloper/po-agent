@@ -11,6 +11,7 @@
         "name": {
           "anyOf": [
             {
+              "minLength": 1,
               "type": "string"
             },
             {
@@ -22,6 +23,7 @@
         "attention": {
           "anyOf": [
             {
+              "minLength": 1,
               "type": "string"
             },
             {
@@ -33,6 +35,7 @@
         "line1": {
           "anyOf": [
             {
+              "minLength": 1,
               "type": "string"
             },
             {
@@ -44,6 +47,7 @@
         "line2": {
           "anyOf": [
             {
+              "minLength": 1,
               "type": "string"
             },
             {
@@ -55,6 +59,7 @@
         "city": {
           "anyOf": [
             {
+              "minLength": 1,
               "type": "string"
             },
             {
@@ -66,6 +71,7 @@
         "state": {
           "anyOf": [
             {
+              "minLength": 1,
               "type": "string"
             },
             {
@@ -77,6 +83,7 @@
         "postal_code": {
           "anyOf": [
             {
+              "minLength": 1,
               "type": "string"
             },
             {
@@ -88,6 +95,7 @@
         "country": {
           "anyOf": [
             {
+              "minLength": 1,
               "type": "string"
             },
             {
@@ -117,6 +125,7 @@
         "customer_name": {
           "anyOf": [
             {
+              "minLength": 1,
               "type": "string"
             },
             {
@@ -128,6 +137,7 @@
         "customer_po_number": {
           "anyOf": [
             {
+              "minLength": 1,
               "type": "string"
             },
             {
@@ -139,6 +149,7 @@
         "po_date_raw": {
           "anyOf": [
             {
+              "minLength": 1,
               "type": "string"
             },
             {
@@ -162,6 +173,7 @@
         "requested_ship_date_raw": {
           "anyOf": [
             {
+              "minLength": 1,
               "type": "string"
             },
             {
@@ -229,6 +241,7 @@
         "payment_terms": {
           "anyOf": [
             {
+              "minLength": 1,
               "type": "string"
             },
             {
@@ -240,6 +253,7 @@
         "notes": {
           "anyOf": [
             {
+              "minLength": 1,
               "type": "string"
             },
             {
@@ -297,6 +311,7 @@
         "customer_part_number": {
           "anyOf": [
             {
+              "minLength": 1,
               "type": "string"
             },
             {
@@ -308,6 +323,7 @@
         "vendor_part_number": {
           "anyOf": [
             {
+              "minLength": 1,
               "type": "string"
             },
             {
@@ -319,6 +335,7 @@
         "description": {
           "anyOf": [
             {
+              "minLength": 1,
               "type": "string"
             },
             {
@@ -342,6 +359,7 @@
         "uom": {
           "anyOf": [
             {
+              "minLength": 1,
               "type": "string"
             },
             {
