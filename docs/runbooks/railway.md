@@ -115,23 +115,33 @@ $env:DEPLOYED_WEB_URL="https://web-dev-3fce.up.railway.app"; pnpm test:deployed
 ```
 - **Pass:** 11 attempts, each with a different forged `X-Real-IP` / `X-Forwarded-For`; 1–10 say "expired" (answered by Auth), the 11th is refused **by our limiter** (`[app limit]`). The forged headers didn't create new buckets.
 - **Fail, 11th says "expired":** the forged header was trusted, so the per-IP limits can be dodged. Pilot gate A13 is open again; stop and fix before inviting anyone.
-- **Fail, an early attempt says "Too many":** your IP was still limited from a run in the last 5 minutes, or Auth's own shared bucket was busy. Wait 5 minutes and re-run.
-- A pass proves one shared bucket, not that it is **your** bucket. So, within 5 minutes of the first run, a **second run from another network**:
-  1. **Really switch networks:** turn **Wi-Fi and Ethernet off** on the laptop, connect only to the phone's hotspot, and make sure the phone itself is on **mobile data**, not the home Wi-Fi. (2026-11-13: a "hotspot" run left from the same public IP as the home run — Railway saw one source IP for both — so it was refused at attempt 1 and proved nothing.)
-  2. Run the same `pnpm test:deployed`. It must pass too (its attempt 1 is not refused).
-  3. **Verify from the logs** that the two runs were two clients and two buckets (counts only; no IP is printed):
-     ```powershell
-     $since = (Get-Date).AddMinutes(-15)
-     $http = railway logs --service web --environment dev --http --json --lines 500 | ForEach-Object { try { $_ | ConvertFrom-Json } catch {} }
-     $posts = @($http | Where-Object { $_.method -eq 'POST' -and $_.path -like '/auth/confirm*' -and [datetime]$_.timestamp -gt $since })
-     "confirm POSTs: $($posts.Count); distinct source IPs (Railway): $(@($posts | ForEach-Object srcIp | Sort-Object -Unique).Count)"
-     $app = @(railway logs --service web --environment dev --lines 1000 | Select-String 'rate_limit\.(refused|ip_unknown)')
-     "ip_unknown events: $(@($app | Select-String 'ip_unknown').Count)"
-     "refused buckets (key_tag): $(@($app | ForEach-Object { [regex]::Match($_.Line, '"key_tag":"([0-9a-f]+)"').Groups[1].Value } | Where-Object { $_ } | Sort-Object -Unique).Count)"
-     ```
-     Tags compare only within one process: **no deploy or restart of `web` between the two runs** (`railway deployment list --service web --environment dev` shows the same active deployment before and after; if not, repeat both runs).
-     **Pass:** 22 POSTs, **2** distinct source IPs, 0 `ip_unknown`, **2** refused buckets (each run's 11th attempt, `family` v4 or v6). One source IP → the runs weren't on two networks: repeat step 1. Two source IPs but one bucket, or any `ip_unknown` → the app isn't keying on the real client IP: A13 open, stop.
-  - `rate_limit.refused` lines carry the action, the limit (`ip`, `ip_wide`, `account`, `address`), the address family and, for IP limits only, `key_tag`: a 12-hex salted HMAC of the bucket key (per process: tags compare only within one deployment's lifetime; never the IP). At most 60 lines a minute; `dropped` counts the rest.
+- **Fail fast, "Attempt 1 was already refused":** this IP used its budget in the last 5 minutes (an earlier run, or another device behind the same public IP — mobile carriers put many phones behind one shared address). Wait 5 minutes and re-run.
+- **Fail, an early attempt says "Too many" without `[app limit]`:** Auth's own shared bucket was busy. Wait and re-run.
+- The test prints `run started <time>` and the 11 results, to match with the logs below.
+
+**A pass proves one shared bucket, not that it is *your* bucket.** That needs a **second client** and the logs:
+1. Run 1: from the owner's machine (above).
+2. Run 2: from **GitHub's network** — Actions → **Deployed check** → Run workflow (branch `dev`), or `gh workflow run deployed-check.yml --ref dev`. It runs the same test from a GitHub runner, against the fixed dev URL, with no secrets (`.github/workflows/deployed-check.yml`). Only after the web deploy of the current `dev` commit has finished: the workflow's first step refuses to start while CI or `migrate` on that commit is still running (a dispatched run is a check suite on the commit, which Railway's gate waits for), but it can't see the deploy itself. Each run uses 10 of Auth's shared 30 verifications / 5 min: don't run more than two runs within 5 minutes, or `/auth/confirm` is blocked for every dev user for a few minutes. No hotspot needed: 2026-11-13, hotspot runs came out on the home IP or on a carrier's shared IP and were hard to read.
+3. **No deploy or restart of `web` between the two runs:** tags compare only within one process. `railway deployment list --service web --environment dev` shows the same active deployment before and after.
+4. **The logs, per run**: start run 2 at least **3 minutes after** run 1 started, so the two windows don't overlap. Fill in both `run started` times (run 1 from your terminal, run 2 from the Actions log). The snippet prints counts and tags only, never an IP:
+   ```powershell
+   $runs = [ordered]@{ 'run 1' = [datetime]'<run 1 started, e.g. 2026-11-13T12:00:00Z>'; 'run 2' = [datetime]'<run 2 started>' }
+   $posts = @(railway logs --service web --environment dev --http --method POST --path /auth/confirm --since 2h --json | ForEach-Object { try { $_ | ConvertFrom-Json } catch {} })
+   $events = @(railway logs --service web --environment dev --since 2h --json | ForEach-Object { try { $_ | ConvertFrom-Json } catch {} } | Where-Object { $_.event -like 'rate_limit.*' })
+   foreach ($name in $runs.Keys) {
+     $from = $runs[$name]; $to = $from.AddMinutes(3)
+     $inRun = { param($t) ([datetime]$t) -ge $from -and ([datetime]$t) -lt $to }
+     $p = @($posts | Where-Object { & $inRun $_.timestamp })
+     $tags = @($events | Where-Object { $_.event -eq 'rate_limit.refused' -and (& $inRun $_.timestamp) } | ForEach-Object key_tag | Sort-Object -Unique)
+     $unknown = @($events | Where-Object { $_.event -eq 'rate_limit.ip_unknown' -and (& $inRun $_.timestamp) }).Count
+     "${name}: POSTs $($p.Count), source IPs $(@($p | ForEach-Object srcIp | Sort-Object -Unique).Count), ip_unknown $unknown, refused tags [$($tags -join ', ')]"
+   }
+   "source IPs across both runs: $(@($posts | Where-Object { $t = [datetime]$_.timestamp; $runs.Values | Where-Object { $t -ge $_ -and $t -lt $_.AddMinutes(3) } } | ForEach-Object srcIp | Sort-Object -Unique).Count)"
+   ```
+
+**Pass:** both runs pass, and for **each** run: 11 POSTs, 1 source IP, 0 `ip_unknown`, exactly **one** refused tag; the two runs' tags are **different**, and there are 2 source IPs across both runs. Timing between the runs doesn't matter beyond the 3 minutes: the tags, not the 5-minute window, show whether two clients got two buckets. **Fail:** two source IPs but the same tag in both runs, or any `ip_unknown` → the app isn't keying on the real client IP: A13 open, stop. One source IP across both runs → not two networks; repeat run 2.
+
+`rate_limit.refused` lines carry the action, the limit (`ip`, `ip_wide`, `account`, `address`), the address family and, for IP limits only, `key_tag`: a 12-hex salted HMAC of the bucket key (per process: tags compare only within one deployment's lifetime; never the IP). At most 60 lines a minute; `dropped` counts the rest.
 - Checked to work both ways against a local production server (2026-11-12/13): forged IPs trusted → fails; one fixed IP → passes.
 - Afterwards your IP is limited on `/auth/confirm` for 5 minutes.
 
