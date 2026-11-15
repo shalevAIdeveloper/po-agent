@@ -54,7 +54,9 @@ jobs:
             api: ['apps/api/**', 'supabase/**', '.github/workflows/**', 'apps/web/**', '**/.railwayignore', '**/.gitignore']
             web: ['apps/web/**', 'apps/api/openapi.json', '.github/workflows/**']
             db: ['supabase/**', 'apps/api/**', '.github/workflows/**']
-            evals: ['apps/api/app/prompts/**', 'apps/api/app/extraction/**']
+            # G2 (`.github/workflows/**`) is added in M1 PR 8, not now: evals fails until the
+            # baseline (PR 9), and PRs into dev have no ci-ok exception for it.
+            evals: ['apps/api/app/prompts/**', 'apps/api/app/extraction/**', 'apps/api/app/llm/**', 'apps/api/evals/**']
             images: ['apps/api/**', 'apps/web/**', '.railway/**', '.railwayignore', '.github/**']
 
   api:
@@ -260,16 +262,16 @@ jobs:
     if: needs.changes.outputs.evals == 'true' && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     defaults: { run: { working-directory: apps/api } }
-    env:
-      LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
-      LLM_EXTRACTION_MODEL: ${{ vars.LLM_EXTRACTION_MODEL }}
+    # No secrets and no network (owner decision Q9): replays recorded answers only. It
+    # fails until there are fixtures, recordings, a baseline and scoring (M1 PRs 6-9);
+    # the live eval is a separate, manual workflow (PR 8).
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with: { persist-credentials: false }
       - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5.4.2
         with: { version: "0.13.7" }
       - run: uv sync --frozen
-      - run: uv run python -m evals.run --fail-on-regression
+      - run: uv run python -m evals.run --replay --fail-on-regression
 
   # The single required status check for branch protection. Path filters skip jobs,
   # and a skipped job can't be "required", so this job aggregates them: every job
