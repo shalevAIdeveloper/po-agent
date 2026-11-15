@@ -32,7 +32,14 @@ def _segment(part: str | int) -> str:
     if len(text) > MAX_PATH_SEGMENT:
         text = text[:MAX_PATH_SEGMENT] + "…"
     # Model-invented key names may carry newlines, control or bidi characters (`sec` L3).
-    return "".join(ch if ch.isprintable() else f"\\u{ord(ch):04x}" for ch in text)
+    return "".join(_escape(ch) for ch in text)
+
+
+def _escape(ch: str) -> str:
+    if ch.isprintable():
+        return ch
+    code = ord(ch)
+    return f"\\u{code:04x}" if code <= 0xFFFF else f"\\U{code:08x}"
 
 
 def sanitize(error: ValidationError) -> tuple[ValidationIssue, ...]:

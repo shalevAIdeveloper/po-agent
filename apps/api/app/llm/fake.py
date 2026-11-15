@@ -114,7 +114,7 @@ def _load_cassette(path: Path) -> dict[str, Any] | None:
     """
     try:
         cassette = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeDecodeError, ValueError):
+    except (OSError, UnicodeDecodeError, ValueError, RecursionError):
         return None
     if not isinstance(cassette, dict) or set(cassette) != _CASSETTE_KEYS:
         return None

@@ -6,8 +6,9 @@
 - No tools, no thinking settings (each model's default), no sampling parameters (the
   current API version rejects `temperature`): depth is set by `output_config.effort`.
 - Transport retries are the SDK's (429/408/409/5xx/connection, honours `retry-after`),
-  bounded by `max_retries`; the whole call is also bounded by a deadline here because
-  the SDK waits as long as `retry-after` says.
+  bounded by `max_retries`. The whole call is bounded by our deadline (one full attempt
+  + slack); the SDK's own timeout is set beyond it, so a timed-out request (likely
+  billed) is never re-sent, and the SDK's unbounded `retry-after` sleep is cut too.
 - Everything the SDK would otherwise take from the environment is pinned: the key, the
   base URL, telemetry. Env vars that would change where the key goes, add headers or
   log requests are refused.
@@ -17,6 +18,7 @@ import asyncio
 import base64
 import os
 import time
+from contextvars import ContextVar
 from functools import cache
 from typing import Any, Final
 
@@ -45,9 +47,38 @@ REFUSED_ENV_VARS: Final = (
     "ANTHROPIC_LOG",
 )
 # The whole call (SDK retries included) gets one full attempt plus this much for quick
-# 429/5xx retries: a timed-out attempt, likely billed, is never repeated in full (`sec` M1).
+# 429/5xx retries: a timed-out attempt, likely billed, is never repeated (`sec` M1).
 # Not Final: tests shrink it.
 DEADLINE_SLACK_SECONDS = 60.0
+# The SDK's own per-attempt timeout is set beyond the deadline, so the SDK never sees a
+# timeout and never re-sends a timed-out (billed) request: our deadline always fires first.
+SDK_TIMEOUT_MARGIN_SECONDS: Final = 30.0
+# Every proxy mount cleared: the SDK builds proxy mounts from HTTPS_PROXY / ALL_PROXY (and
+# the Windows registry) whatever `trust_env` says; explicit mounts override them (`sec` L10).
+NO_PROXY_MOUNTS: Final[dict[str, None]] = {"http://": None, "https://": None, "all://": None}
+# Statuses the SDK retries; seen before a deadline, they make the failure transient.
+_RETRYABLE_STATUSES: Final = frozenset({408, 409, 429}) | frozenset(range(500, 600))
+
+# Statuses of the responses received during the current extract() (per task).
+_seen_statuses: ContextVar[list[int] | None] = ContextVar("llm_seen_statuses", default=None)
+
+
+async def _record_status(response: httpx2.Response) -> None:
+    seen = _seen_statuses.get()
+    if seen is not None:
+        seen.append(response.status_code)
+
+
+def _deadline_code(seen: list[int]) -> LLMErrorCode:
+    """What a deadline hit means: waiting on rate limits / outages is transient, a reply
+    that never came is a (possibly billed) timeout that must not be re-run (`sec` delta 2)."""
+    if not seen:
+        return "llm_timeout"
+    if 429 in seen:
+        return "llm_rate_limited"
+    if any(status in _RETRYABLE_STATUSES for status in seen):
+        return "llm_unavailable"
+    return "llm_timeout"
 
 
 @cache
@@ -112,16 +143,26 @@ class AnthropicLLMClient:
             raise LLMError("llm_config", detail="LLM_API_KEY is empty")
         self._timeout_seconds = timeout_seconds
         self._max_retries = max_retries
+        if http_client is None:
+            # trust_env=False: no CA-bundle env vars (SSL_CERT_FILE, ...); explicit empty
+            # mounts: no proxy from env or registry (`sec` L10). SDK defaults kept.
+            http_client = anthropic.DefaultAsyncHttpxClient(
+                trust_env=False,
+                mounts=NO_PROXY_MOUNTS,
+            )
+        hooks = http_client.event_hooks
+        http_client.event_hooks = {
+            "request": hooks.get("request", []),
+            "response": [*hooks.get("response", []), _record_status],
+        }
         # An explicit api_key stops the SDK from reading any credential env var or profile.
-        # trust_env=False: proxy and CA-bundle env vars (HTTPS_PROXY, SSL_CERT_FILE, ...)
-        # can't route the key through an interceptor (`sec` L10).
         self._client = anthropic.AsyncAnthropic(
             api_key=key,
             base_url=BASE_URL,
-            timeout=timeout_seconds,
+            timeout=self.deadline_seconds + SDK_TIMEOUT_MARGIN_SECONDS,
             max_retries=max_retries,
             open_telemetry=False,
-            http_client=http_client or anthropic.DefaultAsyncHttpxClient(trust_env=False),
+            http_client=http_client,
         )
 
     @property
@@ -136,6 +177,8 @@ class AnthropicLLMClient:
             "format": {"type": "json_schema", "schema": provider_schema(request.output_model)},
         }
         started = time.perf_counter()
+        seen: list[int] = []
+        token = _seen_statuses.set(seen)
         try:
             async with asyncio.timeout(self.deadline_seconds):
                 message = await self._client.messages.create(
@@ -146,8 +189,9 @@ class AnthropicLLMClient:
                     output_config=output_config,
                 )
         except TimeoutError:
-            self._fail(request, "llm_timeout", started)
-            raise LLMError("llm_timeout") from None
+            code = _deadline_code(seen)
+            self._fail(request, code, started)
+            raise LLMError(code) from None
         except anthropic.APIError as error:
             code = _error_code(error)
             self._fail(request, code, started)
@@ -159,6 +203,8 @@ class AnthropicLLMClient:
             # Any other SDK failure (`sec` L2): same stable code, no SDK text.
             self._fail(request, "llm_provider_error", started)
             raise LLMError("llm_provider_error") from None
+        finally:
+            _seen_statuses.reset(token)
 
         texts = [block.text for block in message.content if block.type == "text"]
         return build_result(

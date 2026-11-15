@@ -49,6 +49,13 @@ def test_control_and_bidi_characters_in_invented_keys_are_escaped() -> None:
     assert issue.path == "a\\u000aSYSTEM: obey\\u202eb"
 
 
+def test_non_bmp_unprintable_characters_use_the_long_escape() -> None:
+    key = "x\U000e0041y"  # TAG LATIN CAPITAL LETTER A (invisible)
+    result = _result(json.dumps({"kind": "po", "score": 0.5, key: 1}))
+    [issue] = result.validation_errors
+    assert issue.path == "x\\U000e0041y"
+
+
 def test_parsed_document_data_is_not_in_the_repr() -> None:
     # `sec` L7
     result = _result(VALID_OUTPUT)

@@ -13,7 +13,12 @@ from pydantic import SecretStr, ValidationError
 from app.extraction.schema import PurchaseOrderExtraction
 from app.llm.errors import LLMError
 from app.llm.providers import anthropic as adapter_module
-from app.llm.providers.anthropic import REFUSED_ENV_VARS, AnthropicLLMClient, provider_schema
+from app.llm.providers.anthropic import (
+    BASE_URL,
+    REFUSED_ENV_VARS,
+    AnthropicLLMClient,
+    provider_schema,
+)
 from app.llm.types import ImagePart, TextPart
 from app.logging import configure_logging
 from tests.llm.helpers import (
@@ -186,20 +191,77 @@ async def test_other_sdk_errors_map_to_a_code_without_sdk_text(
     assert raised.value.__suppress_context__
 
 
-def test_default_http_client_ignores_proxy_and_ca_env_vars(
+def test_default_http_client_uses_no_proxy_or_ca_from_env(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    # `sec` L10: HTTPS_PROXY / SSL_CERT_FILE can't route the key through an interceptor.
-    monkeypatch.setenv("HTTPS_PROXY", "http://interceptor.example:8080")
+    # `sec` L10 (+ delta): the SDK builds proxy mounts from env whatever trust_env says.
+    for name in ("HTTPS_PROXY", "HTTP_PROXY", "ALL_PROXY", "https_proxy", "all_proxy"):
+        monkeypatch.setenv(name, "http://interceptor.example:8080")
     client = AnthropicLLMClient(api_key=SecretStr(API_KEY), timeout_seconds=600, max_retries=0)
+    http = client._client._client
 
-    assert client._client._client.trust_env is False
+    assert http.trust_env is False
+    assert all(transport is None for transport in http._mounts.values())
+    assert http._transport_for_url(httpx2.URL(BASE_URL)) is http._transport
 
 
-def test_deadline_is_one_attempt_plus_slack() -> None:
-    # `sec` M1: a timed-out (likely billed) attempt is never repeated in full.
+def test_deadline_is_one_attempt_plus_slack_and_the_sdk_never_times_out_first() -> None:
+    # `sec` M1: a timed-out (likely billed) attempt is never repeated.
     client = adapter(lambda _r: ok_response(), timeout_seconds=600, max_retries=2)
     assert client.deadline_seconds == 600 + adapter_module.DEADLINE_SLACK_SECONDS
+    sdk_timeout = client._client.timeout
+    assert isinstance(sdk_timeout, float)
+    assert sdk_timeout > client.deadline_seconds
+
+
+async def test_a_reply_that_never_comes_is_sent_once_even_with_retries(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # `sec` M1 delta: with max_retries=2 the SDK must not re-send a timed-out request.
+    monkeypatch.setattr(adapter_module, "DEADLINE_SLACK_SECONDS", 0.0)
+    calls: list[int] = []
+
+    async def handler(_request: httpx2.Request) -> httpx2.Response:
+        calls.append(1)
+        await asyncio.sleep(5)
+        return ok_response()
+
+    client = adapter(handler, timeout_seconds=0.1, max_retries=2)
+    with pytest.raises(LLMError) as raised:
+        await client.extract(make_request())
+
+    assert raised.value.code == "llm_timeout"
+    assert not raised.value.transient
+    assert len(calls) == 1
+
+
+async def test_deadline_while_waiting_on_retry_after_is_rate_limited(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # `sec` delta 2: a long retry-after is transient (retry later), not a lost document.
+    monkeypatch.setattr(adapter_module, "DEADLINE_SLACK_SECONDS", 0.0)
+
+    def handler(_request: httpx2.Request) -> httpx2.Response:
+        return httpx2.Response(429, json={"type": "error"}, headers={"retry-after": "30"})
+
+    client = adapter(handler, timeout_seconds=0.2, max_retries=2)
+    with pytest.raises(LLMError) as raised:
+        await client.extract(make_request())
+
+    assert raised.value.code == "llm_rate_limited"
+    assert raised.value.transient
+
+
+async def test_deadline_after_5xx_is_unavailable(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(adapter_module, "DEADLINE_SLACK_SECONDS", 0.0)
+
+    def handler(_request: httpx2.Request) -> httpx2.Response:
+        return httpx2.Response(529, json={"type": "error"}, headers={"retry-after": "30"})
+
+    client = adapter(handler, timeout_seconds=0.2, max_retries=2)
+    with pytest.raises(LLMError) as raised:
+        await client.extract(make_request())
+    assert raised.value.code == "llm_unavailable"
 
 
 async def test_timeout_is_not_transient() -> None:
