@@ -164,6 +164,17 @@ def test_http_client_urls_are_not_logged_at_info() -> None:
     assert stream.getvalue() == ""
 
 
+def test_llm_sdk_debug_logs_are_dropped() -> None:
+    # The SDK logs request options (prompt, document content) at DEBUG.
+    stream = io.StringIO()
+    configure_logging(level="DEBUG", stream=stream)
+
+    logging.getLogger("anthropic._base_client").debug("Request options: %s", PO_TEXT)
+    logging.getLogger("anthropic").info("info %s", PO_TEXT)
+
+    assert stream.getvalue() == ""
+
+
 def test_unhandled_route_error_is_logged_without_message(settings: Settings) -> None:
     app = create_app(settings)
 

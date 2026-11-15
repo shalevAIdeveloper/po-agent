@@ -87,6 +87,8 @@ _UVICORN_LOGGERS = ("uvicorn", "uvicorn.error")
 _UVICORN_ACCESS_LOGGER = "uvicorn.access"
 # HTTP clients log full URLs (query strings, signed-URL tokens) at INFO.
 _URL_LOGGING_CLIENTS = ("httpx", "httpx2", "httpcore", "httpcore2")
+# The LLM SDK logs request options (prompt and document content) at DEBUG.
+_SDK_LOGGERS = ("anthropic",)
 
 _ExcInfo = tuple[type[BaseException], BaseException, TracebackType | None]
 
@@ -244,5 +246,5 @@ def configure_logging(level: str = "INFO", stream: TextIO | None = None) -> None
         uvicorn_logger.handlers.clear()
         uvicorn_logger.propagate = True
     logging.getLogger(_UVICORN_ACCESS_LOGGER).disabled = True
-    for name in _URL_LOGGING_CLIENTS:
+    for name in (*_URL_LOGGING_CLIENTS, *_SDK_LOGGERS):
         logging.getLogger(name).setLevel(logging.WARNING)

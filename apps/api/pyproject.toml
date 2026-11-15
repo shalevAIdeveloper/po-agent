@@ -15,6 +15,7 @@ dependencies = [
     "pyjwt[crypto]>=2.15.1",
     "sqlalchemy[asyncio]>=2",
     "structlog>=26.1.0",
+    "anthropic>=2.3.0,<3",
 ]
 
 [tool.uv]
@@ -51,13 +52,14 @@ pythonpath = ["."]
 testpaths = ["tests"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
-addopts = "-m 'not integration'"
+addopts = "-m 'not integration and not live'"
 # A hung test (e.g. a frozen event-loop clock) fails fast instead of eating the CI
 # job (A9). `thread` works on Windows too; integration tests share the same limit.
 timeout = 60
 timeout_method = "thread"
 markers = [
   "integration: needs local Supabase (DATABASE_URL); run with -m integration",
+  "live: calls the real LLM API with LLM_API_KEY (costs money); never in CI; run with -m live",
 ]
 
 [dependency-groups]
