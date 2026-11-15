@@ -11,8 +11,9 @@ Exit codes (also in evals/README.md):
     10 --live without a non-empty LLM_API_KEY
     11 --live with a key: not implemented until PR 9
     20 no fixture cases found
-    21 a case is invalid or incomplete (exactly one source.*, an expected.json)
-    22 a case has no recording under RECORDINGS_DIR
+    21 a case is invalid or incomplete (exactly one source.*, an expected.json, all
+       resolving inside the fixtures root; symlinked case directories are skipped)
+    22 a case has no recording under RECORDINGS_DIR (recordings/private/ for private)
     23 no baseline at BASELINE_PATH
     30 everything present, but scoring is not implemented (PR 7)
 """
@@ -73,30 +74,65 @@ def _names(cases: Sequence[Case], label: str) -> str:
     return f"{len(cases)} {label}: " + "; ".join(parts)
 
 
-def _discover(fixtures: Path, include_private: bool) -> list[Case]:
-    def dirs(root: Path) -> list[Path]:
-        if not root.is_dir():
-            return []
-        return sorted(p for p in root.iterdir() if p.is_dir() and not p.name.startswith("."))
+def _is_private_name(name: str) -> bool:
+    return name.lower() == PRIVATE_DIRNAME
 
-    cases = [Case(p.name, p, False) for p in dirs(fixtures) if p.name != PRIVATE_DIRNAME]
+
+def _discover(fixtures: Path, include_private: bool) -> list[Case]:
+    """Cases are the non-hidden, non-symlink subdirectories; `private/` only on request.
+
+    A case is private (name never printed, recording under recordings/private/) when it
+    sits in a `private` folder, when any part of the given path is named `private`, or
+    when it resolves into FIXTURES_DIR/private (e.g. through a symlinked alias).
+    """
+    if not fixtures.is_dir():
+        return []
+    private_root = (FIXTURES_DIR / PRIVATE_DIRNAME).resolve()
+    path_is_private = any(_is_private_name(part) for part in fixtures.parts)
+
+    def cases_in(folder: Path, private: bool) -> list[Case]:
+        found = sorted(
+            p
+            for p in folder.iterdir()
+            if p.is_dir() and not p.is_symlink() and not p.name.startswith(".")
+        )
+        return [
+            Case(p.name, p, private or path_is_private or p.resolve().is_relative_to(private_root))
+            for p in found
+            if not _is_private_name(p.name)
+        ]
+
+    cases = cases_in(fixtures, private=False)
     if include_private:
-        cases += [Case(p.name, p, True) for p in dirs(fixtures / PRIVATE_DIRNAME)]
+        # The private folder itself may be a symlink; its cases then fail the root check.
+        for folder in sorted(p for p in fixtures.iterdir() if _is_private_name(p.name)):
+            if folder.is_dir():
+                cases += cases_in(folder, private=True)
     return cases
 
 
-def _is_valid(case: Case) -> bool:
+def _is_valid(case: Case, root: Path) -> bool:
+    """Exactly one source.* and an expected.json, all resolving inside the fixtures root."""
     if not case.private and not _SAFE_NAME.fullmatch(case.name):
         return False
     sources = [p for p in case.path.glob("source.*") if p.is_file()]
-    return len(sources) == 1 and (case.path / "expected.json").is_file()
+    expected = case.path / "expected.json"
+    if len(sources) != 1 or not expected.is_file():
+        return False
+    return all(p.resolve().is_relative_to(root) for p in (case.path, *sources, expected))
 
 
 def _has_recording(case: Case, recordings: Path) -> bool:
-    # Placeholder key: PR 2/7 define the real one (prompt + schema + model hash).
+    """A file named `<case>.<ext>`: private cases only under recordings/private/, public
+    cases only outside it. Placeholder key: PR 2/7 define the real one (prompt + schema
+    + model hash)."""
     if not recordings.is_dir():
         return False
-    return any(p.is_file() and p.name.startswith(case.name) for p in recordings.rglob("*"))
+    for p in recordings.rglob("*"):
+        in_private = _is_private_name(p.relative_to(recordings).parts[0])
+        if in_private == case.private and p.stem == case.name and p.is_file():
+            return True
+    return False
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -131,7 +167,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     if not cases:
         return _fail(EXIT_NO_FIXTURES, "no fixtures found (expected fixtures/<case>/)")
 
-    invalid = [c for c in cases if not _is_valid(c)]
+    root = fixtures.resolve()
+    invalid = [c for c in cases if not _is_valid(c, root)]
     if invalid:
         return _fail(
             EXIT_INVALID_FIXTURE,

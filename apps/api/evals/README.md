@@ -13,6 +13,7 @@ evals/
     meta.json       synthetic: true, generator + seed, tags, input type (checked from PR 6)
   fixtures/private/ real POs, local only: gitignored, never committed
   recordings/       recorded LLM answers that CI replays (from PR 9)
+  recordings/private/  recordings of private cases: gitignored, never committed
   baseline.json     the committed reference scores (from PR 9)
 ```
 Case names are lowercase letters, digits, `-` and `_` (max 64 characters). The runner
@@ -20,8 +21,21 @@ prints case names, so a name must never carry customer data.
 
 **Real customer documents never go into git.** Committed fixtures are synthetic only
 (fictional names, `*.example` / `*.test` domains, `555-01xx` phones). Real POs live only in
-`fixtures/private/`. That folder is skipped unless `--include-private` is given, and the
-runner never prints the names of private cases. Their recordings are never committed either.
+`fixtures/private/`, and their recordings only in `recordings/private/`. Both folders are
+in the root `.gitignore`, and a test checks that git ignores them.
+
+Private cases:
+- **What counts as private:** a case inside a `private` folder (any letter case). Also any
+  case when a part of the `--fixtures` path is named `private`, or when the case resolves
+  into `evals/fixtures/private/`, for example through a symlinked alias.
+- **Skipped by default:** `fixtures/private/` is only read with `--include-private`.
+- **Names never printed:** the runner only counts private cases.
+- **Recordings:** a private case looks for its recording only under `recordings/private/`,
+  and a public case only outside it.
+
+**Symlinks are not followed.** Symlinked case directories are skipped. A case's directory,
+its `source.*` and its `expected.json` must resolve inside the fixtures root, or the case
+is invalid (21). The link target is never printed.
 
 ## Running
 ```powershell
@@ -43,8 +57,8 @@ document content, key values or private case names. The checks run in this order
 | 10 | `--live` without a non-empty `LLM_API_KEY` |
 | 11 | `--live` with a key: not implemented until PR 9 (no network call is made) |
 | 20 | No fixture cases found (what CI sees until PR 6) |
-| 21 | A case is invalid: unsafe name, missing `expected.json`, or not exactly one `source.*` |
-| 22 | A case has no recording under `recordings/` (for now: a file whose name starts with the case name; PR 2/7 define the real key) |
+| 21 | A case is invalid: unsafe name, missing `expected.json`, not exactly one `source.*`, or a path resolving outside the fixtures root |
+| 22 | A case has no recording. For now, a recording is a file named `<case>.<ext>` (exact stem); PR 2/7 define the real key. Private cases need it under `recordings/private/`, public cases outside it |
 | 23 | No `baseline.json` |
 | 30 | Everything is present, but scoring is not implemented (PR 7) |
 

@@ -1,13 +1,21 @@
 """The M1 PR 0b eval runner: every outcome fails, each with its own exit code (owner rule)."""
 
+import builtins
+import io
 import itertools
+import os
+import shutil
 import socket
+import subprocess
 import sys
 from pathlib import Path
 
 import pytest
 
 from evals import run
+
+_API_DIR = Path(__file__).resolve().parents[2]
+_REPO_ROOT = _API_DIR.parents[1]
 
 # Planted in fixture files: no message may ever echo document content.
 _DOC_MARKER = "DOC-CONTENT-MARKER-7f3a"
@@ -44,9 +52,20 @@ def _case(root: Path, name: str, *, source: bool = True, expected: bool = True) 
     return case
 
 
-def _record(name: str) -> None:
-    run.RECORDINGS_DIR.mkdir(parents=True, exist_ok=True)
-    (run.RECORDINGS_DIR / f"{name}.json").write_text(_DOC_MARKER, encoding="utf-8")
+def _record(name: str, *, private: bool = False) -> None:
+    folder = run.RECORDINGS_DIR / "private" if private else run.RECORDINGS_DIR
+    folder.mkdir(parents=True, exist_ok=True)
+    (folder / f"{name}.json").write_text(_DOC_MARKER, encoding="utf-8")
+
+
+def _symlink(link: Path, target: Path, *, is_dir: bool) -> None:
+    """Skips only where the OS refuses symlinks (Windows without the privilege)."""
+    try:
+        link.symlink_to(target, target_is_directory=is_dir)
+    except OSError as exc:
+        if sys.platform == "win32":
+            pytest.skip(f"this Windows account cannot create symlinks ({exc.winerror})")
+        raise
 
 
 def _baseline() -> None:
@@ -190,8 +209,18 @@ def test_empty_fixtures_dir_fails(capsys: pytest.CaptureFixture[str], tmp_path: 
     _assert_one_line(err)
 
 
+def _committed_cases() -> list[str]:
+    return sorted(
+        p.name
+        for p in run.FIXTURES_DIR.iterdir()
+        if p.is_dir() and not p.name.startswith(".") and p.name != "private"
+    )
+
+
 def test_the_committed_fixtures_dir_has_no_cases_yet(capsys: pytest.CaptureFixture[str]) -> None:
-    # Exactly what CI sees until PR 6 adds fixtures (default --fixtures).
+    # Exactly what CI sees until PR 6 adds fixtures (default --fixtures). PR 6 replaces
+    # this test (docs/plans/m1.md); the subprocess tests below rely on it meanwhile.
+    assert _committed_cases() == [], "PR 6 must replace this test and the subprocess tests"
     code, err = _main(capsys, "--replay", "--fail-on-regression")
 
     assert code == run.EXIT_NO_FIXTURES
@@ -348,13 +377,29 @@ def test_the_runner_never_reads_fixture_or_recording_contents(
     def _refuse(*_args: object, **_kwargs: object) -> None:
         raise AssertionError("PR 0b checks presence only")
 
+    attempts: list[str] = []
+
+    def _guard(real: object) -> object:
+        def guarded(file: object, *args: object, **kwargs: object) -> object:
+            path = file if isinstance(file, str | bytes | os.PathLike) else None
+            if path is not None and Path(os.fsdecode(path)).resolve().is_relative_to(tmp_path):
+                attempts.append("open")
+                raise AssertionError("PR 0b checks presence only")
+            return real(file, *args, **kwargs)  # type: ignore[operator]
+
+        return guarded
+
     monkeypatch.setattr(Path, "read_text", _refuse)
     monkeypatch.setattr(Path, "read_bytes", _refuse)
     monkeypatch.setattr(Path, "open", _refuse)
+    monkeypatch.setattr(builtins, "open", _guard(builtins.open))
+    monkeypatch.setattr(io, "open", _guard(io.open))
+    monkeypatch.setattr(os, "open", _guard(os.open))
 
     code, _ = _main(capsys, "--replay", "--fixtures", str(fixtures))
 
     assert code == run.EXIT_SCORING_NOT_IMPLEMENTED
+    assert attempts == []
 
 
 # --- the owner rule: no path returns 0 -----------------------------------------------------
@@ -402,8 +447,9 @@ def test_no_combination_of_conditions_returns_zero(
         monkeypatch.setattr(run, "BASELINE_PATH", root / "baseline.json")
         fixtures = _build_fixtures(root, state)
         if recorded:
-            for name in ("clean_pdf", "no_expected", "real_po"):
+            for name in ("clean_pdf", "no_expected"):
                 _record(name)
+            _record("real_po", private=True)
         if baseline:
             _baseline()
         for mode, key, private, regression in flags:
@@ -434,3 +480,214 @@ def test_running_as_a_module_exits_non_zero(monkeypatch: pytest.MonkeyPatch) -> 
         run.run_cli()
 
     assert exc.value.code == run.EXIT_NO_FIXTURES
+
+
+# --- the real entry point, exactly as CI runs it (sec M1) ----------------------------------
+
+
+def _entry_point(*argv: str) -> subprocess.CompletedProcess[str]:
+    # CI: `uv run python -m evals.run ...` in apps/api, no -I, no LLM_API_KEY. Only the
+    # committed fixtures matter: with no public case the runner stops at "no fixtures",
+    # before it looks at recordings or a baseline (checked by the assert below).
+    assert _committed_cases() == [], "PR 6 must replace this test"
+    env = {k: v for k, v in os.environ.items() if k not in {"LLM_API_KEY", "PYTHONSAFEPATH"}}
+    return subprocess.run(  # noqa: S603 - this interpreter, fixed arguments
+        [sys.executable, "-m", "evals.run", *argv],
+        cwd=_API_DIR,
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=50,
+        check=False,
+    )
+
+
+def test_ci_command_exits_no_fixtures() -> None:
+    proc = _entry_point("--replay", "--fail-on-regression")
+
+    assert proc.returncode == run.EXIT_NO_FIXTURES, proc.stderr
+    assert proc.stdout == ""
+    assert proc.stderr == "evals: no fixtures found (expected fixtures/<case>/)\n"
+
+
+def test_help_through_the_entry_point_exits_usage() -> None:
+    proc = _entry_point("--help")
+
+    assert proc.returncode == run.EXIT_USAGE
+    assert "--replay" in proc.stdout
+
+
+# --- private recordings and the ignore rules (sec M2, L2) ----------------------------------
+
+
+def test_private_fixtures_and_recordings_are_gitignored() -> None:
+    git = shutil.which("git")
+    assert git, "git is needed (CI's checkout has it)"
+    paths = ["apps/api/evals/fixtures/private/x", "apps/api/evals/recordings/private/x"]
+    proc = subprocess.run(  # noqa: S603 - git found on PATH, fixed arguments
+        [git, "check-ignore", "--no-index", "-v", *paths],
+        cwd=_REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert proc.returncode == 0, proc.stderr
+    ignored = {line.split("\t", 1)[1] for line in proc.stdout.splitlines()}
+    assert ignored == set(paths)
+
+
+def test_a_private_case_needs_its_recording_under_recordings_private(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    fixtures = tmp_path / "fixtures"
+    _case(fixtures / "private", "real_po")
+    _record("real_po")  # public location: does not count for a private case
+    _baseline()
+
+    code, err = _main(capsys, "--replay", "--include-private", "--fixtures", str(fixtures))
+
+    assert code == run.EXIT_MISSING_RECORDINGS
+    assert "1 private" in err
+    assert "real_po" not in err
+
+    _record("real_po", private=True)
+    code, _ = _main(capsys, "--replay", "--include-private", "--fixtures", str(fixtures))
+
+    assert code == run.EXIT_SCORING_NOT_IMPLEMENTED
+
+
+def test_a_public_case_ignores_recordings_under_recordings_private(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    fixtures = tmp_path / "fixtures"
+    _case(fixtures, "clean_pdf")
+    _record("clean_pdf", private=True)
+    nested = run.RECORDINGS_DIR / "Private" / "deeper"  # any case of the folder name
+    nested.mkdir(parents=True)
+    (nested / "clean_pdf.json").write_text("{}", encoding="utf-8")
+
+    code, err = _main(capsys, "--replay", "--fixtures", str(fixtures))
+
+    assert code == run.EXIT_MISSING_RECORDINGS
+    assert "clean_pdf" in err
+
+
+@pytest.mark.parametrize("parts", [("Private",), ("private", "sub"), ("x", "PRIVATE", "y")])
+def test_a_fixtures_path_through_a_private_folder_hides_names(
+    parts: tuple[str, ...], capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    fixtures = tmp_path.joinpath(*parts)
+    _case(fixtures, "customer_po")
+
+    code, err = _main(capsys, "--replay", "--fixtures", str(fixtures))
+
+    assert code == run.EXIT_MISSING_RECORDINGS
+    assert "customer_po" not in err
+    assert "1 private" in err
+    _assert_one_line(err)
+
+    _record("customer_po", private=True)
+    code, _ = _main(capsys, "--replay", "--fixtures", str(fixtures))
+
+    assert code == run.EXIT_NO_BASELINE
+
+
+def test_a_path_resolving_into_the_private_fixtures_hides_names(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    fixtures_dir = tmp_path / "fixtures"
+    monkeypatch.setattr(run, "FIXTURES_DIR", fixtures_dir)
+    _case(fixtures_dir / "private", "customer_po")
+    alias = tmp_path / "alias"
+    _symlink(alias, fixtures_dir / "private", is_dir=True)
+
+    code, err = _main(capsys, "--replay", "--fixtures", str(alias))
+
+    assert code == run.EXIT_MISSING_RECORDINGS
+    assert "customer_po" not in err
+    assert "1 private" in err
+
+
+# --- exact recording match (sec L1) --------------------------------------------------------
+
+
+def test_recordings_match_the_case_name_exactly(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    fixtures = tmp_path / "fixtures"
+    _case(fixtures, "clean")
+    _case(fixtures, "clean_pdf")
+    _record("clean_pdf")
+
+    code, err = _main(capsys, "--replay", "--fixtures", str(fixtures))
+
+    assert code == run.EXIT_MISSING_RECORDINGS
+    assert err == "evals: 1 case(s) without a recording: clean\n"
+
+
+# --- symlinks (sec L3) ---------------------------------------------------------------------
+
+
+def test_a_symlinked_case_directory_is_skipped(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    outside = _case(tmp_path / "elsewhere", "outside_case")
+    fixtures = tmp_path / "fixtures"
+    fixtures.mkdir()
+    _symlink(fixtures / "linked_case", outside, is_dir=True)
+
+    code, err = _main(capsys, "--replay", "--fixtures", str(fixtures))
+
+    assert code == run.EXIT_NO_FIXTURES
+    assert "outside" not in err
+
+
+@pytest.mark.parametrize("name", ["source.pdf", "expected.json"])
+def test_a_file_symlinked_outside_the_fixtures_is_invalid(
+    name: str, capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    target = tmp_path / "secret_target_dir" / name
+    target.parent.mkdir()
+    target.write_text(_DOC_MARKER, encoding="utf-8")
+    fixtures = tmp_path / "fixtures"
+    case = _case(
+        fixtures, "linked_file", source=name != "source.pdf", expected=name != "expected.json"
+    )
+    _symlink(case / name, target, is_dir=False)
+
+    code, err = _main(capsys, "--replay", "--fixtures", str(fixtures))
+
+    assert code == run.EXIT_INVALID_FIXTURE
+    assert "linked_file" in err
+    assert "secret_target_dir" not in err
+    _assert_one_line(err)
+
+
+def test_a_private_folder_symlinked_outside_the_fixtures_is_invalid(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    _case(tmp_path / "secret_target_dir", "real_po")
+    fixtures = tmp_path / "fixtures"
+    fixtures.mkdir()
+    _symlink(fixtures / "private", tmp_path / "secret_target_dir", is_dir=True)
+
+    code, err = _main(capsys, "--replay", "--include-private", "--fixtures", str(fixtures))
+
+    assert code == run.EXIT_INVALID_FIXTURE
+    assert "secret_target_dir" not in err
+    assert "real_po" not in err
+    assert "1 private" in err
+
+
+def test_a_symlink_inside_the_fixtures_root_is_allowed(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    fixtures = tmp_path / "fixtures"
+    first = _case(fixtures, "first")
+    second = _case(fixtures, "second", source=False)
+    _symlink(second / "source.pdf", first / "source.pdf", is_dir=False)
+
+    code, _ = _main(capsys, "--replay", "--fixtures", str(fixtures))
+
+    assert code == run.EXIT_MISSING_RECORDINGS

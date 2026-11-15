@@ -183,7 +183,12 @@ def test_evals_job_uses_no_secret(workflow: str) -> None:
     assert "secrets." not in job
     assert "LLM_API_KEY" not in job
     assert "vars." not in job
-    assert not re.search(r"^    env:", job, re.MULTILINE)
+    assert "github.token" not in job
+    assert "permissions:" not in job  # inherits the read-only default, nothing more
+    # No env at any level of the job (job, step, or a nested block); sec L4.
+    assert not re.search(r"^\s*env:", job, re.MULTILINE)
+    # Nor one at workflow level, which every job would inherit.
+    assert not re.search(r"^env:", workflow, re.MULTILINE)
 
 
 def test_evals_job_runs_a_strict_replay(workflow: str) -> None:

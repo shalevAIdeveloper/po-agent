@@ -34,5 +34,6 @@ docs/.obsidian/
 *.jwk
 supabase/signing_keys.json
 *.log
-# real customer POs used for local evals are PII
+# real customer POs used for local evals are PII, and so are their recorded answers
 apps/api/evals/fixtures/private/
+apps/api/evals/recordings/private/
