@@ -169,6 +169,64 @@ def test_ci_ok_verdicts(
     assert (proc.returncode == 0) is passes, proc.stderr
 
 
+_EVALS_COMMAND = "uv run python -m evals.run --replay --fail-on-regression"
+
+
+def _evals_job(workflow: str) -> str:
+    return workflow.split("\n  evals:\n", 1)[1].split("\n  ci-ok:\n", 1)[0]
+
+
+def test_evals_job_uses_no_secret(workflow: str) -> None:
+    # Owner decision Q9: CI evals replay recordings; no key, no network (M1 PR 0b).
+    job = _evals_job(workflow)
+
+    assert "secrets." not in job
+    assert "LLM_API_KEY" not in job
+    assert "vars." not in job
+    assert "github.token" not in job
+    assert "permissions:" not in job  # inherits the read-only default, nothing more
+    # No env at any level of the job (job, step, or a nested block); sec L4.
+    assert not re.search(r"^\s*env:", job, re.MULTILINE)
+    # Nor one at workflow level, which every job would inherit.
+    assert not re.search(r"^env:", workflow, re.MULTILINE)
+
+
+def test_evals_job_runs_a_strict_replay(workflow: str) -> None:
+    job = _evals_job(workflow)
+    runs = re.findall(r"^      - run: (.+)$", job, re.MULTILINE)
+
+    assert runs == ["uv sync --frozen", _EVALS_COMMAND]
+    assert "continue-on-error" not in job
+    assert "|| true" not in job
+    assert (
+        "    if: needs.changes.outputs.evals == 'true' && github.event_name == 'pull_request'\n"
+    ) in job
+    assert "    needs: changes\n" in job
+
+
+def test_evals_path_filter_covers_the_engine_but_not_workflows_yet(workflow: str) -> None:
+    changes_job = workflow.split("\n  changes:\n", 1)[1].split("\n  api:\n", 1)[0]
+    match = re.search(r"^            evals: \[([^\]]*)\]$", changes_job, re.MULTILINE)
+
+    assert match
+    paths = {p.strip().strip("'") for p in match.group(1).split(",")}
+    assert paths == {
+        "apps/api/app/prompts/**",
+        "apps/api/app/extraction/**",
+        "apps/api/app/llm/**",
+        "apps/api/evals/**",
+    }
+    # G2 (`.github/workflows/**`) waits for PR 8: PRs into dev have no evals exception.
+    assert not [p for p in paths if p.startswith(".github")]
+
+
+def test_evals_stays_a_required_part_of_ci_ok(workflow: str) -> None:
+    needs = re.search(r"^  ci-ok:\n(?:.*\n)*?    needs: \[([^\]]+)\]", workflow, re.MULTILINE)
+
+    assert needs
+    assert "evals" in {job.strip() for job in needs.group(1).split(",")}
+
+
 def test_images_job_builds_and_smoke_tests_the_deploy_images(workflow: str) -> None:
     images_job = workflow.split("\n  images:\n", 1)[1].split("\n  evals:\n", 1)[0]
 
