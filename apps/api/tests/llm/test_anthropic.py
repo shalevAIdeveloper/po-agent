@@ -252,6 +252,51 @@ async def test_deadline_while_waiting_on_retry_after_is_rate_limited(
     assert raised.value.transient
 
 
+async def test_deadline_during_a_retry_still_in_flight_is_a_timeout(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # `sec` delta 3: after a 429, a retry that is generating (maybe billed) when the
+    # deadline hits must not be re-run by the job queue.
+    monkeypatch.setattr(adapter_module, "DEADLINE_SLACK_SECONDS", 0.0)
+    calls: list[int] = []
+
+    async def handler(_request: httpx2.Request) -> httpx2.Response:
+        calls.append(1)
+        if len(calls) == 1:
+            return httpx2.Response(429, json={"type": "error"}, headers={"retry-after-ms": "1"})
+        await asyncio.sleep(5)
+        return ok_response()
+
+    client = adapter(handler, timeout_seconds=0.3, max_retries=2)
+    with pytest.raises(LLMError) as raised:
+        await client.extract(make_request())
+
+    assert len(calls) == 2
+    assert raised.value.code == "llm_timeout"
+    assert not raised.value.transient
+
+
+async def test_existing_event_hooks_on_an_injected_client_are_kept() -> None:
+    called: list[str] = []
+
+    async def on_request(_request: httpx2.Request) -> None:
+        called.append("request")
+
+    async def on_response(_response: httpx2.Response) -> None:
+        called.append("response")
+
+    http = httpx2.AsyncClient(
+        transport=httpx2.MockTransport(lambda _r: ok_response()),
+        event_hooks={"request": [on_request], "response": [on_response]},
+    )
+    client = AnthropicLLMClient(
+        api_key=SecretStr(API_KEY), timeout_seconds=5, max_retries=0, http_client=http
+    )
+
+    await client.extract(make_request())
+    assert called == ["request", "response"]
+
+
 async def test_deadline_after_5xx_is_unavailable(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(adapter_module, "DEADLINE_SLACK_SECONDS", 0.0)
 

@@ -19,6 +19,7 @@ import base64
 import os
 import time
 from contextvars import ContextVar
+from dataclasses import dataclass, field
 from functools import cache
 from typing import Any, Final
 
@@ -59,24 +60,42 @@ NO_PROXY_MOUNTS: Final[dict[str, None]] = {"http://": None, "https://": None, "a
 # Statuses the SDK retries; seen before a deadline, they make the failure transient.
 _RETRYABLE_STATUSES: Final = frozenset({408, 409, 429}) | frozenset(range(500, 600))
 
-# Statuses of the responses received during the current extract() (per task).
-_seen_statuses: ContextVar[list[int] | None] = ContextVar("llm_seen_statuses", default=None)
+
+@dataclass(slots=True)
+class _CallTrace:
+    """Requests sent and response statuses received during one extract() (per task)."""
+
+    sent: int = 0
+    statuses: list[int] = field(default_factory=list)
+
+
+_call_trace: ContextVar[_CallTrace | None] = ContextVar("llm_call_trace", default=None)
+
+
+async def _record_request(_request: httpx2.Request) -> None:
+    trace = _call_trace.get()
+    if trace is not None:
+        trace.sent += 1
 
 
 async def _record_status(response: httpx2.Response) -> None:
-    seen = _seen_statuses.get()
-    if seen is not None:
-        seen.append(response.status_code)
+    trace = _call_trace.get()
+    if trace is not None:
+        trace.statuses.append(response.status_code)
 
 
-def _deadline_code(seen: list[int]) -> LLMErrorCode:
-    """What a deadline hit means: waiting on rate limits / outages is transient, a reply
-    that never came is a (possibly billed) timeout that must not be re-run (`sec` delta 2)."""
-    if not seen:
+def _deadline_code(trace: _CallTrace) -> LLMErrorCode:
+    """What a deadline hit means (`sec` delta 2 + 3).
+
+    A request still waiting for its reply may already be generated and billed: that is a
+    timeout and must not be re-run. Only when every request got an answer (the deadline
+    hit while the SDK slept before a retry) is it transient.
+    """
+    if trace.sent > len(trace.statuses) or not trace.statuses:
         return "llm_timeout"
-    if 429 in seen:
+    if 429 in trace.statuses:
         return "llm_rate_limited"
-    if any(status in _RETRYABLE_STATUSES for status in seen):
+    if any(status in _RETRYABLE_STATUSES for status in trace.statuses):
         return "llm_unavailable"
     return "llm_timeout"
 
@@ -152,7 +171,7 @@ class AnthropicLLMClient:
             )
         hooks = http_client.event_hooks
         http_client.event_hooks = {
-            "request": hooks.get("request", []),
+            "request": [*hooks.get("request", []), _record_request],
             "response": [*hooks.get("response", []), _record_status],
         }
         # An explicit api_key stops the SDK from reading any credential env var or profile.
@@ -177,8 +196,8 @@ class AnthropicLLMClient:
             "format": {"type": "json_schema", "schema": provider_schema(request.output_model)},
         }
         started = time.perf_counter()
-        seen: list[int] = []
-        token = _seen_statuses.set(seen)
+        trace = _CallTrace()
+        token = _call_trace.set(trace)
         try:
             async with asyncio.timeout(self.deadline_seconds):
                 message = await self._client.messages.create(
@@ -189,7 +208,7 @@ class AnthropicLLMClient:
                     output_config=output_config,
                 )
         except TimeoutError:
-            code = _deadline_code(seen)
+            code = _deadline_code(trace)
             self._fail(request, code, started)
             raise LLMError(code) from None
         except anthropic.APIError as error:
@@ -204,7 +223,7 @@ class AnthropicLLMClient:
             self._fail(request, "llm_provider_error", started)
             raise LLMError("llm_provider_error") from None
         finally:
-            _seen_statuses.reset(token)
+            _call_trace.reset(token)
 
         texts = [block.text for block in message.content if block.type == "text"]
         return build_result(
