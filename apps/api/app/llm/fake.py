@@ -5,7 +5,8 @@
   an error (`llm_replay_miss`), never a live call.
 - `RecordingLLMClient`: wraps a real client and writes a cassette per call (evals
   `--live --record` only). A cassette holds the model's output, usage, model, latency
-  and the provider request id: never request headers, the key or the prompt.
+  and the provider request id: never request headers, the key or the prompt. The output
+  is document data, so record only synthetic fixtures (enforced by the eval runner, PR 7).
 """
 
 import json
@@ -100,6 +101,33 @@ def to_cassette(request: StructuredRequest[Any], result: LLMResult[Any]) -> dict
     }
 
 
+_STR_KEYS: Final = ("fingerprint", "prompt_version", "schema_version", "provider", "model")
+_OPTIONAL_STR_KEYS: Final = ("raw_output", "stop_reason", "provider_request_id")
+_INT_KEYS: Final = ("cassette_version", "latency_ms", "input_tokens", "output_tokens")
+
+
+def _load_cassette(path: Path) -> dict[str, Any] | None:
+    """The cassette if it has exactly the expected keys and types, else None.
+
+    Never raises with the file's content: a JSONDecodeError would carry the whole
+    document (`sec` L4).
+    """
+    try:
+        cassette = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, ValueError):
+        return None
+    if not isinstance(cassette, dict) or set(cassette) != _CASSETTE_KEYS:
+        return None
+    ok = (
+        all(isinstance(cassette[key], str) for key in _STR_KEYS)
+        and all(
+            cassette[key] is None or isinstance(cassette[key], str) for key in _OPTIONAL_STR_KEYS
+        )
+        and all(type(cassette[key]) is int and cassette[key] >= 0 for key in _INT_KEYS)
+    )
+    return cassette if ok else None
+
+
 class ReplayLLMClient:
     provider = "replay"
 
@@ -110,26 +138,25 @@ class ReplayLLMClient:
         path = cassette_path(self._directory, request)
         if not path.is_file():
             raise LLMError("llm_replay_miss")
-        cassette = json.loads(path.read_text(encoding="utf-8"))
+        cassette = _load_cassette(path)
         if (
-            not isinstance(cassette, dict)
-            or set(cassette) != _CASSETTE_KEYS
+            cassette is None
             or cassette["cassette_version"] != CASSETTE_VERSION
             or cassette["fingerprint"] != request.fingerprint()
         ):
-            # A hand-edited or foreign file is a miss, not a result.
+            # A hand-edited, malformed or foreign file is a miss, not a result (`sec` L4).
             raise LLMError("llm_replay_miss", detail="cassette does not match the request")
         # Parsing, cost and the log line are recomputed exactly as for a live call.
         return build_result(
             request,
-            provider=str(cassette["provider"]),
-            model=str(cassette["model"]),
+            provider=cassette["provider"],
+            model=cassette["model"],
             raw_output=cassette["raw_output"],
             stop_reason=cassette["stop_reason"],
             provider_request_id=cassette["provider_request_id"],
-            latency_ms=int(cassette["latency_ms"]),
-            input_tokens=int(cassette["input_tokens"]),
-            output_tokens=int(cassette["output_tokens"]),
+            latency_ms=cassette["latency_ms"],
+            input_tokens=cassette["input_tokens"],
+            output_tokens=cassette["output_tokens"],
         )
 
 

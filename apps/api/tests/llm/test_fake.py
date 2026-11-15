@@ -1,5 +1,7 @@
 import json
+from collections.abc import Callable
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -81,6 +83,33 @@ async def test_replay_of_a_different_request_misses(tmp_path: Path) -> None:
     with pytest.raises(LLMError) as raised:
         await ReplayLLMClient(tmp_path).extract(make_request(prompt_version="extract_po/v2"))
     assert raised.value.code == "llm_replay_miss"
+
+
+@pytest.mark.parametrize(
+    "corrupt",
+    [
+        lambda c: "{not json " + PO_TEXT,
+        lambda c: json.dumps(c | {"latency_ms": "12"}),
+        lambda c: json.dumps(c | {"input_tokens": -1}),
+        lambda c: json.dumps(c | {"input_tokens": True}),
+        lambda c: json.dumps(c | {"raw_output": {"kind": "po"}}),
+        lambda c: json.dumps([c]),
+    ],
+)
+async def test_malformed_cassette_is_a_miss_without_its_content(
+    tmp_path: Path, corrupt: Callable[[dict[str, Any]], str]
+) -> None:
+    # `sec` L4: never a crash that carries the file's content.
+    request = make_request()
+    await RecordingLLMClient(adapter(lambda _r: ok_response()), tmp_path).extract(request)
+    path = cassette_path(tmp_path, request)
+    path.write_text(corrupt(json.loads(path.read_text(encoding="utf-8"))), encoding="utf-8")
+
+    with pytest.raises(LLMError) as raised:
+        await ReplayLLMClient(tmp_path).extract(request)
+    assert raised.value.code == "llm_replay_miss"
+    assert PO_TEXT not in str(raised.value)
+    assert raised.value.__cause__ is None
 
 
 async def test_tampered_cassette_misses(tmp_path: Path) -> None:

@@ -1,7 +1,9 @@
 """Manual smoke test against the real API. Never runs in CI (deselected by `-m 'not live'`).
 
-Run it yourself, with LLM_API_KEY and LLM_EXTRACTION_MODEL in the repo-root .env:
-    uv run pytest -m live tests/llm/test_anthropic_live.py
+Run it yourself (PowerShell, from apps/api), with LLM_API_KEY and LLM_EXTRACTION_MODEL in
+the repo-root .env:
+    $env:RUN_LIVE="1"; uv run pytest -m live tests/llm/test_anthropic_live.py
+    Remove-Item Env:RUN_LIVE
 One tiny call; cost well under $0.01.
 """
 

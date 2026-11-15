@@ -14,9 +14,9 @@ LLMErrorCode = Literal[
 ]
 
 # Codes worth retrying later at the job level (PR 12 backs off via run_after).
-TRANSIENT_CODES: Final[frozenset[str]] = frozenset(
-    {"llm_timeout", "llm_rate_limited", "llm_unavailable"}
-)
+# Not `llm_timeout`: the timeout covers a full-length reply, so a timed-out call was
+# likely generated and billed; retrying it would pay again for the same document (`sec` M1).
+TRANSIENT_CODES: Final[frozenset[str]] = frozenset({"llm_rate_limited", "llm_unavailable"})
 
 
 class LLMError(Exception):

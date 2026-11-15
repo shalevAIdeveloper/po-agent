@@ -1,3 +1,4 @@
+import os
 from collections.abc import Iterator
 from typing import NoReturn
 
@@ -38,6 +39,19 @@ _SETTINGS_ENV_VARS = (
     "ANTHROPIC_OPEN_TELEMETRY",
     "ANTHROPIC_OPEN_TELEMETRY_TRACES_CONTENT_MODE",
 )
+
+
+def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item]) -> None:
+    """`live` tests cost money: they run only with RUN_LIVE=1, whatever `-m` says (`sec` L8).
+
+    addopts deselects them, but an explicit `-m integration` replaces addopts' `-m`.
+    """
+    if os.environ.get("RUN_LIVE", "").strip() == "1":
+        return
+    skip = pytest.mark.skip(reason="live LLM test: set RUN_LIVE=1 to run it")
+    for item in items:
+        if item.get_closest_marker("live"):
+            item.add_marker(skip)
 
 
 @pytest.fixture(autouse=True)

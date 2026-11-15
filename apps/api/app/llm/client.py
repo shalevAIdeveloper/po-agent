@@ -29,7 +29,10 @@ class LLMClient(Protocol):
 
 def _segment(part: str | int) -> str:
     text = str(part)
-    return text if len(text) <= MAX_PATH_SEGMENT else text[:MAX_PATH_SEGMENT] + "…"
+    if len(text) > MAX_PATH_SEGMENT:
+        text = text[:MAX_PATH_SEGMENT] + "…"
+    # Model-invented key names may carry newlines, control or bidi characters (`sec` L3).
+    return "".join(ch if ch.isprintable() else f"\\u{ord(ch):04x}" for ch in text)
 
 
 def sanitize(error: ValidationError) -> tuple[ValidationIssue, ...]:
@@ -76,6 +79,9 @@ def build_result[T: BaseModel](
             outcome = "invalid_output"
             issues = sanitize(error)
     cost = cost_usd(model, input_tokens, output_tokens)
+    if cost is None and model != request.model:
+        # The provider may answer with a dated id of the requested model (`sec` L1).
+        cost = cost_usd(request.model, input_tokens, output_tokens)
     if cost is None:
         log.warning("llm.unknown_model_price", provider=provider, model=model)
     result = LLMResult(

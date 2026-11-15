@@ -5,14 +5,15 @@ import json
 from decimal import Decimal
 from typing import Any
 
+import anthropic
 import httpx2
 import pytest
-from pydantic import ValidationError
+from pydantic import SecretStr, ValidationError
 
 from app.extraction.schema import PurchaseOrderExtraction
 from app.llm.errors import LLMError
 from app.llm.providers import anthropic as adapter_module
-from app.llm.providers.anthropic import REFUSED_ENV_VARS, provider_schema
+from app.llm.providers.anthropic import REFUSED_ENV_VARS, AnthropicLLMClient, provider_schema
 from app.llm.types import ImagePart, TextPart
 from app.logging import configure_logging
 from tests.llm.helpers import (
@@ -152,10 +153,62 @@ async def test_refusal_and_truncation_are_never_parsed(stop_reason: str, outcome
 
 async def test_unknown_model_has_no_cost() -> None:
     body = message_body(model="claude-unknown-9")
-    result = await adapter(lambda _r: ok_response(body)).extract(make_request())
+    request = make_request(model="claude-unknown-9")
+    result = await adapter(lambda _r: ok_response(body)).extract(request)
 
     assert result.outcome == "ok"
     assert result.cost_usd is None
+
+
+async def test_dated_model_id_in_the_reply_is_priced_by_the_requested_model() -> None:
+    # `sec` L1: a dated id must not blind cost accounting.
+    body = message_body(model="claude-sonnet-5-5-20261101")
+    result = await adapter(lambda _r: ok_response(body)).extract(make_request())
+
+    assert result.model == "claude-sonnet-5-5-20261101"
+    assert result.cost_usd == Decimal("0.004000")
+
+
+async def test_other_sdk_errors_map_to_a_code_without_sdk_text(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client = adapter(lambda _r: ok_response())
+
+    async def boom(**_kwargs: object) -> None:
+        raise anthropic.AnthropicError(PO_TEXT)
+
+    monkeypatch.setattr(client._client.messages, "create", boom)
+    with pytest.raises(LLMError) as raised:
+        await client.extract(make_request())
+
+    assert raised.value.code == "llm_provider_error"
+    assert PO_TEXT not in str(raised.value)
+    assert raised.value.__suppress_context__
+
+
+def test_default_http_client_ignores_proxy_and_ca_env_vars(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # `sec` L10: HTTPS_PROXY / SSL_CERT_FILE can't route the key through an interceptor.
+    monkeypatch.setenv("HTTPS_PROXY", "http://interceptor.example:8080")
+    client = AnthropicLLMClient(api_key=SecretStr(API_KEY), timeout_seconds=600, max_retries=0)
+
+    assert client._client._client.trust_env is False
+
+
+def test_deadline_is_one_attempt_plus_slack() -> None:
+    # `sec` M1: a timed-out (likely billed) attempt is never repeated in full.
+    client = adapter(lambda _r: ok_response(), timeout_seconds=600, max_retries=2)
+    assert client.deadline_seconds == 600 + adapter_module.DEADLINE_SLACK_SECONDS
+
+
+async def test_timeout_is_not_transient() -> None:
+    def handler(request: httpx2.Request) -> httpx2.Response:
+        raise httpx2.ReadTimeout("timed out", request=request)
+
+    with pytest.raises(LLMError) as raised:
+        await adapter(handler, max_retries=0).extract(make_request())
+    assert not raised.value.transient
 
 
 # ----- transport errors and retries -----

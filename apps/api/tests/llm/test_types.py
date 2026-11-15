@@ -3,7 +3,7 @@ from dataclasses import replace
 import pytest
 
 from app.llm.types import ImagePart, TextPart
-from tests.llm.helpers import PO_TEXT, make_request
+from tests.llm.helpers import PO_TEXT, Answer, make_request
 
 
 def test_fingerprint_is_stable() -> None:
@@ -29,6 +29,15 @@ def test_everything_that_decides_the_output_changes_the_fingerprint(
 ) -> None:
     base = make_request()
     assert replace(base, **change).fingerprint() != base.fingerprint()  # type: ignore[arg-type]
+
+
+def test_schema_edit_without_a_version_bump_changes_the_fingerprint() -> None:
+    # `sec` L5: replay must never answer for an edited schema under the same label.
+    class AnswerEdited(Answer):
+        note: str | None = None
+
+    base = make_request()
+    assert replace(base, output_model=AnswerEdited).fingerprint() != base.fingerprint()
 
 
 def test_image_bytes_change_the_fingerprint() -> None:

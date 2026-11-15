@@ -86,6 +86,12 @@ def reads_env_files() -> bool:
     return os.environ.get("APP_ENV", AppEnv.LOCAL).strip().lower() == AppEnv.LOCAL
 
 
+def expected_reply_seconds(max_output_tokens: int) -> float:
+    """The anthropic SDK's own estimate of how long a non-streaming reply of this size
+    may take (3600 s per 128k tokens); a shorter timeout would cut long, billed replies."""
+    return 3600 * max_output_tokens / 128_000
+
+
 def _is_blank(value: SecretStr | str | None) -> bool:
     if isinstance(value, SecretStr):
         value = value.get_secret_value()
@@ -126,8 +132,9 @@ class Settings(BaseSettings):
     llm_api_key: SecretStr | None = None
     llm_extraction_model: str | None = Field(default=None, pattern=_MODEL_ID_PATTERN)
     llm_mapping_model: str | None = Field(default=None, pattern=_MODEL_ID_PATTERN)
-    # Per attempt; the adapter also bounds the whole call including transport retries.
-    llm_timeout_seconds: float = Field(default=120.0, gt=0, le=600)
+    # Per attempt, and it must cover a full-length reply (see _llm_timeout_covers_reply): a
+    # reply cut by the timeout has likely been generated and billed already (`sec` M1).
+    llm_timeout_seconds: float = Field(default=600.0, gt=0, le=900)
     llm_max_retries: int = Field(default=2, ge=0, le=5)
     # Non-streaming requests: kept well under what a single HTTP response can carry.
     llm_max_output_tokens: int = Field(default=16000, ge=1, le=32000)
@@ -164,6 +171,16 @@ class Settings(BaseSettings):
             if not 1 <= port <= _MAX_PORT:
                 raise ValueError("port out of range")
         return value
+
+    @model_validator(mode="after")
+    def _llm_timeout_covers_reply(self) -> Self:
+        needed = expected_reply_seconds(self.llm_max_output_tokens)
+        if self.llm_timeout_seconds < needed:
+            raise ValueError(
+                f"LLM_TIMEOUT_SECONDS must be at least {needed:g} for "
+                f"LLM_MAX_OUTPUT_TOKENS={self.llm_max_output_tokens} (non-streaming reply time)"
+            )
+        return self
 
     @model_validator(mode="after")
     def _fake_llm_only_locally(self) -> Self:

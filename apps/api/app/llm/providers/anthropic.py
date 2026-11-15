@@ -44,8 +44,10 @@ REFUSED_ENV_VARS: Final = (
     "ANTHROPIC_CUSTOM_HEADERS",
     "ANTHROPIC_LOG",
 )
-# Slack on top of the per-attempt timeouts for backoff sleeps (not Final: tests shrink it).
-DEADLINE_SLACK_SECONDS = 30.0
+# The whole call (SDK retries included) gets one full attempt plus this much for quick
+# 429/5xx retries: a timed-out attempt, likely billed, is never repeated in full (`sec` M1).
+# Not Final: tests shrink it.
+DEADLINE_SLACK_SECONDS = 60.0
 
 
 @cache
@@ -111,18 +113,20 @@ class AnthropicLLMClient:
         self._timeout_seconds = timeout_seconds
         self._max_retries = max_retries
         # An explicit api_key stops the SDK from reading any credential env var or profile.
+        # trust_env=False: proxy and CA-bundle env vars (HTTPS_PROXY, SSL_CERT_FILE, ...)
+        # can't route the key through an interceptor (`sec` L10).
         self._client = anthropic.AsyncAnthropic(
             api_key=key,
             base_url=BASE_URL,
             timeout=timeout_seconds,
             max_retries=max_retries,
             open_telemetry=False,
-            http_client=http_client,
+            http_client=http_client or anthropic.DefaultAsyncHttpxClient(trust_env=False),
         )
 
     @property
     def deadline_seconds(self) -> float:
-        return self._timeout_seconds * (self._max_retries + 1) + DEADLINE_SLACK_SECONDS
+        return self._timeout_seconds + DEADLINE_SLACK_SECONDS
 
     async def extract[T: BaseModel](self, request: StructuredRequest[T]) -> LLMResult[T]:
         user_turn: UserMessageParam = {"role": "user", "content": _content_blocks(request.content)}
@@ -151,6 +155,10 @@ class AnthropicLLMClient:
             request_id = error.request_id if isinstance(error, anthropic.APIStatusError) else None
             # `from None`: the SDK error's message and body may quote the request.
             raise LLMError(code, status_code=status, provider_request_id=request_id) from None
+        except anthropic.AnthropicError:
+            # Any other SDK failure (`sec` L2): same stable code, no SDK text.
+            self._fail(request, "llm_provider_error", started)
+            raise LLMError("llm_provider_error") from None
 
         texts = [block.text for block in message.content if block.type == "text"]
         return build_result(

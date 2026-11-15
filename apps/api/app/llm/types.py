@@ -53,10 +53,18 @@ class StructuredRequest[T: BaseModel]:
             else:
                 digest = hashlib.sha256(part.data).hexdigest()
                 parts.append({"type": "image", "media_type": part.media_type, "sha256": digest})
+        # The schema itself, not only its version label: an edit without a version bump
+        # must not replay old answers (`sec` L5).
+        schema = json.dumps(
+            self.output_model.model_json_schema(mode="validation"),
+            sort_keys=True,
+            separators=(",", ":"),
+        )
         payload = {
             "v": FINGERPRINT_VERSION,
             "prompt_version": self.prompt_version,
             "schema_version": self.schema_version,
+            "schema_sha256": hashlib.sha256(schema.encode("utf-8")).hexdigest(),
             "model": self.model,
             "effort": self.effort,
             "max_output_tokens": self.max_output_tokens,
@@ -79,7 +87,8 @@ class ValidationIssue:
 @dataclass(frozen=True, slots=True)
 class LLMResult[T: BaseModel]:
     outcome: Outcome
-    parsed: T | None
+    # Extracted document data: never in a repr or a log line (`sec` L7).
+    parsed: T | None = field(repr=False)
     validation_errors: tuple[ValidationIssue, ...]
     # The model's JSON text as returned (document data: stored, never logged).
     raw_output: str | None = field(repr=False)

@@ -57,10 +57,22 @@ def test_llm_settings_defaults_and_secret_repr(monkeypatch: pytest.MonkeyPatch) 
     settings = Settings(_env_file=None)
 
     assert settings.llm_provider == "anthropic"
-    assert settings.llm_timeout_seconds == 120
+    assert settings.llm_timeout_seconds == 600
     assert settings.llm_max_retries == 2
     assert settings.llm_effort == "medium"
     assert "sk-ant-secret-value" not in repr(settings)
+
+
+@pytest.mark.parametrize(("timeout", "max_tokens"), [(120, 16000), (600, 32000), (449, 16000)])
+def test_timeout_shorter_than_a_full_reply_is_refused(timeout: float, max_tokens: int) -> None:
+    # `sec` M1: a timeout that cuts a long reply pays for it and gets nothing.
+    with pytest.raises(ValidationError, match="LLM_TIMEOUT_SECONDS must be at least"):
+        Settings(_env_file=None, llm_timeout_seconds=timeout, llm_max_output_tokens=max_tokens)
+
+
+def test_timeout_covering_a_full_reply_is_accepted() -> None:
+    settings = Settings(_env_file=None, llm_timeout_seconds=450, llm_max_output_tokens=16000)
+    assert settings.llm_timeout_seconds == 450
 
 
 @pytest.mark.parametrize("model", ["Claude Sonnet", "claude sonnet", "", "x" * 101])
