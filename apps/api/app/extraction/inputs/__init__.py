@@ -85,6 +85,8 @@ def _parse(kind: DocumentKind, data: bytes) -> ParsedDocument:
         return ParsedDocument(
             kind=kind, text=None, images=(parse_image(data),), page_count=1, warnings=()
         )
+    if kind in ("xlsx", "csv"):
+        raise InputError("unsupported_type")  # the table comes with PR 5 T6
     from app.extraction.inputs.email import parse_email
 
     email = parse_email(data)

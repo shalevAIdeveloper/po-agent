@@ -1,15 +1,28 @@
 """File type from the bytes only: the filename and the declared Content-Type are never used.
 
-Spreadsheets (XLSX/CSV) come with PR 5; until then they are `unsupported_type`, like HEIC,
-GIF, WebP and anything else we don't recognise (Q2).
+Order: PNG, JPEG, PDF, ZIP, CFB, EML, a late PDF header, CSV. Anything else (HEIC, GIF,
+WebP, ...) is `unsupported_type` (Q2).
+
+- ZIP: XLSX (and XLSM) only when `[Content_Types].xml` (read with defusedxml) gives
+  `xl/workbook.xml` a workbook content type. `.xlsb` (`xl/workbook.bin`), `.ods` (its
+  ODF `mimetype`) and templates are `unsupported_spreadsheet`; any other ZIP (`.docx`,
+  a plain archive) is `unsupported_type`. The central directory is checked against the
+  caps before any entry is read (`archive.py`).
+- CFB (legacy Office): a `Workbook`/`Book` stream is `.xls` (`unsupported_spreadsheet`);
+  an `EncryptedPackage` stream is a password-protected workbook (`encrypted_spreadsheet`;
+  an encrypted Word file looks the same). Any other CFB is `unsupported_type`.
+- CSV is tried last, with our own linear sniffer (`csvfile.py`).
 """
 
 import re
 from typing import Final, Literal
 
+from app.extraction.inputs import archive, cfb
+from app.extraction.inputs.csvfile import looks_like_csv
 from app.extraction.inputs.errors import InputError
 
-DocumentKind = Literal["pdf", "png", "jpeg", "eml"]
+DocumentKind = Literal["pdf", "png", "jpeg", "eml", "xlsx", "csv"]
+SPREADSHEET_KINDS: Final = frozenset({"xlsx", "csv"})
 
 _PNG: Final = b"\x89PNG\r\n\x1a\n"
 _JPEG: Final = b"\xff\xd8\xff"
@@ -44,6 +57,21 @@ _EMAIL_FIELDS: Final = frozenset(
 # text file that starts with "Item: ..." isn't taken for an email.
 MIN_EMAIL_FIELDS: Final = 2
 
+WORKBOOK_PART: Final = "/xl/workbook.xml"
+XLSX_MAIN: Final = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"
+XLSM_MAIN: Final = "application/vnd.ms-excel.sheet.macroEnabled.main+xml"
+_TEMPLATE_MAIN: Final = frozenset(
+    {
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.template.main+xml",
+        "application/vnd.ms-excel.template.macroEnabled.main+xml",
+    }
+)
+_ODF_MIMETYPE: Final = "mimetype"
+_ODF_SPREADSHEET: Final = b"application/vnd.oasis.opendocument.spreadsheet"
+_MAX_MIMETYPE_BYTES: Final = 256
+_XLS_STREAMS: Final = frozenset({"Workbook", "Book"})
+_ENCRYPTED_STREAM: Final = "EncryptedPackage"
+
 
 def _looks_like_email(data: bytes) -> bool:
     head = data[:EML_HEADER_WINDOW]
@@ -65,6 +93,42 @@ def _looks_like_email(data: bytes) -> bool:
     return b"from" in known and len(known) >= MIN_EMAIL_FIELDS
 
 
+def _zip_kind(data: bytes) -> DocumentKind:
+    try:
+        with archive.open_archive(data) as package:
+            names = set(package.namelist())
+            if "xl/workbook.bin" in names:
+                raise InputError("unsupported_spreadsheet")  # .xlsb
+            if _ODF_MIMETYPE in names:
+                mimetype = archive.read_entry(package, _ODF_MIMETYPE, _MAX_MIMETYPE_BYTES)
+                if mimetype.strip().startswith(_ODF_SPREADSHEET):
+                    raise InputError("unsupported_spreadsheet")  # .ods / .ots
+                raise InputError("unsupported_type")
+            if archive.CONTENT_TYPES not in names or WORKBOOK_PART[1:] not in names:
+                raise InputError("unsupported_type")
+            content_type = archive.read_content_types(package).of(WORKBOOK_PART)
+    except InputError:
+        raise
+    except Exception:
+        # Malformed XML, an entity or a DTD (defusedxml), a damaged entry: never the
+        # message, which can quote the file.
+        raise InputError("invalid_file") from None
+    if content_type in (XLSX_MAIN, XLSM_MAIN):
+        return "xlsx"
+    if content_type in _TEMPLATE_MAIN:
+        raise InputError("unsupported_spreadsheet")
+    raise InputError("unsupported_type")
+
+
+def _cfb_code(data: bytes) -> InputError:
+    names = cfb.stream_names(data)
+    if names & _XLS_STREAMS:
+        return InputError("unsupported_spreadsheet")
+    if _ENCRYPTED_STREAM in names:
+        return InputError("encrypted_spreadsheet")
+    return InputError("unsupported_type")
+
+
 def detect_kind(data: bytes) -> DocumentKind:
     if data.startswith(_PNG):
         return "png"
@@ -72,8 +136,14 @@ def detect_kind(data: bytes) -> DocumentKind:
         return "jpeg"
     if data.startswith(_PDF):
         return "pdf"
+    if archive.is_zip(data):
+        return _zip_kind(data)
+    if data.startswith(cfb.MAGIC):
+        raise _cfb_code(data)
     if _looks_like_email(data):
         return "eml"
     if _PDF in data[:PDF_HEADER_WINDOW]:
         return "pdf"
+    if looks_like_csv(data):
+        return "csv"
     raise InputError("unsupported_type")
