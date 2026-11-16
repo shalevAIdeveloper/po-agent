@@ -21,7 +21,7 @@ from app.extraction.extract import (
 from app.extraction.schema import SCHEMA_VERSION
 from app.llm.errors import LLMError
 from app.llm.fake import FakeLLMClient, FakeResponse
-from app.llm.prompts import load_prompt
+from app.llm.prompts import PromptError, load_prompt, parse_prompt
 from app.llm.types import ContentPart, ImagePart, StructuredRequest, TextPart, ValidationIssue
 from tests.extraction.test_schema import a_document, a_line
 
@@ -110,7 +110,7 @@ def test_document_id_is_deterministic_and_depends_on_every_input() -> None:
     base = DocumentInput(text="a", images=(PNG,), sender_email="x@y.com")
     same = DocumentInput(text="a", images=(PNG,), sender_email="x@y.com")
     assert document_id(base) == document_id(same)
-    assert re.fullmatch(r"[0-9a-f]{16}", document_id(base))
+    assert re.fullmatch(r"[0-9a-f]{32}", document_id(base))  # 128 bits
     others = [
         DocumentInput(text="b", images=(PNG,), sender_email="x@y.com"),
         DocumentInput(text="a", sender_email="x@y.com"),
@@ -332,6 +332,21 @@ def test_format_issues_escapes_and_labels_the_root() -> None:
         "- path: (a key not in the schema; name withheld); type: extra_forbidden; "
         "message: Extra inputs",
     ]
+
+
+async def test_a_broken_retry_section_fails_before_any_call(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # `sec` delta: a prompt bug found only on the retry would lose the first billed call.
+    no_retry = parse_prompt(
+        "extract_po", 1, f"## System\n{PROMPT.system}\n\n## User\n{PROMPT.sections['User']}\n"
+    )
+    monkeypatch.setattr(extract_module, "load_prompt", lambda *_args: no_retry)
+    client = FakeLLMClient([FakeResponse("{}"), FakeResponse(output())])
+
+    with pytest.raises(PromptError):
+        await run(client)
+    assert client.requests == []
 
 
 async def test_invalid_twice_fails_with_schema_validation_failed() -> None:

@@ -42,7 +42,7 @@ from app.llm.types import (
 log = structlog.get_logger("app.extraction")
 
 PROMPT_NAME: Final = "extract_po"
-DOCUMENT_ID_CHARS: Final = 16
+DOCUMENT_ID_CHARS: Final = 32  # 128 bits
 WITHHELD_KEY: Final = "(a key not in the schema; name withheld)"
 PROMPT_VERSION: Final = 1
 MAX_EMAIL_CHARS: Final = 254
@@ -240,6 +240,8 @@ async def extract_po(
     client: LLMClient, document: DocumentInput, settings: ExtractionSettings
 ) -> ExtractionResult:
     prompt = load_prompt(PROMPT_NAME, PROMPT_VERSION)
+    # A broken Retry section must fail before the first (billed) call, not after it.
+    prompt.render("Retry", validation_errors="")
     request = StructuredRequest(
         system=prompt.system,
         content=build_content(prompt, document),
