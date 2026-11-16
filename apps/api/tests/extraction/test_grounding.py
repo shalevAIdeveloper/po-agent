@@ -1,8 +1,9 @@
+import time
 from typing import Any
 
 import pytest
 
-from app.extraction.grounding import check_grounding
+from app.extraction.grounding import MAX_SHORT_ID_PUNCTUATION, check_grounding
 from app.extraction.schema import PurchaseOrderExtraction
 from tests.extraction.test_schema import a_document, a_line
 
@@ -106,6 +107,100 @@ def test_a_number_inside_a_longer_number_does_not_count() -> None:
     # which is accepted: grounding errs toward fewer warnings, it never changes a value.
     result = extraction([a_line(qty="4500")], customer_po_number="4500012345")
     assert paths(result) == ["lines.0.qty"]
+
+
+@pytest.mark.parametrize("value", ["A", "a", "E", "3", "UR", "00"])
+def test_a_short_id_inside_a_longer_token_is_flagged(value: str) -> None:
+    # PR 3 known issue: a 1 or 2 character id matched as a substring, so "A" was grounded by
+    # "ACME" and "00" by "4500012345". Short ids must be a whole token of the document.
+    result = extraction([a_line(customer_part_number=value, qty=None, unit_price=None)])
+    assert paths(result) == ["lines.0.customer_part_number"]
+
+
+@pytest.mark.parametrize(
+    ("value", "source"),
+    [
+        ("A", "Item A qty 1"),
+        ("A", "Item: A, qty 1"),
+        ("A", "(A)"),
+        ("a", "ITEM A"),
+        ("A", "A"),
+        ("9", "BX 77 / 9"),
+        ("A1", "Part #A1."),
+        ("A1", "Part A 1 each"),
+        ("#5", "Item #5 qty"),
+        ("A", "Item\tA\nqty"),
+        (chr(0xFF21), "Item A"),  # fullwidth A
+    ],
+)
+def test_a_short_id_printed_as_its_own_token_is_grounded(value: str, source: str) -> None:
+    result = extraction([a_line(customer_part_number=value, qty=None, unit_price=None)])
+    assert paths(result, source) == []
+
+
+@pytest.mark.parametrize("source", ["00123-A", "A-1", "BA1", "A12", "A1B", "_A1", "A1_"])
+def test_a_short_id_joined_to_other_characters_is_flagged(source: str) -> None:
+    value = "A" if source in {"00123-A", "A-1"} else "A1"
+    result = extraction([a_line(customer_part_number=value, qty=None, unit_price=None)])
+    assert paths(result, source) == ["lines.0.customer_part_number"]
+
+
+def test_a_short_po_number_is_checked_as_a_token() -> None:
+    result = extraction([a_line()], customer_po_number="45")
+    assert paths(result) == ["header.customer_po_number"]
+    result = extraction([a_line()], customer_po_number="12")
+    assert paths(result) == []
+
+
+def test_ids_of_three_characters_or_more_still_match_inside_a_token() -> None:
+    # Unchanged: longer ids keep the whitespace-insensitive substring rule.
+    result = extraction([a_line(customer_part_number="123", qty=None, unit_price=None)])
+    assert paths(result) == []
+
+
+COMBINING_ACUTE = chr(0x0301)
+
+
+@pytest.mark.parametrize("value", ["A1", "-", "--", "#", "#5", "5#", COMBINING_ACUTE, "a"])
+@pytest.mark.parametrize("filler", ["!", "-", "#", "(", COMBINING_ACUTE, " !", "A", " A"])
+def test_short_id_matching_is_linear_on_hostile_input(value: str, filler: str) -> None:
+    # `sec` H1: "-" against " " + "-" * N + "a" took 12.9 s at N = 30,000 (quadratic).
+    result = extraction([a_line(customer_part_number=value, qty=None, unit_price=None)])
+    source = " " + filler * (200_000 // len(filler)) + "x"
+    start = time.perf_counter()
+    check_grounding(result, source)
+    assert time.perf_counter() - start < 1
+
+
+@pytest.mark.parametrize(
+    ("value", "source"),
+    [
+        ("-", "Item - Widget"),
+        ("--", "Part -- each"),
+        ("#", "PO # 12"),
+        (COMBINING_ACUTE, f"x {COMBINING_ACUTE} y"),
+    ],
+)
+def test_a_short_id_without_a_letter_or_digit_is_flagged(value: str, source: str) -> None:
+    # `sec` L2: standalone punctuation is in almost every document.
+    result = extraction([a_line(customer_part_number=value, qty=None, unit_price=None)])
+    assert paths(result, source) == ["lines.0.customer_part_number"]
+
+
+def test_a_short_id_does_not_match_across_a_line_break() -> None:
+    # `sec` L1: "A1" was grounded by "Size A\n1 Widget".
+    result = extraction([a_line(customer_part_number="A1", qty=None, unit_price=None)])
+    assert paths(result, "Size A\n1 Widget") == ["lines.0.customer_part_number"]
+    assert paths(result, "Size A\t1 Widget") == []
+
+
+def test_punctuation_around_a_short_id_is_bounded() -> None:
+    result = extraction([a_line(customer_part_number="A", qty=None, unit_price=None)])
+    most = MAX_SHORT_ID_PUNCTUATION
+    assert MAX_SHORT_ID_PUNCTUATION == 8
+    assert paths(result, "x " + "(" * most + "A" + ")" * most + " y") == []
+    assert paths(result, "x " + "(" * (most + 1) + "A y") == ["lines.0.customer_part_number"]
+    assert paths(result, "x A" + ")" * (most + 1) + " y") == ["lines.0.customer_part_number"]
 
 
 def test_fullwidth_text_layer_grounds_ascii_values() -> None:

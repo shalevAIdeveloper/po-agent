@@ -1,7 +1,10 @@
 """Versioned prompts: `app/prompts/<name>/v<N>.md` (CLAUDE.md, ADR 0011).
 
-A prompt file has `## <Section>` headings; `System` and `User` are required. Text before the
-first heading is a title and is ignored (but hashed). Placeholders are `{{lower_snake}}`:
+A prompt file has `## <Section>` headings (letters only); `System` and `User` are required.
+Text before the first heading is a title and is ignored (but hashed). Any other line that
+starts with `#` (`## System Prompt`, `### Retry`, `##Retry`, an indented `## User`) is an
+error, so a misspelled heading can't silently become part of the section before it.
+Placeholders are `{{lower_snake}}`:
 
 - The system section has none: document data never reaches the system prompt.
 - Substitution is strict (a missing or unknown value is an error) and single-pass, so a
@@ -23,6 +26,14 @@ PROMPTS_DIR: Final = Path(__file__).resolve().parent.parent / "prompts"
 
 _NAME_RE: Final = re.compile(r"^[a-z][a-z0-9_]*$")
 _HEADING_RE: Final = re.compile(r"^## ([A-Za-z]+)[ \t]*$", re.MULTILINE)
+# Any line that starts with `#` (after any whitespace, incl. NBSP) is meant as a heading.
+_HEADING_LIKE_RE: Final = re.compile(r"^[^\S\n]*#[^\n]*", re.MULTILINE)
+# Line breaks other than LF (after CRLF → LF) would hide a heading from `^` (`sec` L4).
+_OTHER_LINE_BREAKS: Final = (0x0B, 0x0C, 0x0D, 0x1C, 0x1D, 0x1E, 0x85, 0x2028, 0x2029)
+_OTHER_LINE_BREAK_RE: Final = re.compile(
+    "[" + "".join(re.escape(chr(code)) for code in _OTHER_LINE_BREAKS) + "]"
+)
+_TITLE_RE: Final = re.compile(r"# [^\n]*")
 _PLACEHOLDER_RE: Final = re.compile(r"\{\{([a-z][a-z0-9_]*)\}\}")
 _REQUIRED_SECTIONS: Final = ("System", "User")
 
@@ -96,10 +107,26 @@ def _substitute(text: str, values: Mapping[str, str]) -> str:
     return _PLACEHOLDER_RE.sub(lambda match: values[match.group(1)], text)
 
 
+def _check_heading_lines(label: str, text: str, headings: list[re.Match[str]]) -> None:
+    """Every `#` line is a section heading, or a `# title` line before the first section."""
+    first_section = headings[0].start() if headings else len(text)
+    section_starts = {heading.start() for heading in headings}
+    for line in _HEADING_LIKE_RE.finditer(text):
+        if line.start() in section_starts:
+            continue
+        if line.start() < first_section and _TITLE_RE.fullmatch(line.group()):
+            continue
+        line_no = text.count("\n", 0, line.start()) + 1
+        raise PromptError(f"{label}: unrecognized heading on line {line_no}")
+
+
 def parse_prompt(name: str, version: int, text: str) -> Prompt:
     label = f"{name}/v{version}"
     text = text.replace("\r\n", "\n")
+    if _OTHER_LINE_BREAK_RE.search(text):
+        raise PromptError(f"{label}: line break other than LF or CRLF")
     headings = list(_HEADING_RE.finditer(text))
+    _check_heading_lines(label, text, headings)
     sections: dict[str, str] = {}
     for index, heading in enumerate(headings):
         end = headings[index + 1].start() if index + 1 < len(headings) else len(text)

@@ -100,6 +100,59 @@ def test_malformed_prompt_files_fail_to_load(text: str, message: str) -> None:
 
 
 @pytest.mark.parametrize(
+    "heading",
+    [
+        "## System Prompt",
+        "## Retry:",
+        "##Retry",
+        "### Retry",
+        "# Retry",
+        "  ## Retry",
+        "#### Notes",
+        "## Re-try",
+    ],
+)
+def test_an_unrecognized_heading_fails_instead_of_joining_the_previous_section(
+    heading: str,
+) -> None:
+    # PR 3 known issue: `## System Prompt` was not a section and silently became part of
+    # the User text (or of whatever section came before it).
+    text = GOOD + f"\n{heading}\nMore text.\n"
+    with pytest.raises(PromptError, match="unrecognized heading on line 11"):
+        parse_prompt("demo", 1, text)
+
+
+@pytest.mark.parametrize("indent", [chr(0xA0), chr(0x3000), " \t"])
+def test_a_heading_indented_with_any_whitespace_fails(indent: str) -> None:
+    with pytest.raises(PromptError, match="unrecognized heading on line 11"):
+        parse_prompt("demo", 1, GOOD + f"\n{indent}## Retry\nMore text.\n")
+
+
+@pytest.mark.parametrize("code", [0x0D, 0x0B, 0x0C, 0x85, 0x2028, 0x2029, 0x1C])
+def test_a_line_break_other_than_lf_fails(code: int) -> None:
+    brk = chr(code)
+    # `sec` L4: "x<U+2028>## Retry" or a lone CR hid a heading from the line-start match.
+    with pytest.raises(PromptError, match="line break other than LF"):
+        parse_prompt("demo", 1, GOOD + f"x{brk}## Retry\nMore text.\n")
+
+
+def test_an_unrecognized_heading_before_the_first_section_fails() -> None:
+    text = GOOD.replace("# demo — v1\n", "# demo — v1\n## System rules\n")
+    with pytest.raises(PromptError, match="unrecognized heading on line 2"):
+        parse_prompt("demo", 1, text)
+
+
+def test_a_title_before_the_first_section_is_allowed() -> None:
+    prompt = parse_prompt("demo", 1, "# demo\n# second title line\n" + GOOD)
+    assert set(prompt.sections) == {"System", "User"}
+
+
+def test_a_hash_inside_a_line_is_not_a_heading() -> None:
+    prompt = parse_prompt("demo", 1, GOOD.replace("Bye.", "PO # 12 ## not a heading"))
+    assert prompt.sections["User"].endswith("PO # 12 ## not a heading")
+
+
+@pytest.mark.parametrize(
     ("name", "version"), [("../x", 1), ("Demo", 1), ("demo", 0), ("", 1), ("demo", True)]
 )
 def test_bad_name_or_version_is_refused(tmp_path: Path, name: str, version: int) -> None:
