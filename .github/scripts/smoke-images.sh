@@ -53,7 +53,7 @@ docker run --rm --entrypoint sh "$API_IMAGE" -c '
   done
   python - <<PY
 import importlib.util as u
-for mod in ("opentelemetry.sdk", "fastapi_cli", "pytest"):
+for mod in ("opentelemetry.sdk", "fastapi_cli", "pytest", "reportlab"):
     assert u.find_spec(mod) is None, f"{mod} must not be installed"
 PY
 ' || fail "api image contents"

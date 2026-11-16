@@ -16,6 +16,8 @@ dependencies = [
     "sqlalchemy[asyncio]>=2",
     "structlog>=26.1.0",
     "anthropic~=2.3.0",
+    "pypdfium2~=5.14.0",
+    "pillow~=13.0.0",
 ]
 
 [tool.uv]
@@ -40,6 +42,11 @@ plugins = ["pydantic.mypy"]
 # asyncpg ships no type information; only operator tools import it directly.
 [[tool.mypy.overrides]]
 module = ["asyncpg", "asyncpg.*"]
+ignore_missing_imports = true
+
+# pypdfium2 ships no type information either; only `app/extraction/inputs/pdf.py` uses it.
+[[tool.mypy.overrides]]
+module = ["pypdfium2", "pypdfium2.*"]
 ignore_missing_imports = true
 
 [tool.pydantic-mypy]
@@ -70,5 +77,6 @@ dev = [
     "pytest>=9.2.0",
     "pytest-asyncio>=1.4.1.post1",
     "pytest-timeout>=2.4.0",
+    "reportlab~=5.1.0",
     "ruff>=0.17.4",
 ]
