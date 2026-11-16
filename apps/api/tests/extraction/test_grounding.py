@@ -3,7 +3,7 @@ from typing import Any
 
 import pytest
 
-from app.extraction.grounding import check_grounding
+from app.extraction.grounding import MAX_SHORT_ID_PUNCTUATION, check_grounding
 from app.extraction.schema import PurchaseOrderExtraction
 from tests.extraction.test_schema import a_document, a_line
 
@@ -158,12 +158,49 @@ def test_ids_of_three_characters_or_more_still_match_inside_a_token() -> None:
     assert paths(result) == []
 
 
-def test_short_id_matching_is_linear_on_hostile_input() -> None:
+COMBINING_ACUTE = chr(0x0301)
+
+
+@pytest.mark.parametrize("value", ["A1", "-", "--", "#", "#5", "5#", COMBINING_ACUTE, "a"])
+@pytest.mark.parametrize("filler", ["!", "-", "#", "(", COMBINING_ACUTE, " !", "A", " A"])
+def test_short_id_matching_is_linear_on_hostile_input(value: str, filler: str) -> None:
+    # `sec` H1: "-" against " " + "-" * N + "a" took 12.9 s at N = 30,000 (quadratic).
+    result = extraction([a_line(customer_part_number=value, qty=None, unit_price=None)])
+    source = " " + filler * (200_000 // len(filler)) + "x"
+    start = time.perf_counter()
+    check_grounding(result, source)
+    assert time.perf_counter() - start < 1
+
+
+@pytest.mark.parametrize(
+    ("value", "source"),
+    [
+        ("-", "Item - Widget"),
+        ("--", "Part -- each"),
+        ("#", "PO # 12"),
+        (COMBINING_ACUTE, f"x {COMBINING_ACUTE} y"),
+    ],
+)
+def test_a_short_id_without_a_letter_or_digit_is_flagged(value: str, source: str) -> None:
+    # `sec` L2: standalone punctuation is in almost every document.
+    result = extraction([a_line(customer_part_number=value, qty=None, unit_price=None)])
+    assert paths(result, source) == ["lines.0.customer_part_number"]
+
+
+def test_a_short_id_does_not_match_across_a_line_break() -> None:
+    # `sec` L1: "A1" was grounded by "Size A\n1 Widget".
     result = extraction([a_line(customer_part_number="A1", qty=None, unit_price=None)])
-    for source in (" " + "!" * 200_000, " !" * 100_000, "A" * 200_000, " A" * 100_000):
-        start = time.perf_counter()
-        assert paths(result, source) == ["lines.0.customer_part_number"]
-        assert time.perf_counter() - start < 1
+    assert paths(result, "Size A\n1 Widget") == ["lines.0.customer_part_number"]
+    assert paths(result, "Size A\t1 Widget") == []
+
+
+def test_punctuation_around_a_short_id_is_bounded() -> None:
+    result = extraction([a_line(customer_part_number="A", qty=None, unit_price=None)])
+    most = MAX_SHORT_ID_PUNCTUATION
+    assert MAX_SHORT_ID_PUNCTUATION == 8
+    assert paths(result, "x " + "(" * most + "A" + ")" * most + " y") == []
+    assert paths(result, "x " + "(" * (most + 1) + "A y") == ["lines.0.customer_part_number"]
+    assert paths(result, "x A" + ")" * (most + 1) + " y") == ["lines.0.customer_part_number"]
 
 
 def test_fullwidth_text_layer_grounds_ascii_values() -> None:

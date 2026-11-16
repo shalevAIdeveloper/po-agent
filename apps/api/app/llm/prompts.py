@@ -26,8 +26,13 @@ PROMPTS_DIR: Final = Path(__file__).resolve().parent.parent / "prompts"
 
 _NAME_RE: Final = re.compile(r"^[a-z][a-z0-9_]*$")
 _HEADING_RE: Final = re.compile(r"^## ([A-Za-z]+)[ \t]*$", re.MULTILINE)
-# Any line that starts with `#` (after optional indentation) is meant as a heading.
-_HEADING_LIKE_RE: Final = re.compile(r"^[ \t]*#[^\n]*", re.MULTILINE)
+# Any line that starts with `#` (after any whitespace, incl. NBSP) is meant as a heading.
+_HEADING_LIKE_RE: Final = re.compile(r"^[^\S\n]*#[^\n]*", re.MULTILINE)
+# Line breaks other than LF (after CRLF → LF) would hide a heading from `^` (`sec` L4).
+_OTHER_LINE_BREAKS: Final = (0x0B, 0x0C, 0x0D, 0x1C, 0x1D, 0x1E, 0x85, 0x2028, 0x2029)
+_OTHER_LINE_BREAK_RE: Final = re.compile(
+    "[" + "".join(re.escape(chr(code)) for code in _OTHER_LINE_BREAKS) + "]"
+)
 _TITLE_RE: Final = re.compile(r"# [^\n]*")
 _PLACEHOLDER_RE: Final = re.compile(r"\{\{([a-z][a-z0-9_]*)\}\}")
 _REQUIRED_SECTIONS: Final = ("System", "User")
@@ -118,6 +123,8 @@ def _check_heading_lines(label: str, text: str, headings: list[re.Match[str]]) -
 def parse_prompt(name: str, version: int, text: str) -> Prompt:
     label = f"{name}/v{version}"
     text = text.replace("\r\n", "\n")
+    if _OTHER_LINE_BREAK_RE.search(text):
+        raise PromptError(f"{label}: line break other than LF or CRLF")
     headings = list(_HEADING_RE.finditer(text))
     _check_heading_lines(label, text, headings)
     sections: dict[str, str] = {}

@@ -12,7 +12,13 @@ Matching errs toward fewer warnings (a false alarm trains reviewers to ignore th
   token: whitespace (or the start/end of the text) on both sides, optionally with
   punctuation in between ("(A)", "#A1.", "A 1"). As a substring they'd match almost any
   document ("A" in "ACME"). A short id joined to letters, digits or `_` ("00123-A" for "A"
-  is joined by "00123") is flagged;
+  is joined by "00123") is flagged. At most 8 punctuation characters on each side, and
+  only spaces/tabs between the two characters (not a line break), keep the match linear
+  on hostile text (`sec` H1). A short id with no letter or digit ("-", "#") is always
+  flagged: standalone punctuation is in almost every document (`sec` L2). This is still a
+  weak check: a common token ("A" as the English article, "1" as a line number) grounds
+  an invented 1-character id, so "grounded" means "printed somewhere", not "printed in
+  this field";
 - numbers (qty, prices, totals): by value, after removing `$` and thousands separators, sign
   ignored ("1,234.50" grounds 1234.5; "(5.00)" grounds -5); more than 40 digits never
   matches.
@@ -35,9 +41,12 @@ _WHITESPACE_RE: Final = re.compile(r"\s+")
 MAX_DIGITS: Final = 40
 # Identifiers up to this many characters (folded) are matched as a whole token.
 SHORT_ID_MAX: Final = 2
-# Around a short id: whitespace or the text's edge, then only punctuation.
-_SHORT_ID_BEFORE: Final = r"(?<!\S)[^\w\s]*"
-_SHORT_ID_AFTER: Final = r"[^\w\s]*(?!\S)"
+# Around a short id: whitespace or the text's edge, then a little punctuation. Bounded runs:
+# with `*` on both sides, a punctuation id over a long punctuation run was quadratic (`sec` H1).
+MAX_SHORT_ID_PUNCTUATION: Final = 8
+_SHORT_ID_BEFORE: Final = rf"(?<!\S)[^\w\s]{{0,{MAX_SHORT_ID_PUNCTUATION}}}"
+_SHORT_ID_AFTER: Final = rf"[^\w\s]{{0,{MAX_SHORT_ID_PUNCTUATION}}}(?!\S)"
+_WORD_CHAR_RE: Final = re.compile(r"\w")
 
 _HEADER_IDS: Final = ("customer_po_number",)
 _HEADER_NUMBERS: Final = ("order_total",)
@@ -62,8 +71,8 @@ def _normalize(text: str) -> str:
 
 
 def _short_id_pattern(folded_value: str) -> re.Pattern[str]:
-    # At most two escaped characters with one `\s*` between them: linear on any input.
-    core = r"\s*".join(re.escape(char) for char in folded_value)
+    # At most two escaped characters, spaces/tabs between them (never a line break: `sec` L1).
+    core = r"[ \t]*".join(re.escape(char) for char in folded_value)
     return re.compile(_SHORT_ID_BEFORE + core + _SHORT_ID_AFTER)
 
 
@@ -96,6 +105,8 @@ def check_grounding(
     def grounded_id(value: str) -> bool:
         folded_value = _fold(value)
         if 0 < len(folded_value) <= SHORT_ID_MAX:
+            if _WORD_CHAR_RE.search(folded_value) is None:
+                return False
             return _short_id_pattern(folded_value).search(normalized) is not None
         return folded_value in folded
 
