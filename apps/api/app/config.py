@@ -51,6 +51,10 @@ def is_deployed() -> bool:
 
 
 LogLevel = Literal["DEBUG", "INFO", "WARNING", "ERROR"]
+LLMProvider = Literal["anthropic", "fake"]
+LLMEffort = Literal["low", "medium", "high", "xhigh", "max"]
+# A provider model id, e.g. claude-sonnet-5-5. Only a sanity check: the provider decides.
+_MODEL_ID_PATTERN = r"^[a-z0-9][a-z0-9._-]{0,99}$"
 
 # A bare origin: scheme, host, optional port. No path, query, fragment or userinfo.
 # Host labels must start and end with a letter/digit (no "..", no trailing dot).
@@ -80,6 +84,12 @@ def reads_env_files() -> bool:
     if is_deployed():
         return False
     return os.environ.get("APP_ENV", AppEnv.LOCAL).strip().lower() == AppEnv.LOCAL
+
+
+def expected_reply_seconds(max_output_tokens: int) -> float:
+    """The anthropic SDK's own estimate of how long a non-streaming reply of this size
+    may take (3600 s per 128k tokens); a shorter timeout would cut long, billed replies."""
+    return 3600 * max_output_tokens / 128_000
 
 
 def _is_blank(value: SecretStr | str | None) -> bool:
@@ -115,6 +125,21 @@ class Settings(BaseSettings):
 
     worker_poll_interval_seconds: float = Field(default=1.0, gt=0)
 
+    # LLM (ADR 0011). The key and models are required only where an LLM client is built
+    # (worker, evals --live): app.llm.factory checks them, so the API process never needs
+    # the key. `fake` is refused outside local and in a deployed image.
+    llm_provider: LLMProvider = "anthropic"
+    llm_api_key: SecretStr | None = None
+    llm_extraction_model: str | None = Field(default=None, pattern=_MODEL_ID_PATTERN)
+    llm_mapping_model: str | None = Field(default=None, pattern=_MODEL_ID_PATTERN)
+    # Per attempt, and it must cover a full-length reply (see _llm_timeout_covers_reply): a
+    # reply cut by the timeout has likely been generated and billed already (`sec` M1).
+    llm_timeout_seconds: float = Field(default=600.0, gt=0, le=900)
+    llm_max_retries: int = Field(default=2, ge=0, le=5)
+    # Non-streaming requests: kept well under what a single HTTP response can carry.
+    llm_max_output_tokens: int = Field(default=16000, ge=1, le=32000)
+    llm_effort: LLMEffort = "medium"
+
     @classmethod
     def settings_customise_sources(
         cls,
@@ -146,6 +171,24 @@ class Settings(BaseSettings):
             if not 1 <= port <= _MAX_PORT:
                 raise ValueError("port out of range")
         return value
+
+    @model_validator(mode="after")
+    def _llm_timeout_covers_reply(self) -> Self:
+        needed = expected_reply_seconds(self.llm_max_output_tokens)
+        if self.llm_timeout_seconds < needed:
+            raise ValueError(
+                f"LLM_TIMEOUT_SECONDS must be at least {needed:g} for "
+                f"LLM_MAX_OUTPUT_TOKENS={self.llm_max_output_tokens} (non-streaming reply time)"
+            )
+        return self
+
+    @model_validator(mode="after")
+    def _fake_llm_only_locally(self) -> Self:
+        # The fake returns scripted output: in a real environment it would turn every
+        # document into made-up data, so it never starts there.
+        if self.llm_provider == "fake" and (self.app_env is not AppEnv.LOCAL or is_deployed()):
+            raise ValueError("LLM_PROVIDER=fake is allowed only with APP_ENV=local, not deployed")
+        return self
 
     @model_validator(mode="after")
     def _require_cloud_settings(self) -> Self:
