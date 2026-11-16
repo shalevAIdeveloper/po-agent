@@ -14,11 +14,15 @@
 - Grounding (Q16) adds `ungrounded` warnings for text inputs; it never changes a value.
 """
 
+import hashlib
+import json
 import re
 import unicodedata
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Final, Literal
+
+import structlog
 
 from app.extraction.grounding import ExtractionWarning, check_grounding
 from app.extraction.schema import SCHEMA_VERSION, PurchaseOrderExtraction
@@ -35,30 +39,61 @@ from app.llm.types import (
     ValidationIssue,
 )
 
+log = structlog.get_logger("app.extraction")
+
 PROMPT_NAME: Final = "extract_po"
+DOCUMENT_ID_CHARS: Final = 16
+WITHHELD_KEY: Final = "(a key not in the schema; name withheld)"
 PROMPT_VERSION: Final = 1
 MAX_EMAIL_CHARS: Final = 254
 MAX_RECEIVED_AT_CHARS: Final = 64
 UNKNOWN: Final = "unknown"
 
-# Invisible characters an attacker could put inside a delimiter to hide it from a naive
-# match while a model may still read it as the delimiter.
-# Built from code points so the source stays ASCII (soft hyphen, Mongolian vowel
-# separator, zero-width and bidi marks, word joiners, BOM).
-_INVISIBLE_CODES: Final = (
-    0x00AD,
-    0x180E,
-    *range(0x200B, 0x2010),
-    *range(0x202A, 0x202F),
-    *range(0x2060, 0x2065),
-    0xFEFF,
+MAX_CODE_POINT: Final = 0x10FFFF
+# Characters an attacker could put inside a delimiter to hide it from a plain match while
+# a model may still read it as the delimiter: every format (Cf: zero-width, bidi, soft
+# hyphen, BOM, tag characters) and space/separator (Zs/Zl/Zp) character, plus the
+# combining grapheme joiner and variation selectors. Built from code points at import, so
+# the source stays ASCII and the set can't silently miss a new range (`sec` M2).
+_INVISIBLE_CATEGORIES: Final = frozenset({"Cf", "Zs", "Zl", "Zp"})
+_EXTRA_INVISIBLE: Final = (0x034F, *range(0xFE00, 0xFE10), *range(0xE0100, 0xE01F0))
+_INVISIBLE: Final = "".join(
+    re.escape(chr(code))
+    for code in sorted(
+        {
+            code
+            for code in range(MAX_CODE_POINT + 1)
+            if unicodedata.category(chr(code)) in _INVISIBLE_CATEGORIES
+        }
+        | set(_EXTRA_INVISIBLE)
+    )
 )
-_GAP: Final = "[\\s" + "".join(chr(code) for code in _INVISIBLE_CODES) + "]*"
+# Look-alikes a model may read as "<" / "/" (fullwidth, small form, angle brackets, math).
+_LESS_THAN: Final = "".join(
+    re.escape(chr(code)) for code in (0x3C, 0xFF1C, 0xFE64, 0x2329, 0x27E8, 0x3008)
+)
+_SLASH: Final = "".join(re.escape(chr(code)) for code in (0x2F, 0xFF0F, 0x2215, 0x2044, 0x29F8))
+_HASH: Final = "".join(re.escape(chr(code)) for code in (0x23, 0xFF03))
+# Possessive (`*+`): never gives characters back, so matching stays linear on hostile
+# input; the old `<\s*/?\s*` backtracked quadratically (`sec` H1).
+_GAP: Final = f"[\\s{_INVISIBLE}]*+"
+_INLINE_GAP: Final = f"[ \\t{_INVISIBLE}]*+"
+
+
+def _spaced(word: str) -> str:
+    """`word` with invisible characters or spaces allowed between its letters."""
+    return _GAP.join(re.escape(letter) for letter in word)
+
+
 _DELIMITER_RE: Final = re.compile(
-    rf"<{_GAP}/?{_GAP}(?:document|metadata|validation_errors)\b", re.IGNORECASE
+    f"[{_LESS_THAN}]{_GAP}(?:[{_SLASH}]{_GAP})?"
+    f"(?:{_spaced('document')}|{_spaced('metadata')}|{_spaced('validation_errors')})",
+    re.IGNORECASE,
 )
 _ROLE_HEADING_RE: Final = re.compile(
-    r"^([ \t]*)(#+[ \t]*(?:system|user|assistant|retry)\b)", re.IGNORECASE | re.MULTILINE
+    f"^({_INLINE_GAP})([{_HASH}]{_INLINE_GAP}(?:[{_HASH}]{_INLINE_GAP})*+"
+    "(?:system|user|assistant|retry)(?![a-z0-9_]))",
+    re.IGNORECASE | re.MULTILINE,
 )
 # C0 controls except tab and newline, DEL, and C1 controls.
 _CONTROL_RE: Final = re.compile(r"[\x00-\x08\x0b-\x1f\x7f-\x9f]")
@@ -100,6 +135,9 @@ class ExtractionResult:
     calls: tuple[LLMResult[PurchaseOrderExtraction], ...]  # every billed call, in order
     prompt_version: str
     prompt_sha256: str
+    # False for image-only input or if the check failed: "no warnings" then means "not
+    # checked", never "all grounded" (`sec` L2).
+    grounding_checked: bool
 
 
 class ExtractionCallError(Exception):
@@ -130,11 +168,33 @@ def _metadata(value: str | None, limit: int) -> str:
     return flat or UNKNOWN
 
 
+def document_id(document: DocumentInput) -> str:
+    """A code derived from the whole input, used in the delimiter tags.
+
+    The document can't contain the hash of itself, so it can't forge the closing tag,
+    whatever look-alike tricks it uses; this also covers text printed on page images.
+    Deterministic, so replay cassettes still match.
+    """
+    received_at = None if document.received_at is None else document.received_at.isoformat()
+    payload = {
+        "v": 1,
+        "text": document.text,
+        "images": [
+            [image.media_type, hashlib.sha256(image.data).hexdigest()] for image in document.images
+        ],
+        "sender_email": document.sender_email,
+        "received_at": received_at,
+    }
+    canonical = json.dumps(payload, sort_keys=True, ensure_ascii=True, separators=(",", ":"))
+    return hashlib.sha256(canonical.encode("ascii")).hexdigest()[:DOCUMENT_ID_CHARS]
+
+
 def build_content(prompt: Prompt, document: DocumentInput) -> tuple[ContentPart, ...]:
     received_at = None if document.received_at is None else document.received_at.isoformat()
     before, after = prompt.split(
         "User",
         "document",
+        document_id=document_id(document),
         sender_email=_metadata(document.sender_email, MAX_EMAIL_CHARS),
         received_at=_metadata(received_at, MAX_RECEIVED_AT_CHARS),
     )
@@ -149,10 +209,18 @@ def _escape(text: str) -> str:
     return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
+def _issue_path(issue: ValidationIssue) -> str:
+    if issue.type == "extra_forbidden":
+        # The key name is model-chosen and may echo document text; the model doesn't need
+        # it to drop the key (`sec` L4). Every other path is our schema's field names.
+        return WITHHELD_KEY
+    return _escape(issue.path) or "(root)"
+
+
 def format_issues(issues: tuple[ValidationIssue, ...]) -> str:
-    """One line per issue; paths may hold model-invented key names, so `<`/`>` are escaped."""
+    """One line per issue: field path, type and a fixed message; never input values."""
     return "\n".join(
-        f"- path: {_escape(issue.path) or '(root)'}; type: {_escape(issue.type)}; "
+        f"- path: {_issue_path(issue)}; type: {_escape(issue.type)}; "
         f"message: {_escape(issue.message)}"
         for issue in issues
     )
@@ -218,10 +286,18 @@ async def extract_po(
             calls=tuple(calls),
             prompt_version=prompt.prompt_version,
             prompt_sha256=prompt.sha256,
+            grounding_checked=False,
         )
-    warnings = (
-        check_grounding(last.parsed, document.text) if document.has_text and document.text else ()
-    )
+    warnings: tuple[ExtractionWarning, ...] = ()
+    grounding_checked = False
+    if document.has_text and document.text is not None:
+        try:
+            warnings = check_grounding(last.parsed, document.text)
+            grounding_checked = True
+        except Exception as error:
+            # The calls are paid for: a bug in a flag-only check must never lose them
+            # (`sec` M1). The reviewer sees "not checked".
+            log.warning("extraction.grounding_failed", error_type=type(error).__name__)
     return ExtractionResult(
         status="extracted",
         extraction=last.parsed,
@@ -230,4 +306,5 @@ async def extract_po(
         calls=tuple(calls),
         prompt_version=prompt.prompt_version,
         prompt_sha256=prompt.sha256,
+        grounding_checked=grounding_checked,
     )

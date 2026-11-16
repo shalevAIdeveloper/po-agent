@@ -99,10 +99,20 @@ def test_malformed_prompt_files_fail_to_load(text: str, message: str) -> None:
         parse_prompt("demo", 1, text)
 
 
-@pytest.mark.parametrize(("name", "version"), [("../x", 1), ("Demo", 1), ("demo", 0), ("", 1)])
+@pytest.mark.parametrize(
+    ("name", "version"), [("../x", 1), ("Demo", 1), ("demo", 0), ("", 1), ("demo", True)]
+)
 def test_bad_name_or_version_is_refused(tmp_path: Path, name: str, version: int) -> None:
+    write(tmp_path, GOOD)
     with pytest.raises(PromptError):
         load_prompt(name, version, directory=tmp_path)
+
+
+def test_split_substitutes_both_sides_and_keeps_values_literal() -> None:
+    prompt = parse_prompt("demo", 1, GOOD.replace("Bye.", "Bye {{name}}."))
+    assert prompt.split("User", "document", name="N") == ("Hello N.\n", "\nBye N.")
+    before, _after = prompt.split("User", "document", name="{{document}}")
+    assert before == "Hello {{document}}.\n"
 
 
 def test_missing_file_is_a_prompt_error(tmp_path: Path) -> None:

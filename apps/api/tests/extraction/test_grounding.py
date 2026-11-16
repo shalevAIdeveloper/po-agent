@@ -108,6 +108,31 @@ def test_a_number_inside_a_longer_number_does_not_count() -> None:
     assert paths(result) == ["lines.0.qty"]
 
 
+def test_fullwidth_text_layer_grounds_ascii_values() -> None:
+    source = "".join(chr(0xFF00 + ord(ch) - 0x20) for ch in "AB-12") + "  qty " + chr(0xFF11) * 2
+    result = extraction([a_line(customer_part_number="AB-12", qty="11", unit_price=None)])
+    assert paths(result, source) == []
+
+
+def test_negative_values_ground_on_parentheses_or_minus() -> None:
+    result = extraction(
+        [a_line(customer_part_number=None, qty=None, unit_price="-5.00", extended_price="-5")]
+    )
+    assert paths(result, "Discount (5.00)  -5") == []
+
+
+def test_a_huge_number_in_the_document_does_not_crash() -> None:
+    # `sec` M1: abs() on a 1,000,001-digit Decimal raised decimal.Overflow.
+    result = extraction([a_line()], customer_po_number=None)
+    source = SOURCE + " total " + "9" * 1_000_001
+    assert paths(result, source) == []
+
+
+def test_a_huge_number_from_the_model_is_flagged_not_a_crash() -> None:
+    result = extraction([a_line(qty="9" * 1_000_001)])
+    assert paths(result) == ["lines.0.qty"]
+
+
 def test_flags_follow_line_order() -> None:
     result = extraction([a_line(), a_line(customer_part_number="NOPE", qty="99")])
     assert paths(result) == ["lines.1.customer_part_number", "lines.1.qty"]
