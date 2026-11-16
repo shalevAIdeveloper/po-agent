@@ -100,6 +100,45 @@ def test_malformed_prompt_files_fail_to_load(text: str, message: str) -> None:
 
 
 @pytest.mark.parametrize(
+    "heading",
+    [
+        "## System Prompt",
+        "## Retry:",
+        "##Retry",
+        "### Retry",
+        "# Retry",
+        "  ## Retry",
+        "#### Notes",
+        "## Re-try",
+    ],
+)
+def test_an_unrecognized_heading_fails_instead_of_joining_the_previous_section(
+    heading: str,
+) -> None:
+    # PR 3 known issue: `## System Prompt` was not a section and silently became part of
+    # the User text (or of whatever section came before it).
+    text = GOOD + f"\n{heading}\nMore text.\n"
+    with pytest.raises(PromptError, match="unrecognized heading on line 11"):
+        parse_prompt("demo", 1, text)
+
+
+def test_an_unrecognized_heading_before_the_first_section_fails() -> None:
+    text = GOOD.replace("# demo — v1\n", "# demo — v1\n## System rules\n")
+    with pytest.raises(PromptError, match="unrecognized heading on line 2"):
+        parse_prompt("demo", 1, text)
+
+
+def test_a_title_before_the_first_section_is_allowed() -> None:
+    prompt = parse_prompt("demo", 1, "# demo\n# second title line\n" + GOOD)
+    assert set(prompt.sections) == {"System", "User"}
+
+
+def test_a_hash_inside_a_line_is_not_a_heading() -> None:
+    prompt = parse_prompt("demo", 1, GOOD.replace("Bye.", "PO # 12 ## not a heading"))
+    assert prompt.sections["User"].endswith("PO # 12 ## not a heading")
+
+
+@pytest.mark.parametrize(
     ("name", "version"), [("../x", 1), ("Demo", 1), ("demo", 0), ("", 1), ("demo", True)]
 )
 def test_bad_name_or_version_is_refused(tmp_path: Path, name: str, version: int) -> None:
