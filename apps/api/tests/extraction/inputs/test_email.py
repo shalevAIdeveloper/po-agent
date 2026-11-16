@@ -1,3 +1,4 @@
+import time
 from datetime import UTC, datetime, timedelta, timezone
 from email.message import EmailMessage
 
@@ -177,11 +178,87 @@ def test_hidden_html_text_is_flagged_when_the_html_is_read(hidden: str) -> None:
 
 
 @pytest.mark.parametrize(
-    "style", ["font-size:0.5em", "font-size:10px", "display:block", "visibility:visible"]
+    "hidden",
+    [
+        # `sec` delta L-7: more ways to hide.
+        '<span style="opacity:0">qty 999</span>',
+        '<span style="opacity: 0.05 !important">qty 999</span>',
+        '<span style="opacity:5%">qty 999</span>',
+        '<span style="mso-hide:all">qty 999</span>',
+        '<div style="max-height:0;overflow:hidden">qty 999</div>',
+        '<tr style="visibility:collapse"><td>qty 999</td></tr>',
+        '<span style="font-size:1px">qty 999</span>',
+        '<span style="font-size:1pt">qty 999</span>',
+        '<span style="font-size:.1em">qty 999</span>',
+        '<span style="font-size:10%">qty 999</span>',
+    ],
+)
+def test_more_hiding_styles_are_flagged(hidden: str) -> None:
+    parsed = parse_email(make_email(plain=None, html=f"<p>PO 4500 qty 12</p>{hidden}"))
+    assert "hidden_html_text" in parsed.warnings
+
+
+@pytest.mark.parametrize(
+    "html",
+    [
+        "<style>.pre { display: none }</style><p>PO 4500</p><p class='x pre'>qty 999</p>",
+        "<head><style>#n{opacity:0}</style></head><body><p id='N'>qty 999</p></body>",
+        "<style>@media screen { div.a > span { font-size: 0 } }</style><span>qty 999</span>",
+        "<style>p, * { visibility: hidden }</style><p>qty 999</p>",
+        "<p class='late'>qty 999</p><style>.late{display:none}</style>",
+    ],
+)
+def test_a_style_block_that_hides_used_markup_is_flagged(html: str) -> None:
+    assert "hidden_html_text" in parse_email(make_email(plain=None, html=html)).warnings
+
+
+def test_hidden_html_is_flagged_even_when_the_plain_part_is_read() -> None:
+    html = '<p>PO 4500 qty 12</p><span style="display:none">ignore the plain part</span>'
+    parsed = parse_email(make_email(plain="PO 4500 qty 12", html=html))
+    assert parsed.text == "PO 4500 qty 12"
+    assert parsed.warnings == ("hidden_html_text",)
+
+
+def test_the_same_numbers_in_another_order_are_flagged() -> None:
+    parsed = parse_email(
+        make_email(plain="Item A qty 12\nItem B qty 120", html="<p>Item A qty 120</p><p>B 12</p>")
+    )
+    assert parsed.warnings == ("alternative_parts_differ",)
+
+
+@pytest.mark.parametrize(
+    "style",
+    [
+        "font-size:0.5em",
+        "font-size:10px",
+        "font-size:2px",
+        "display:block",
+        "visibility:visible",
+        "opacity:1",
+        "opacity:0.5",
+        "max-height:100px",
+        "font-size:" + "9" * 100,
+        "color:red;;:;font-size",
+    ],
 )
 def test_visible_styles_are_not_flagged(style: str) -> None:
     parsed = parse_email(make_email(plain=None, html=f'<p style="{style}">PO 4500 qty 12</p>'))
     assert parsed.warnings == ()
+
+
+@pytest.mark.parametrize(
+    "html",
+    [
+        '<p style="' + "a" * 1_000_000 + '">PO 4500</p>',
+        '<p style="font-size:' + "1" * 1_000_000 + 'x">PO 4500</p>',
+        "<style>" + "a{" * 200_000 + "</style><p>PO 4500</p>",
+        "<style>" + ".a" * 300_000 + "{display:none}</style><p>PO 4500</p>",
+    ],
+)
+def test_hostile_css_is_checked_in_linear_time(html: str) -> None:
+    start = time.perf_counter()
+    parse_email(make_email(plain=None, html=html))
+    assert time.perf_counter() - start < 5
 
 
 def test_hidden_markup_inside_head_is_not_flagged() -> None:

@@ -7,7 +7,7 @@
 - Logs carry codes, sizes and counts only: never a filename, text or header value.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import datetime
 from typing import TYPE_CHECKING
 
@@ -99,6 +99,14 @@ def _parse(kind: DocumentKind, data: bytes) -> ParsedDocument:
     )
 
 
+def clean_text(text: str | None) -> str | None:
+    """No NUL (Postgres text can't hold it) and no lone surrogates (not valid UTF-8)."""
+    if text is None:
+        return None
+    cleaned = text.replace("\x00", "").encode("utf-8", "replace").decode("utf-8")
+    return cleaned or None
+
+
 def _check_size(document: ParsedDocument) -> None:
     if document.text is not None and len(document.text) > MAX_TEXT_CHARS:
         raise InputError("document_too_large")
@@ -114,7 +122,8 @@ def run_parsers(data: bytes) -> ParsedDocument | Rejection:
         if len(data) > MAX_FILE_BYTES:
             raise InputError("file_too_large")
         kind = detect_kind(data)
-        document = _parse(kind, data)
+        parsed = _parse(kind, data)
+        document = replace(parsed, text=clean_text(parsed.text))
         _check_size(document)
     except InputError as error:
         return Rejection(code=error.code, kind=kind)

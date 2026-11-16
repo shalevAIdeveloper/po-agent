@@ -66,6 +66,35 @@ def flood(_data: bytes) -> ParsedDocument | Rejection:
     os._exit(0)
 
 
+def spawn_and_exit(_data: bytes) -> ParsedDocument | Rejection:
+    """Starts a grandchild that holds the reply pipe open, answers, exits (`sec` M-B).
+
+    On Linux (not root) the child can't start a process: this raises, `parse_failed`.
+    """
+    import subprocess
+
+    grandchild = subprocess.Popen(
+        [sys.executable, "-c", "import time; time.sleep(30)"],
+        stdin=subprocess.DEVNULL,
+        stdout=sys.stdout.fileno(),
+        stderr=subprocess.DEVNULL,
+    )
+    return ParsedDocument(
+        kind="eml", text=f"grandchild {grandchild.pid}", images=(), page_count=1, warnings=()
+    )
+
+
+def read_parent_environ(_data: bytes) -> ParsedDocument | Rejection:
+    """Reports whether the parent's /proc environ (its secrets) is readable (`sec` M-A)."""
+    try:
+        with open(f"/proc/{os.getppid()}/environ", "rb") as environ:
+            environ.read()
+        verdict = "readable"
+    except PermissionError:
+        verdict = "denied"
+    return ParsedDocument(kind="eml", text=verdict, images=(), page_count=1, warnings=())
+
+
 def close_and_linger(_data: bytes) -> ParsedDocument | Rejection:
     """Closes stdout without an answer and keeps running."""
     sys.stdout.close()

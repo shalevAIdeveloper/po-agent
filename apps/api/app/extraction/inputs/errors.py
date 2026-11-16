@@ -24,8 +24,9 @@ InputWarningCode = Literal[
     # EML: the plain-text and HTML versions carry different numbers. The model read the
     # plain text; a mail client shows the HTML (`sec` M3).
     "alternative_parts_differ",
-    # EML HTML: text hidden by inline style (display:none, visibility:hidden, font-size:0)
-    # is in what the model read but not on screen in a mail client (`sec` M3).
+    # EML HTML: elements hidden by the `hidden` attribute, an inline style or a `<style>`
+    # rule (display:none, visibility, opacity, tiny fonts, ...): a mail client shows less
+    # than the text holds (`sec` M3, delta L-7).
     "hidden_html_text",
 ]
 

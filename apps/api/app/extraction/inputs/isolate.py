@@ -4,23 +4,37 @@ PDFium and Pillow's decoders are native code: a thread can't stop them, and a cr
 them would take the worker down. The child (`child.py`) is a fresh interpreter:
 - started with `subprocess` and an **empty environment** (only `PATH`, plus `SYSTEMROOT`
   on Windows): no `DATABASE_URL`, `LLM_API_KEY` or any other secret (`sec` M1);
-  `python -I -B` ignores `PYTHON*` variables, the user site and the current directory;
+  `python -I -B` ignores `PYTHON*` variables, the user site and the current directory,
+  and the app directory is appended to `sys.path`, so it can't shadow the stdlib (L-8);
+- runs as the worker's user, so on Linux the worker first makes itself non-dumpable
+  (`PR_SET_DUMPABLE` 0): a compromised child can't read the worker's
+  `/proc/<pid>/environ` or memory (`sec` delta M-A). Processes that started the worker
+  are not covered: the worker must be `exec`ed, with no shell or launcher holding the
+  secrets (ADR 0012);
 - gets the file on stdin and nothing else (no inherited descriptors, stderr to devnull,
-  `sec` L4); runs only the parsers: no logging, no network, no DB;
-- on Linux has an address-space limit (CHILD_MEMORY_BYTES), set before it reads the file;
+  `sec` L4); runs only the parsers: no logging, no DB. Network access is not blocked
+  (Follow-up M1-PARSE-NET);
+- on Linux has memory, CPU and no-new-process limits, set before it reads the file;
+- runs in its own session (POSIX): the parent kills the whole process group when it is
+  done, whatever happened (`sec` delta M-B);
 - answers with a JSON header plus raw image bytes (`wire.py`), never a pickle, and the
   parent checks it like any untrusted input (`sec` M2). The parent reads at most
   `MAX_REPLY_BYTES`;
-- is killed after the timeout (`parse_timeout`). No answer, a non-zero exit, too much
-  output or a malformed reply is `parse_failed`.
+- is killed after the timeout (`parse_timeout`). The parent waits on the process, not on
+  its stdout, so a pipe held open can't stall it. No answer, a non-zero exit, too much
+  output, an unfinished reply or a malformed one is `parse_failed`.
 
 The call blocks; the worker runs it with `asyncio.to_thread` (PR 14).
 """
 
+import contextlib
+import functools
 import os
+import re
 import subprocess
 import sys
 import threading
+from collections.abc import Callable
 from pathlib import Path
 from typing import IO, Final
 
@@ -31,100 +45,141 @@ from app.extraction.inputs.wire import MAX_REPLY_BYTES, WireError, decode
 # The directory that holds the `app` package (`/app` in the image, `apps/api` locally).
 APP_ROOT: Final = Path(__file__).resolve().parents[3]
 DEFAULT_PARSER: Final = "app.extraction.inputs:run_parsers"
+_PARSER_RE: Final = re.compile(r"(?:app|tests)(?:\.[a-z_][a-z0-9_]*)+:[a-z_][a-z0-9_]*")
 _BOOTSTRAP: Final = (
-    "import sys; sys.path.insert(0, sys.argv[1]); "
-    "from app.extraction.inputs.child import main; main()"
+    "import sys; sys.path.append(sys.argv[1]); from app.extraction.inputs.child import main; main()"
 )
 _READ_CHUNK: Final = 64 * 1024
 _REAP_SECONDS: Final = 5.0
+_PR_SET_DUMPABLE: Final = 4
 
 
 def child_environment() -> dict[str, str]:
-    env = {"PATH": os.defpath}
-    if sys.platform == "win32" and "SYSTEMROOT" in os.environ:
-        env["SYSTEMROOT"] = os.environ["SYSTEMROOT"]  # the interpreter needs it to start
-    return env
+    if sys.platform == "win32":
+        # `os.defpath` on Windows starts with the current directory (`sec` delta L-9).
+        system_root = os.environ.get("SYSTEMROOT", r"C:\Windows")
+        # SYSTEMROOT: the interpreter needs it to start.
+        return {"PATH": str(Path(system_root) / "System32"), "SYSTEMROOT": system_root}
+    return {"PATH": os.defpath}
+
+
+@functools.cache
+def _make_parent_undumpable() -> None:
+    """Linux: no other process of this user may read our environ or memory (M-A)."""
+    if sys.platform == "linux":
+        import ctypes
+
+        libc = ctypes.CDLL(None, use_errno=True)
+        if libc.prctl(_PR_SET_DUMPABLE, 0, 0, 0, 0) != 0:
+            error = ctypes.get_errno()
+            raise OSError(error, os.strerror(error))
+
+
+def _kill(process: subprocess.Popen[bytes]) -> None:
+    """The child and anything left in its process group."""
+    if sys.platform != "win32":
+        import signal
+
+        # The group outlives a reaped leader while a member lives, so its id isn't reused
+        # before then. ProcessLookupError/PermissionError: nothing left in the group.
+        with contextlib.suppress(ProcessLookupError, PermissionError):
+            os.killpg(process.pid, signal.SIGKILL)
+    with contextlib.suppress(OSError):  # already gone
+        process.kill()
 
 
 class _Reader:
-    """Reads the child's stdout up to MAX_REPLY_BYTES; more is an overflow."""
+    """Owns the child's stdout: reads up to MAX_REPLY_BYTES; more is an overflow."""
 
-    def __init__(self, stream: IO[bytes]) -> None:
+    def __init__(self, stream: IO[bytes], on_overflow: Callable[[], None]) -> None:
         self._stream = stream
+        self._on_overflow = on_overflow
         self.data = bytearray()
         self.overflow = False
 
     def run(self) -> None:
-        while chunk := self._stream.read(_READ_CHUNK):
-            if len(self.data) + len(chunk) > MAX_REPLY_BYTES:
-                self.overflow = True
-                return
-            self.data.extend(chunk)
+        try:
+            while chunk := self._stream.read(_READ_CHUNK):
+                if len(self.data) + len(chunk) > MAX_REPLY_BYTES:
+                    self.overflow = True
+                    self._on_overflow()  # a child blocked on a full pipe never exits
+                    return
+                self.data.extend(chunk)
+        finally:
+            self._stream.close()
 
 
 def _write(stream: IO[bytes], data: bytes) -> None:
+    """Owns the child's stdin: writes the file, then closes it (`sec` delta L-5)."""
     try:
-        stream.write(data)
-        stream.close()
-    except OSError:
+        view = memoryview(data)
+        while view:
+            written = stream.write(view)  # unbuffered: may write part
+            view = view[written or 0 :]
+    except (OSError, ValueError):
         pass  # the child exited early (or was killed): its reply says why
+    finally:
+        with contextlib.suppress(OSError):
+            stream.close()
 
 
 def _run_child(data: bytes, timeout: float, parser: str) -> ParsedDocument | Rejection:
+    if _PARSER_RE.fullmatch(parser) is None:
+        raise ValueError("parser must be app.* or tests.* 'module:function'")
+    _make_parent_undumpable()
     process = subprocess.Popen(  # noqa: S603 - fixed argv, our own interpreter and module
         [sys.executable, "-I", "-B", "-c", _BOOTSTRAP, str(APP_ROOT), parser],
+        bufsize=0,
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.DEVNULL,
         env=child_environment(),
         cwd=APP_ROOT,
         close_fds=True,
+        start_new_session=sys.platform != "win32",
     )
     assert process.stdin is not None and process.stdout is not None  # noqa: S101 - PIPE set
-    reader = _Reader(process.stdout)
-    threads = [
-        threading.Thread(target=_write, args=(process.stdin, data), daemon=True),
-        threading.Thread(target=reader.run, daemon=True),
-    ]
-    for thread in threads:
-        thread.start()
+    reader = _Reader(process.stdout, on_overflow=lambda: _kill(process))
+    # Each thread owns and closes its stream: the parent never closes a stream another
+    # thread may be blocked on.
+    writer_thread = threading.Thread(target=_write, args=(process.stdin, data), daemon=True)
+    reader_thread = threading.Thread(target=reader.run, daemon=True)
+    writer_thread.start()
+    reader_thread.start()
+    timed_out = False
+    exit_code: int | None = None
     try:
-        threads[1].join(timeout)
-        timed_out = threads[1].is_alive()
-        if timed_out or reader.overflow:
-            process.kill()
         try:
-            exit_code = process.wait(_REAP_SECONDS)
+            exit_code = process.wait(timeout)
         except subprocess.TimeoutExpired:
-            exit_code = None  # closed its stdout but kept running: killed below
+            timed_out = True
     finally:
-        if process.poll() is None:
-            process.kill()
+        # Whatever happened: nothing the child started may keep running or keep the
+        # pipes open. Killing the group closes their ends, so both threads finish.
+        _kill(process)
+        with contextlib.suppress(subprocess.TimeoutExpired):
             process.wait(_REAP_SECONDS)
-        for thread in threads:
-            thread.join(_REAP_SECONDS)
-        process.stdout.close()
+        reader_thread.join(_REAP_SECONDS)
+        writer_thread.join(_REAP_SECONDS)
     if timed_out:
         return Rejection(code="parse_timeout")
-    if reader.overflow or exit_code != 0:
+    if reader.overflow or exit_code != 0 or reader_thread.is_alive():
+        # Still reading: something outside the group holds the pipe; the reply is unknown.
         return Rejection(code="parse_failed")
     try:
         return decode(bytes(reader.data))
     except (WireError, TypeError, ValueError, KeyError):
-        # TypeError: unhashable JSON values in a membership test (`sec` delta L-1).
+        # Defence in depth: `decode` should raise only WireError (`sec` delta L-1).
         return Rejection(code="parse_failed")
 
 
-def parse_isolated(
-    data: bytes,
-    *,
-    timeout: float = PARSE_TIMEOUT_SECONDS,
-    parser: str = DEFAULT_PARSER,
-) -> ParsedDocument:
-    """Like `parse_document`, in a child process. Raises `InputError` with a code.
+def parse_isolated(data: bytes, *, timeout: float = PARSE_TIMEOUT_SECONDS) -> ParsedDocument:
+    """Like `parse_document`, in a child process. Raises `InputError` with a code."""
+    return _parse_isolated(data, timeout, DEFAULT_PARSER)
 
-    `parser` ("module:function") exists for tests; the worker never passes it.
-    """
+
+def _parse_isolated(data: bytes, timeout: float, parser: str) -> ParsedDocument:
+    """`parser` ("module:function", `app.*` or `tests.*`) is for tests (`sec` delta L-8)."""
     if len(data) > MAX_FILE_BYTES:
         outcome: ParsedDocument | Rejection = Rejection(code="file_too_large")
     else:

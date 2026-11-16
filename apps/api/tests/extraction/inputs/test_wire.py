@@ -7,7 +7,7 @@ from typing import Any
 import pytest
 
 from app.extraction.inputs import ParsedDocument, Rejection, run_parsers
-from app.extraction.inputs.limits import MAX_PDF_PAGES, MAX_TEXT_CHARS
+from app.extraction.inputs.limits import MAX_PDF_PAGES, MAX_TEXT_CHARS, MAX_TOTAL_IMAGE_BYTES
 from app.extraction.inputs.wire import MAX_REPLY_BYTES, WireError, decode, encode
 from tests.extraction.inputs.files import make_email, make_image, make_pdf
 
@@ -115,6 +115,53 @@ def test_a_rejection_round_trips() -> None:
 def test_a_malformed_reply_is_refused(reply: bytes) -> None:
     with pytest.raises(WireError):
         decode(reply)
+
+
+@pytest.mark.parametrize(
+    "header",
+    [
+        # `sec` delta L-1: unhashable values where a literal belongs are WireError.
+        ok_header(kind=["png"]),
+        ok_header(warnings=[["attachments_ignored"]]),
+        ok_header(images=[{"media_type": ["image/png"], "length": 3}]),
+        # `sec` delta L-2: the parent re-applies the parsers' sanitizing.
+        ok_header(text="PO" + chr(0) + "4500"),
+        ok_header(text=chr(0xD800)),  # a lone surrogate, sent as a JSON escape
+        ok_header(text=""),
+        ok_header(claimed_from="no-at-sign.example"),
+        ok_header(claimed_from="@b.example"),
+        ok_header(claimed_from="a" + chr(0x202E) + "@b.example"),
+        ok_header(claimed_from="a@b.example\n"),
+        ok_header(claimed_date="1980-01-01T00:00:00+00:00"),
+        ok_header(claimed_date="2999-01-01T00:00:00+00:00"),
+    ],
+)
+def test_a_reply_a_parser_could_not_produce_is_refused(header: dict[str, Any]) -> None:
+    with pytest.raises(WireError):
+        decode(frame(header, b"abc"))
+
+
+def test_a_rejection_with_an_unhashable_code_is_refused() -> None:
+    header = {"v": 1, "status": "rejected", "code": {}, "kind": None, "error_type": None}
+    with pytest.raises(WireError):
+        decode(frame(header))
+
+
+def test_image_bytes_over_the_total_cap_are_refused() -> None:
+    # `sec` delta L-3.
+    length = MAX_TOTAL_IMAGE_BYTES + 1
+    header = ok_header(images=[{"media_type": "image/png", "length": length}])
+    with pytest.raises(WireError):
+        decode(frame(header, b"\0" * length))
+
+
+@pytest.mark.parametrize("char", [chr(0x1F4E6), chr(1), '"', "\\"])
+def test_the_longest_text_fits_whatever_its_characters(char: str) -> None:
+    # `sec` delta L-4: 4-byte characters and escaped ones at MAX_TEXT_CHARS.
+    document = ParsedDocument(
+        kind="eml", text=char * MAX_TEXT_CHARS, images=(), page_count=1, warnings=()
+    )
+    assert decode(encode(document)) == document
 
 
 def test_a_reply_over_the_read_limit_is_refused() -> None:

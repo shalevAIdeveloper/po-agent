@@ -30,6 +30,27 @@ def test_too_much_text_is_refused() -> None:
     assert isinstance(run_parsers(make_email(plain="x" * MAX_TEXT_CHARS)), ParsedDocument)
 
 
+@pytest.mark.parametrize(
+    ("text", "cleaned"),
+    [
+        (None, None),
+        ("PO 4500", "PO 4500"),
+        ("PO" + chr(0) + " 4500", "PO 4500"),
+        ("PO " + chr(0xD800) + "4500", "PO ?4500"),
+        (chr(0) * 3, None),
+    ],
+)
+def test_text_is_cleaned_for_storage(text: str | None, cleaned: str | None) -> None:
+    # `sec` delta L-2: no NUL, valid UTF-8; the parent checks the same.
+    assert inputs.clean_text(text) == cleaned
+
+
+def test_a_nul_in_the_document_never_reaches_the_text() -> None:
+    document = run_parsers(make_email(plain="PO 4500" + chr(0) + "012345"))
+    assert isinstance(document, ParsedDocument)
+    assert document.text == "PO 4500012345"
+
+
 def test_too_many_image_bytes_are_refused(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(inputs, "MAX_TOTAL_IMAGE_BYTES", 10)
     assert run_parsers(make_image()) == Rejection(code="document_too_large", kind="png")

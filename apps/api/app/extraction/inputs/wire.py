@@ -3,7 +3,8 @@
 Frame: 8-byte big-endian header length, the UTF-8 JSON header, then each image's bytes in
 order. The parent treats the reply as untrusted (the child parsed a hostile file and may
 be compromised): `decode` checks every field against literals, types and the same caps
-the parsers use, and anything off is `parse_failed`.
+and sanitizing the parsers apply (text, claimed From/Date), and anything off is
+`parse_failed`.
 """
 
 import json
@@ -12,8 +13,9 @@ import struct
 from datetime import datetime
 from typing import Any, Final, get_args
 
-from app.extraction.inputs import ParsedDocument, Rejection
+from app.extraction.inputs import ParsedDocument, Rejection, clean_text
 from app.extraction.inputs.detect import DocumentKind
+from app.extraction.inputs.email import acceptable_address, acceptable_date
 from app.extraction.inputs.errors import InputErrorCode, InputWarningCode
 from app.extraction.inputs.limits import (
     MAX_PDF_PAGES,
@@ -24,7 +26,9 @@ from app.llm.types import ImageMediaType, ImagePart
 
 VERSION: Final = 1
 _LENGTH: Final = struct.Struct(">Q")
-MAX_HEADER_BYTES: Final = 4 * MAX_TEXT_CHARS + 64 * 1024  # UTF-8 text + small fields
+# UTF-8 JSON: at most 4 bytes per character, 6 for a control character escaped as
+# `\u00XX` (`sec` delta L-4), plus the small fields.
+MAX_HEADER_BYTES: Final = 6 * MAX_TEXT_CHARS + 64 * 1024
 # The most the parent ever reads from the child.
 MAX_REPLY_BYTES: Final = _LENGTH.size + MAX_HEADER_BYTES + MAX_TOTAL_IMAGE_BYTES
 _MAX_CLAIMED_CHARS: Final = 254
@@ -65,7 +69,7 @@ def encode(outcome: ParsedDocument | Rejection) -> bytes:
             else outcome.claimed_date.isoformat(),
             "images": [{"media_type": i.media_type, "length": len(i.data)} for i in images],
         }
-    raw = json.dumps(header, ensure_ascii=True, allow_nan=False).encode("ascii")
+    raw = json.dumps(header, ensure_ascii=False, allow_nan=False).encode("utf-8")
     return _LENGTH.pack(len(raw)) + raw + b"".join(image.data for image in images)
 
 
@@ -78,6 +82,11 @@ def _expect(condition: bool) -> None:
         raise WireError("bad reply")
 
 
+def _member(value: object, allowed: frozenset[str]) -> bool:
+    # isinstance first: an unhashable JSON value would make `in` raise (`sec` delta L-1).
+    return isinstance(value, str) and value in allowed
+
+
 def _optional_str(value: object, limit: int) -> str | None:
     if value is None:
         return None
@@ -86,11 +95,37 @@ def _optional_str(value: object, limit: int) -> str | None:
     return value
 
 
+def _decode_text(value: object) -> str | None:
+    # The parent re-applies what the parsers guarantee (`sec` delta L-2): JSON `\ud800`
+    # escapes or `\u0000` would otherwise get past a compromised child.
+    text = _optional_str(value, MAX_TEXT_CHARS)
+    _expect(text is None or clean_text(text) == text)  # also refuses ""
+    return text
+
+
+def _decode_claimed_from(value: object) -> str | None:
+    claimed_from = _optional_str(value, _MAX_CLAIMED_CHARS)
+    _expect(claimed_from is None or acceptable_address(claimed_from))
+    return claimed_from
+
+
+def _decode_claimed_date(value: object) -> datetime | None:
+    raw = _optional_str(value, 64)
+    if raw is None:
+        return None
+    try:
+        claimed_date = datetime.fromisoformat(raw)
+    except ValueError:
+        raise WireError("bad date") from None
+    _expect(acceptable_date(claimed_date))
+    return claimed_date
+
+
 def _decode_rejection(header: dict[str, Any]) -> Rejection:
     _expect(set(header) == {"v", "status", "code", "kind", "error_type"})
     code, kind, error_type = header["code"], header["kind"], header["error_type"]
-    _expect(code in _CODES)
-    _expect(kind is None or kind in _KINDS)
+    _expect(_member(code, _CODES))
+    _expect(kind is None or _member(kind, _KINDS))
     _expect(
         error_type is None
         or (isinstance(error_type, str) and _ERROR_TYPE_RE.fullmatch(error_type) is not None)
@@ -101,12 +136,13 @@ def _decode_rejection(header: dict[str, Any]) -> Rejection:
 def _decode_images(specs: object, body: bytes) -> tuple[ImagePart, ...]:
     if not isinstance(specs, list) or len(specs) > MAX_PDF_PAGES:
         raise WireError("bad image list")
+    _expect(len(body) <= MAX_TOTAL_IMAGE_BYTES)  # `sec` delta L-3
     images: list[ImagePart] = []
     offset = 0
     for spec in specs:
         _expect(isinstance(spec, dict) and set(spec) == {"media_type", "length"})
         media_type, length = spec["media_type"], spec["length"]
-        _expect(media_type in _MEDIA_TYPES)
+        _expect(_member(media_type, _MEDIA_TYPES))
         _expect(type(length) is int and 0 < length <= len(body) - offset)
         media: ImageMediaType = media_type
         images.append(ImagePart(data=body[offset : offset + length], media_type=media))
@@ -119,20 +155,13 @@ def _decode_document(header: dict[str, Any], body: bytes) -> ParsedDocument:
     keys = {"v", "status", "kind", "text", "page_count", "warnings"}
     _expect(set(header) == keys | {"claimed_from", "claimed_date", "images"})
     kind, page_count, warnings = header["kind"], header["page_count"], header["warnings"]
-    _expect(kind in _KINDS)
+    _expect(_member(kind, _KINDS))
     _expect(type(page_count) is int and 1 <= page_count <= MAX_PDF_PAGES)
-    _expect(isinstance(warnings, list) and all(w in _WARNINGS for w in warnings))
+    _expect(isinstance(warnings, list) and all(_member(w, _WARNINGS) for w in warnings))
     _expect(len(warnings) == len(set(warnings)))
-    text = _optional_str(header["text"], MAX_TEXT_CHARS)
-    claimed_from = _optional_str(header["claimed_from"], _MAX_CLAIMED_CHARS)
-    claimed_date_raw = _optional_str(header["claimed_date"], 64)
-    claimed_date = None
-    if claimed_date_raw is not None:
-        try:
-            claimed_date = datetime.fromisoformat(claimed_date_raw)
-        except ValueError:
-            raise WireError("bad date") from None
-        _expect(claimed_date.tzinfo is not None)
+    text = _decode_text(header["text"])
+    claimed_from = _decode_claimed_from(header["claimed_from"])
+    claimed_date = _decode_claimed_date(header["claimed_date"])
     images = _decode_images(header["images"], body)
     _expect(text is not None or bool(images))
     return ParsedDocument(
@@ -154,7 +183,7 @@ def decode(reply: bytes) -> ParsedDocument | Rejection:
     raw = reply[_LENGTH.size : _LENGTH.size + length]
     body = reply[_LENGTH.size + length :]
     try:
-        header = json.loads(raw.decode("ascii"), parse_constant=_reject_constant)
+        header = json.loads(raw.decode("utf-8", errors="strict"), parse_constant=_reject_constant)
     except (UnicodeDecodeError, ValueError, RecursionError):
         raise WireError("bad header") from None
     _expect(isinstance(header, dict) and header.get("v") == VERSION)
