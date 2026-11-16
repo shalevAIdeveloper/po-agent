@@ -11,6 +11,10 @@
   MAX_IMAGE_SIDE on its long side, so a huge page box can't allocate a huge bitmap.
 - Values typed into form fields are drawn on the page image but are not in the text
   layer, so grounding may flag them (a false alarm the reviewer can see; ADR 0012).
+- Text can be in the text layer without being visible (render mode 3, white text): OCR'd
+  scans rely on it, so it is kept; the review screen shows the text the model read
+  (`sec` M3, ADR 0012).
+- The text is checked against MAX_TEXT_CHARS page by page, before each page is rendered.
 """
 
 from collections.abc import Iterator
@@ -26,6 +30,7 @@ from app.extraction.inputs.image import encode_for_model
 from app.extraction.inputs.limits import (
     MAX_IMAGE_SIDE,
     MAX_PDF_PAGES,
+    MAX_TEXT_CHARS,
     MIN_TEXT_CHARS,
     PDF_RENDER_DPI,
 )
@@ -64,7 +69,7 @@ def render_scale(width: float, height: float) -> float:
     return min(PDF_RENDER_DPI / POINTS_PER_INCH, MAX_IMAGE_SIDE / max(width, height))
 
 
-def _page(document: pdfium.PdfDocument, index: int) -> tuple[str, ImagePart]:
+def _page(document: pdfium.PdfDocument, index: int, text_budget: int) -> tuple[str, ImagePart]:
     page = document[index]
     try:
         textpage = page.get_textpage()
@@ -72,6 +77,9 @@ def _page(document: pdfium.PdfDocument, index: int) -> tuple[str, ImagePart]:
             text = textpage.get_text_bounded()
         finally:
             textpage.close()
+        if len(text) > text_budget:
+            # Stop before rendering: a page full of text operators is slow to draw (`sec` L3).
+            raise InputError("document_too_large")
         width, height = page.get_size()
         bitmap = page.render(scale=render_scale(width, height), may_draw_forms=True)
         try:
@@ -93,8 +101,10 @@ def parse_pdf(data: bytes) -> ParsedPdf:
         document.init_forms()
         texts: list[str] = []
         images: list[ImagePart] = []
+        used = 0
         for index in range(page_count):
-            text, image = _page(document, index)
+            text, image = _page(document, index, MAX_TEXT_CHARS - used)
+            used += len(text)
             texts.append(text)
             images.append(image)
     visible = sum(len("".join(text.split())) for text in texts)

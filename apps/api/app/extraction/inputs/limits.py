@@ -15,13 +15,20 @@ MAX_SOURCE_PIXELS: Final = 60_000_000
 # A page image is sent as PNG (sharp text) unless that is larger than this; then JPEG.
 MAX_PNG_BYTES: Final = 1_000_000
 JPEG_QUALITY: Final = 85
-# All page images of one document together (one LLM request must stay well under 32 MB).
-MAX_TOTAL_IMAGE_BYTES: Final = 24 * 1024 * 1024
+# All page images of one document together. The adapter sends them base64-encoded (x 4/3),
+# so 20 MiB is ~26.7 MiB on the wire plus at most ~0.8 MB of text, under the provider's
+# 32 MB request limit (`sec` L2).
+MAX_TOTAL_IMAGE_BYTES: Final = 20 * 1024 * 1024
 
 # A PDF with fewer non-space characters than this in its text layer is treated as a scan.
 MIN_TEXT_CHARS: Final = 20
 # Text of one document (about 50k tokens): more is not a purchase order we can send.
 MAX_TEXT_CHARS: Final = 200_000
+# An HTML email body larger than this is refused before conversion (`sec` L3).
+MAX_HTML_CHARS: Final = 5_000_000
+
+# EML: the claimed `Date` must fall between this year and one day from now.
+MIN_CLAIMED_YEAR: Final = 1990
 
 # The parsing child process (isolate.py).
 PARSE_TIMEOUT_SECONDS: Final = 60.0

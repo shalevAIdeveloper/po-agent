@@ -17,8 +17,11 @@ _PDF: Final = b"%PDF-"
 # Readers accept a few junk bytes before `%PDF-` (the PDF spec's implementation note).
 PDF_HEADER_WINDOW: Final = 1024
 
-# An email starts with RFC 5322 header fields up to the first blank line.
-EML_HEADER_WINDOW: Final = 16 * 1024
+# An email starts with RFC 5322 header fields up to the first blank line. Long `Received` /
+# ARC chains (Microsoft 365) can pass 16 KB (`qa`).
+EML_HEADER_WINDOW: Final = 64 * 1024
+# Mail-client exports may start with an mbox separator line ("From - Mon Nov 16 ...").
+_MBOX_FROM: Final = b"From "
 _FIELD_RE: Final = re.compile(rb"^[!-9;-~]{1,76}:")
 _CONTINUATION_RE: Final = re.compile(rb"^[ \t]")
 _EMAIL_FIELDS: Final = frozenset(
@@ -45,6 +48,8 @@ MIN_EMAIL_FIELDS: Final = 2
 def _looks_like_email(data: bytes) -> bool:
     head = data[:EML_HEADER_WINDOW]
     lines = head.replace(b"\r\n", b"\n").split(b"\n")
+    if lines[0].startswith(_MBOX_FROM):
+        lines = lines[1:]
     names: set[bytes] = set()
     for line in lines:
         if line == b"":

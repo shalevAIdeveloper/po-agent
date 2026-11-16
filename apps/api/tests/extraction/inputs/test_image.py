@@ -5,6 +5,7 @@ import time
 import pytest
 from PIL import Image
 
+from app.extraction.inputs import image as image_module
 from app.extraction.inputs import parse_document
 from app.extraction.inputs.errors import InputError
 from app.extraction.inputs.image import encode_for_model, parse_image
@@ -73,6 +74,41 @@ def test_a_decompression_bomb_is_refused_before_decoding() -> None:
         parse_image(png_header_only(100_000, 100_000))
     assert caught.value.code == "image_too_large"
     assert time.perf_counter() - start < 1
+
+
+def test_the_pixel_cap_is_inclusive(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(image_module, "MAX_SOURCE_PIXELS", 200 * 100)
+    assert parse_image(make_image((200, 100))).media_type == "image/png"
+    with pytest.raises(InputError, match="image_too_large"):
+        parse_image(make_image((201, 100)))
+
+
+def test_our_pixel_check_works_without_pillows_backstop(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(Image, "MAX_IMAGE_PIXELS", None)
+    with pytest.raises(InputError, match="image_too_large"):
+        parse_image(png_header_only(100_000, 100_000))
+
+
+def test_pillows_backstop_works_without_our_check(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(image_module, "MAX_SOURCE_PIXELS", 10**12)
+    with pytest.raises(InputError, match="image_too_large"):
+        parse_image(png_header_only(100_000, 100_000))
+
+
+@pytest.mark.parametrize("fmt", ["GIF", "BMP", "TIFF", "WEBP"])
+def test_only_png_and_jpeg_decoders_are_used(fmt: str) -> None:
+    # `detect_kind` never routes these here; the decoder list is a second wall.
+    with pytest.raises(InputError, match="invalid_file"):
+        parse_image(make_image(fmt=fmt))
+
+
+def test_a_multi_picture_jpeg_uses_its_first_picture() -> None:
+    first = Image.new("RGB", (120, 80), (10, 20, 30))
+    second = Image.new("RGB", (60, 40), (200, 200, 200))
+    buffer = io.BytesIO()
+    first.save(buffer, format="MPO", save_all=True, append_images=[second])
+    image = opened(parse_image(buffer.getvalue()))
+    assert image.size == (120, 80)
 
 
 def test_just_over_the_pixel_cap_is_refused() -> None:

@@ -29,7 +29,9 @@ from app.llm.types import ImagePart
 # size ourselves first; this is the backstop for any other path into the decoder.
 Image.MAX_IMAGE_PIXELS = MAX_SOURCE_PIXELS
 
-_DECODERS: Final = ("PNG", "JPEG", "MPO")  # MPO = a JPEG with extra frames (phones)
+# A phone's multi-picture JPEG (MPO) opens through the JPEG decoder; "MPO" is not an opener
+# name in Pillow and listing it made other formats raise KeyError (`qa`).
+_DECODERS: Final = ("PNG", "JPEG")
 _WHITE: Final = (255, 255, 255)
 
 

@@ -7,7 +7,7 @@ import app.extraction.inputs as inputs
 from app.extraction.inputs import ParsedDocument, Rejection, parse_document, run_parsers
 from app.extraction.inputs.detect import DocumentKind
 from app.extraction.inputs.errors import InputError
-from app.extraction.inputs.limits import MAX_FILE_BYTES, MAX_TEXT_CHARS
+from app.extraction.inputs.limits import MAX_FILE_BYTES, MAX_TEXT_CHARS, MAX_TOTAL_IMAGE_BYTES
 from tests.extraction.inputs.files import make_email, make_image, make_pdf
 
 SECRETS = ("SECRET-BODY-5e1a", "victim@acme.example", "po-secret-name")
@@ -28,6 +28,16 @@ def test_too_much_text_is_refused() -> None:
         code="document_too_large", kind="eml"
     )
     assert isinstance(run_parsers(make_email(plain="x" * MAX_TEXT_CHARS)), ParsedDocument)
+
+
+def test_too_many_image_bytes_are_refused(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(inputs, "MAX_TOTAL_IMAGE_BYTES", 10)
+    assert run_parsers(make_image()) == Rejection(code="document_too_large", kind="png")
+
+
+def test_the_image_byte_cap_fits_one_request_after_base64() -> None:
+    # `sec` L2: base64 adds a third; plus the text, one request must stay under 32 MB.
+    assert MAX_TOTAL_IMAGE_BYTES * 4 / 3 + MAX_TEXT_CHARS * 4 < 32_000_000
 
 
 def test_an_unexpected_parser_error_is_invalid_file_with_its_type_only(

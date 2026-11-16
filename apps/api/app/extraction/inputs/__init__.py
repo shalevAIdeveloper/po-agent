@@ -3,7 +3,7 @@
 - `run_parsers` runs the parsers and never raises or logs: it returns the document or a
   `Rejection`. The parsing child process (`isolate.py`) calls only this.
 - `parse_document` runs them in this process and logs; the worker uses `parse_isolated`
-  (`isolate.py`): the same, in a child process with a time and memory limit.
+  (`isolate.py`): the same, in a child process with no secrets, a time and a memory limit.
 - Logs carry codes, sizes and counts only: never a filename, text or header value.
 """
 
@@ -43,12 +43,14 @@ class ParsedDocument:
     images: tuple[ImagePart, ...] = field(repr=False)
     page_count: int
     warnings: tuple[InputWarningCode, ...]
-    # EML `From` / `Date`: forgeable, for display only (owner, 2026-11-16). Never use them to
-    # identify a customer or to decide anything (ADR 0012).
-    display_from: str | None = field(default=None, repr=False)
-    display_date: datetime | None = None
+    # EML `From` / `Date` as the file claims them: forgeable, for display only (owner,
+    # 2026-11-16). Never store them as the received time and never use them to identify a
+    # customer or to decide anything (ADR 0012, Follow-up M6-FROM).
+    claimed_from: str | None = field(default=None, repr=False)
+    claimed_date: datetime | None = None
 
     def to_document_input(self) -> "DocumentInput":
+        """The model sees the claims only as untrusted metadata inside the document block."""
         # Imported here: `extract` builds a large character set at import, which the
         # parsing child process doesn't need.
         from app.extraction.extract import DocumentInput
@@ -56,8 +58,8 @@ class ParsedDocument:
         return DocumentInput(
             text=self.text,
             images=self.images,
-            sender_email=self.display_from,
-            received_at=self.display_date,
+            sender_email=self.claimed_from,
+            received_at=self.claimed_date,
         )
 
 
@@ -92,8 +94,8 @@ def _parse(kind: DocumentKind, data: bytes) -> ParsedDocument:
         images=(),
         page_count=1,
         warnings=email.warnings,
-        display_from=email.display_from,
-        display_date=email.display_date,
+        claimed_from=email.claimed_from,
+        claimed_date=email.claimed_date,
     )
 
 

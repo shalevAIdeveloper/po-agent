@@ -1,5 +1,6 @@
 import pytest
 
+from app.extraction.inputs import parse_document
 from app.extraction.inputs.detect import PDF_HEADER_WINDOW, detect_kind
 from app.extraction.inputs.errors import InputError
 from tests.extraction.inputs.files import make_email, make_image, make_pdf
@@ -44,6 +45,37 @@ def test_a_pdf_header_after_a_few_junk_bytes_is_a_pdf() -> None:
 )
 def test_anything_else_is_unsupported(data: bytes) -> None:
     assert kind_or_code(data) == "unsupported_type"
+
+
+@pytest.mark.parametrize(
+    "data",
+    [
+        b"From: Warehouse 3\n\nItem,Qty\n",  # only one known field
+        b"From: a@b.example\nSubject: hi",  # no blank line at all
+        b" folded\nFrom: a@b.example\nSubject: x\n\nbody",  # continuation as first line
+    ],
+)
+def test_more_near_misses_are_not_emails(data: bytes) -> None:
+    assert kind_or_code(data) == "unsupported_type"
+
+
+def test_an_email_is_checked_before_a_late_pdf_header() -> None:
+    assert detect_kind(b"From: a@b.example\nSubject: x\n\n%PDF-1.4 attached text") == "eml"
+
+
+def test_an_mbox_separator_line_is_allowed() -> None:
+    data = b"From - Mon Nov 16 09:30:00 2026\n" + make_email()
+    assert detect_kind(data) == "eml"
+    assert parse_document(data).text == "PO 4500012345\n1 x Widget 00123-A"
+
+
+def test_a_long_received_chain_is_still_an_email() -> None:
+    # `qa`: 300 Received lines (~19 KB) went past the old 16 KB window.
+    chain = b"".join(
+        b"Received: from mx%d.example by mx.example; Mon, 16 Nov 2026 09:30:00 -0500\n" % i
+        for i in range(300)
+    )
+    assert detect_kind(chain + make_email()) == "eml"
 
 
 def test_an_email_with_folded_headers_and_crlf_is_an_email() -> None:

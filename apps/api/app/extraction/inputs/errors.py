@@ -19,7 +19,15 @@ InputErrorCode = Literal[
     "parse_failed",  # the parsing child process died (native crash, memory limit)
 ]
 
-InputWarningCode = Literal["attachments_ignored"]
+InputWarningCode = Literal[
+    "attachments_ignored",  # EML attachments / forwarded messages were not read
+    # EML: the plain-text and HTML versions carry different numbers. The model read the
+    # plain text; a mail client shows the HTML (`sec` M3).
+    "alternative_parts_differ",
+    # EML HTML: text hidden by inline style (display:none, visibility:hidden, font-size:0)
+    # is in what the model read but not on screen in a mail client (`sec` M3).
+    "hidden_html_text",
+]
 
 
 class InputError(Exception):
