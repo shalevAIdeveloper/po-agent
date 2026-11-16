@@ -173,6 +173,50 @@ def test_missing_file_is_a_prompt_error(tmp_path: Path) -> None:
         load_prompt("demo", 9, directory=tmp_path)
 
 
+@pytest.mark.parametrize(
+    "replacement",
+    [
+        "{{{name}}}",
+        "{{{name}}",
+        "{{name}}}",
+        "{{{{name}}}}",
+        "{{name}} {{{",
+        "{{name}} }}}",
+        "{{name}} {{{ }}}",
+    ],
+)
+@pytest.mark.parametrize("section", ["User", "Retry"])
+def test_a_brace_touching_a_placeholder_or_a_triple_brace_run_fails(
+    replacement: str, section: str
+) -> None:
+    # M1-BRACES: `{{{name}}}` used to render as `{value}`, the leftover single brace
+    # passing the malformed-placeholder check.
+    text = GOOD + "\n## Retry\nAgain {{name}}.\n"
+    if section == "User":
+        text = text.replace("Hello {{name}}.", f"Hello {replacement}.")
+    else:
+        text = text.replace("Again {{name}}.", f"Again {replacement}.")
+    with pytest.raises(PromptError, match=f"malformed placeholder in section '{section}'"):
+        parse_prompt("demo", 1, text)
+
+
+def test_single_braces_apart_from_a_placeholder_are_allowed() -> None:
+    prompt = parse_prompt("demo", 1, GOOD.replace("Hello {{name}}.", "Hello { {{name}} }."))
+    assert prompt.render("User", name="Ann", document="d") == "Hello { Ann }.\nd\nBye."
+
+
+def test_a_value_with_triple_braces_renders_literally() -> None:
+    prompt = parse_prompt("demo", 1, GOOD)
+    out = prompt.render("User", name="{{{x}}}", document="}}}")
+    assert out == "Hello {{{x}}}.\n}}}\nBye."
+
+
+def test_the_extract_po_prompt_hash_is_unchanged_by_the_brace_check() -> None:
+    path = PROMPTS_DIR / "extract_po" / "v1.md"
+    text = path.read_bytes().decode("utf-8").replace("\r\n", "\n")
+    assert load_prompt("extract_po", 1).sha256 == hashlib.sha256(text.encode()).hexdigest()
+
+
 def test_unknown_section_cannot_be_rendered() -> None:
     prompt = parse_prompt("demo", 1, GOOD)
     with pytest.raises(PromptError, match="no section"):
