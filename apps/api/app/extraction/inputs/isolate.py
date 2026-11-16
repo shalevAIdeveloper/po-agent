@@ -110,7 +110,8 @@ def _run_child(data: bytes, timeout: float, parser: str) -> ParsedDocument | Rej
         return Rejection(code="parse_failed")
     try:
         return decode(bytes(reader.data))
-    except WireError:
+    except (WireError, TypeError, ValueError, KeyError):
+        # TypeError: unhashable JSON values in a membership test (`sec` delta L-1).
         return Rejection(code="parse_failed")
 
 

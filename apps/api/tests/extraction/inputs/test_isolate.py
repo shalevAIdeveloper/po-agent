@@ -41,7 +41,8 @@ def test_the_child_gets_no_secrets(monkeypatch: pytest.MonkeyPatch) -> None:
     document = parse_isolated(b"x", parser=targets.name("environment"))
     names = set((document.text or "").split())
     assert not names & {"DATABASE_URL", "LLM_API_KEY", "SUPABASE_SECRET_KEY"}
-    assert names <= {"PATH", "SYSTEMROOT"}
+    # LC_CTYPE: Python's C-locale coercion adds it on Linux (`sec` delta L-6).
+    assert names <= {"PATH", "SYSTEMROOT", "LC_CTYPE"}
 
 
 def test_the_child_receives_the_whole_file() -> None:
