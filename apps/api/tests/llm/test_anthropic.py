@@ -276,6 +276,43 @@ async def test_deadline_during_a_retry_still_in_flight_is_a_timeout(
     assert not raised.value.transient
 
 
+class _StalledBody(httpx2.AsyncByteStream):
+    """A 200 body whose bytes never finish arriving."""
+
+    async def __aiter__(self) -> Any:
+        yield b'{"id": "msg_'
+        await asyncio.sleep(5)
+        yield b'"}'
+
+
+@pytest.mark.parametrize("first_status", [429, 529])
+async def test_deadline_while_reading_a_200_body_is_a_timeout(
+    monkeypatch: pytest.MonkeyPatch, first_status: int
+) -> None:
+    # `sec` delta 4: the 200 headers arrived (the reply was generated and billed) but the
+    # deadline hit while reading the body; the earlier 429/5xx must not make it transient.
+    monkeypatch.setattr(adapter_module, "DEADLINE_SLACK_SECONDS", 0.0)
+    calls: list[int] = []
+
+    def handler(_request: httpx2.Request) -> httpx2.Response:
+        calls.append(1)
+        if len(calls) == 1:
+            return httpx2.Response(
+                first_status, json={"type": "error"}, headers={"retry-after-ms": "1"}
+            )
+        return httpx2.Response(
+            200, headers={"content-type": "application/json"}, stream=_StalledBody()
+        )
+
+    client = adapter(handler, timeout_seconds=0.3, max_retries=2)
+    with pytest.raises(LLMError) as raised:
+        await client.extract(make_request())
+
+    assert len(calls) == 2
+    assert raised.value.code == "llm_timeout"
+    assert not raised.value.transient
+
+
 async def test_existing_event_hooks_on_an_injected_client_are_kept() -> None:
     called: list[str] = []
 

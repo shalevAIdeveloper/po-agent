@@ -85,13 +85,16 @@ async def _record_status(response: httpx2.Response) -> None:
 
 
 def _deadline_code(trace: _CallTrace) -> LLMErrorCode:
-    """What a deadline hit means (`sec` delta 2 + 3).
+    """What a deadline hit means (`sec` delta 2, 3 + 4).
 
-    A request still waiting for its reply may already be generated and billed: that is a
-    timeout and must not be re-run. Only when every request got an answer (the deadline
-    hit while the SDK slept before a retry) is it transient.
+    A request still waiting for its reply, or a 2xx whose body was still being read, may
+    already be generated and billed: that is a timeout and must not be re-run. Only when
+    every request got an error answer (the deadline hit while the SDK slept before a
+    retry) is it transient.
     """
     if trace.sent > len(trace.statuses) or not trace.statuses:
+        return "llm_timeout"
+    if any(200 <= status < 300 for status in trace.statuses):
         return "llm_timeout"
     if 429 in trace.statuses:
         return "llm_rate_limited"
