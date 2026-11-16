@@ -186,7 +186,7 @@ def decode(reply: bytes) -> ParsedDocument | Rejection:
         header = json.loads(raw.decode("utf-8", errors="strict"), parse_constant=_reject_constant)
     except (UnicodeDecodeError, ValueError, RecursionError):
         raise WireError("bad header") from None
-    _expect(isinstance(header, dict) and header.get("v") == VERSION)
+    _expect(isinstance(header, dict) and type(header.get("v")) is int and header["v"] == VERSION)
     status = header.get("status")
     if status == "rejected":
         _expect(not body)

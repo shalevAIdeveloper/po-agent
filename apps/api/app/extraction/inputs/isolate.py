@@ -34,7 +34,7 @@ import re
 import subprocess
 import sys
 import threading
-from collections.abc import Callable
+import time
 from pathlib import Path
 from typing import IO, Final
 
@@ -51,6 +51,7 @@ _BOOTSTRAP: Final = (
 )
 _READ_CHUNK: Final = 64 * 1024
 _REAP_SECONDS: Final = 5.0
+_POLL_SECONDS: Final = 0.02
 _PR_SET_DUMPABLE: Final = 4
 
 
@@ -88,21 +89,41 @@ def _kill(process: subprocess.Popen[bytes]) -> None:
         process.kill()
 
 
+def _exited(process: subprocess.Popen[bytes]) -> bool:
+    """Whether the child exited, without reaping it on POSIX (`sec` delta 2, Low 1)."""
+    if sys.platform == "win32":
+        return process.poll() is not None  # no process group to kill on Windows
+    result = os.waitid(os.P_PID, process.pid, os.WEXITED | os.WNOHANG | os.WNOWAIT)
+    return result is not None
+
+
+def _wait_unreaped(process: subprocess.Popen[bytes], timeout: float, stop: threading.Event) -> bool:
+    """Until the child exits or `stop` is set: True; False at the timeout."""
+    deadline = time.monotonic() + timeout
+    while not _exited(process):
+        if stop.is_set():
+            return True
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            return False
+        stop.wait(min(_POLL_SECONDS, remaining))
+    return True
+
+
 class _Reader:
     """Owns the child's stdout: reads up to MAX_REPLY_BYTES; more is an overflow."""
 
-    def __init__(self, stream: IO[bytes], on_overflow: Callable[[], None]) -> None:
+    def __init__(self, stream: IO[bytes]) -> None:
         self._stream = stream
-        self._on_overflow = on_overflow
         self.data = bytearray()
-        self.overflow = False
+        # Set on overflow; the main thread does all the killing (`sec` delta 2, Low 1).
+        self.overflow = threading.Event()
 
     def run(self) -> None:
         try:
             while chunk := self._stream.read(_READ_CHUNK):
                 if len(self.data) + len(chunk) > MAX_REPLY_BYTES:
-                    self.overflow = True
-                    self._on_overflow()  # a child blocked on a full pipe never exits
+                    self.overflow.set()  # a child blocked on a full pipe never exits
                     return
                 self.data.extend(chunk)
         finally:
@@ -115,7 +136,9 @@ def _write(stream: IO[bytes], data: bytes) -> None:
         view = memoryview(data)
         while view:
             written = stream.write(view)  # unbuffered: may write part
-            view = view[written or 0 :]
+            if not written:
+                break  # never spin (a blocking pipe doesn't return 0 or None)
+            view = view[written:]
     except (OSError, ValueError):
         pass  # the child exited early (or was killed): its reply says why
     finally:
@@ -139,7 +162,7 @@ def _run_child(data: bytes, timeout: float, parser: str) -> ParsedDocument | Rej
         start_new_session=sys.platform != "win32",
     )
     assert process.stdin is not None and process.stdout is not None  # noqa: S101 - PIPE set
-    reader = _Reader(process.stdout, on_overflow=lambda: _kill(process))
+    reader = _Reader(process.stdout)
     # Each thread owns and closes its stream: the parent never closes a stream another
     # thread may be blocked on.
     writer_thread = threading.Thread(target=_write, args=(process.stdin, data), daemon=True)
@@ -149,21 +172,19 @@ def _run_child(data: bytes, timeout: float, parser: str) -> ParsedDocument | Rej
     timed_out = False
     exit_code: int | None = None
     try:
-        try:
-            exit_code = process.wait(timeout)
-        except subprocess.TimeoutExpired:
-            timed_out = True
+        timed_out = not _wait_unreaped(process, timeout, reader.overflow)
     finally:
         # Whatever happened: nothing the child started may keep running or keep the
-        # pipes open. Killing the group closes their ends, so both threads finish.
+        # pipes open. Killing the group closes their ends, so both threads finish. The
+        # child isn't reaped yet, so its pid (the group id) can't have been reused.
         _kill(process)
         with contextlib.suppress(subprocess.TimeoutExpired):
-            process.wait(_REAP_SECONDS)
+            exit_code = process.wait(_REAP_SECONDS)
         reader_thread.join(_REAP_SECONDS)
         writer_thread.join(_REAP_SECONDS)
     if timed_out:
         return Rejection(code="parse_timeout")
-    if reader.overflow or exit_code != 0 or reader_thread.is_alive():
+    if reader.overflow.is_set() or exit_code != 0 or reader_thread.is_alive():
         # Still reading: something outside the group holds the pipe; the reply is unknown.
         return Rejection(code="parse_failed")
     try:

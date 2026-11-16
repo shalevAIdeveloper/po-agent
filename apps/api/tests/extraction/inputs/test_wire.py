@@ -69,6 +69,8 @@ def test_a_rejection_round_trips() -> None:
         frame("not json"),
         frame('{"v": 1, "status": "ok", "page_count": NaN}'),
         frame(ok_header(v=2), b"abc"),
+        frame(ok_header(v=True), b"abc"),  # JSON true == 1 in Python
+        frame(ok_header(v=1.0), b"abc"),
         frame(ok_header(status="maybe"), b"abc"),
         frame(ok_header(extra=1), b"abc"),
         frame(ok_header(kind="exe"), b"abc"),

@@ -8,6 +8,8 @@ The limits are set before the file is read. On Linux:
   the reply pipe open or outlive the kill (`sec` delta M-B);
 - RLIMIT_CPU: a backstop past the parent's timeout.
 Each is a hard limit too, so code running in the child can't raise it again.
+RLIMIT_NPROC 0 also forbids threads: a parser must not start any. A dependency with a
+thread pool (numpy/OpenBLAS, ...) needs `*_NUM_THREADS=1` in `child_environment()`.
 """
 
 import importlib
