@@ -102,6 +102,20 @@ def parse_xml(data: bytes) -> Element:
     return cast(Element, SafeET.fromstring(data, forbid_dtd=True))
 
 
+def refuse_dtds(archive: zipfile.ZipFile) -> None:
+    """No XML part may declare a DTD (OOXML never does).
+
+    openpyxl's defusedxml calls forbid entities and external references but allow a
+    DTD; this closes that gap for every part it might read. Only each part's prolog is
+    parsed (up to its root element), streamed. defusedxml raises `DTDForbidden`.
+    """
+    for info in archive.infolist():
+        if info.filename.lower().endswith((".xml", ".rels", ".vml")):
+            with archive.open(info) as source:
+                for _event in SafeET.iterparse(source, events=("start",), forbid_dtd=True):
+                    break
+
+
 @dataclass(frozen=True, slots=True)
 class ContentTypes:
     overrides: dict[str, str]  # part name ("/xl/workbook.xml") -> content type

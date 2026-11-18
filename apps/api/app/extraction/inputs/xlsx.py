@@ -8,7 +8,8 @@
   are hidden from openpyxl, so their drawings and images are never parsed.
 - **openpyxl must parse XML with defusedxml and never lxml**: checked at import, and the
   parser refuses to run otherwise (`parse_failed`, fail closed). Our own XML reads
-  (content types, the pre-pass) use defusedxml directly.
+  (content types, the pre-pass) use defusedxml directly, and before openpyxl runs
+  every XML part's prolog is checked: a DTD anywhere is `invalid_file`.
 - Each sheet's XML is pre-scanned (`xlsx_scan.py`): hidden rows and columns holding
   data are dropped (`hidden_cells_ignored`), uncached formulas are counted
   (`formula_without_value`), and openpyxl's read is bounded by the last visible data
@@ -35,7 +36,7 @@ from typing import Any, Final
 import openpyxl.xml
 import openpyxl.xml.functions
 
-from app.extraction.inputs.archive import open_archive, read_content_types
+from app.extraction.inputs.archive import open_archive, read_content_types, refuse_dtds
 from app.extraction.inputs.detect import WORKBOOK_PART, XLSM_MAIN
 from app.extraction.inputs.errors import InputError, InputWarningCode
 from app.extraction.inputs.limits import (
@@ -137,6 +138,7 @@ def parse_xlsx(data: bytes) -> SpreadsheetParse:
         warnings.simplefilter("ignore")  # openpyxl warns about unsupported extensions
         with open_archive(data) as package:
             macros = _check_shared_strings(package)
+            refuse_dtds(package)
             reader = ExcelReader(
                 io.BytesIO(data),
                 read_only=True,
