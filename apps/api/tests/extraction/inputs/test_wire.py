@@ -19,7 +19,7 @@ def frame(header: dict[str, Any] | str, body: bytes = b"") -> bytes:
 
 def ok_header(**changes: Any) -> dict[str, Any]:
     header: dict[str, Any] = {
-        "v": 1,
+        "v": 2,
         "status": "ok",
         "kind": "png",
         "text": None,
@@ -28,6 +28,7 @@ def ok_header(**changes: Any) -> dict[str, Any]:
         "claimed_from": None,
         "claimed_date": None,
         "images": [{"media_type": "image/png", "length": 3}],
+        "table": None,
     }
     header.update(changes)
     return header
@@ -67,10 +68,10 @@ def test_a_rejection_round_trips() -> None:
         pickle.dumps(Rejection(code="invalid_file")),  # never unpickled
         frame("[]"),
         frame("not json"),
-        frame('{"v": 1, "status": "ok", "page_count": NaN}'),
-        frame(ok_header(v=2), b"abc"),
+        frame('{"v": 2, "status": "ok", "page_count": NaN}'),
+        frame(ok_header(v=1), b"abc"),
         frame(ok_header(v=True), b"abc"),  # JSON true == 1 in Python
-        frame(ok_header(v=1.0), b"abc"),
+        frame(ok_header(v=2.0), b"abc"),
         frame(ok_header(status="maybe"), b"abc"),
         frame(ok_header(extra=1), b"abc"),
         frame(ok_header(kind="exe"), b"abc"),
@@ -90,10 +91,10 @@ def test_a_rejection_round_trips() -> None:
         frame(ok_header(), b"abcd"),  # trailing bytes
         frame(ok_header(images=[]), b""),  # neither text nor images
         frame(ok_header(images=[{"media_type": "image/png", "length": 3, "x": 1}]), b"abc"),
-        frame({"v": 1, "status": "rejected", "code": "rm -rf", "kind": None, "error_type": None}),
+        frame({"v": 2, "status": "rejected", "code": "rm -rf", "kind": None, "error_type": None}),
         frame(
             {
-                "v": 1,
+                "v": 2,
                 "status": "rejected",
                 "code": "invalid_file",
                 "kind": None,
@@ -102,7 +103,7 @@ def test_a_rejection_round_trips() -> None:
         ),
         frame(
             {
-                "v": 1,
+                "v": 2,
                 "status": "rejected",
                 "code": "invalid_file",
                 "kind": None,
@@ -144,7 +145,7 @@ def test_a_reply_a_parser_could_not_produce_is_refused(header: dict[str, Any]) -
 
 
 def test_a_rejection_with_an_unhashable_code_is_refused() -> None:
-    header = {"v": 1, "status": "rejected", "code": {}, "kind": None, "error_type": None}
+    header = {"v": 2, "status": "rejected", "code": {}, "kind": None, "error_type": None}
     with pytest.raises(WireError):
         decode(frame(header))
 
