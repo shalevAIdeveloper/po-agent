@@ -10,11 +10,14 @@ appear in at least two records and in at least half of them.
 """
 
 import codecs
+import csv
+import io
 from dataclasses import dataclass
 from typing import Final
 
-from app.extraction.inputs.errors import InputError
-from app.extraction.inputs.limits import CSV_SNIFF_BYTES
+from app.extraction.inputs.errors import InputError, InputWarningCode
+from app.extraction.inputs.limits import CSV_SNIFF_BYTES, MAX_CELL_CHARS, MAX_ROWS_READ
+from app.extraction.inputs.table import SpreadsheetParse, TableBuilder
 
 DELIMITERS: Final = (",", ";", "\t", "|")
 SNIFF_RECORDS: Final = 50
@@ -97,6 +100,32 @@ def sniff_delimiter(text: str) -> str | None:
     if best is None or best_records < 2 or 2 * best_records < len(records):
         return None
     return best
+
+
+def parse_csv(data: bytes) -> SpreadsheetParse:
+    """Every record read, streamed; a cell starting with `=` is text, never evaluated."""
+    decoded = decode(data)
+    delimiter = sniff_delimiter(decoded.text[:CSV_SNIFF_BYTES])
+    if delimiter is None:
+        raise InputError("invalid_file")
+    builder = TableBuilder()
+    reader = csv.reader(io.StringIO(decoded.text, newline=""), delimiter=delimiter)
+    # The limit is process-wide: restored afterwards (the worker parses in a child).
+    previous = csv.field_size_limit(MAX_CELL_CHARS)
+    try:
+        for number, record in enumerate(reader, start=1):
+            if number > MAX_ROWS_READ:
+                raise InputError("too_many_rows")
+            builder.add_row(number, enumerate(record, start=1))
+    except csv.Error as error:
+        # Only the start of the message is looked at; it is never logged or kept.
+        if str(error).startswith("field larger than field limit"):
+            raise InputError("document_too_large") from None
+        raise InputError("invalid_file") from None
+    finally:
+        csv.field_size_limit(previous)
+    warnings: tuple[InputWarningCode, ...] = ("encoding_guessed",) if decoded.guessed else ()
+    return SpreadsheetParse(table=builder.build(), warnings=warnings)
 
 
 def looks_like_csv(data: bytes) -> bool:
