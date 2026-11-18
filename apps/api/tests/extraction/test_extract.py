@@ -303,7 +303,9 @@ async def test_invalid_then_valid_passes_on_the_second_attempt() -> None:
     result = await run(client)
 
     assert result.status == "extracted"
-    assert [call.outcome for call in result.calls] == ["invalid_output", "ok"]
+    assert [call.result.outcome for call in result.calls] == ["invalid_output", "ok"]
+    # The retry is attempt 2 of the same purpose (no separate `retry` purpose).
+    assert [(c.purpose, c.attempt) for c in result.calls] == [("extract", 1), ("extract", 2)]
     first, second = client.requests
     assert second.system == first.system
     assert second.content[:-1] == first.content
@@ -388,7 +390,8 @@ async def test_a_transport_error_keeps_the_calls_already_paid_for() -> None:
         await run(client)
 
     assert raised.value.error.code == "llm_rate_limited"
-    assert [call.outcome for call in raised.value.calls] == ["invalid_output"]
+    assert [call.result.outcome for call in raised.value.calls] == ["invalid_output"]
+    assert raised.value.calls[0].attempt == 1
 
 
 async def test_a_transport_error_on_the_first_attempt_has_no_calls() -> None:
