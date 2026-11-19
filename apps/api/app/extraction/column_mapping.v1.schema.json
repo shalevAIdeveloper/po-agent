@@ -1,0 +1,208 @@
+{
+  "$defs": {
+    "AddressCells": {
+      "additionalProperties": false,
+      "properties": {
+        "field": {
+          "enum": [
+            "ship_to",
+            "bill_to"
+          ],
+          "title": "Field",
+          "type": "string"
+        },
+        "cells": {
+          "items": {
+            "$ref": "#/$defs/CellRef"
+          },
+          "maxItems": 8,
+          "title": "Cells",
+          "type": "array"
+        }
+      },
+      "required": [
+        "field",
+        "cells"
+      ],
+      "title": "AddressCells",
+      "type": "object"
+    },
+    "CellRef": {
+      "additionalProperties": false,
+      "properties": {
+        "row": {
+          "maximum": 1048576,
+          "minimum": 1,
+          "title": "Row",
+          "type": "integer"
+        },
+        "column": {
+          "pattern": "^[A-Z]{1,3}$",
+          "title": "Column",
+          "type": "string"
+        }
+      },
+      "required": [
+        "row",
+        "column"
+      ],
+      "title": "CellRef",
+      "type": "object"
+    },
+    "ColumnAssignment": {
+      "additionalProperties": false,
+      "properties": {
+        "column": {
+          "pattern": "^[A-Z]{1,3}$",
+          "title": "Column",
+          "type": "string"
+        },
+        "field": {
+          "enum": [
+            "line_no",
+            "customer_part_number",
+            "vendor_part_number",
+            "description",
+            "qty",
+            "uom",
+            "unit_price",
+            "extended_price"
+          ],
+          "title": "Field",
+          "type": "string"
+        }
+      },
+      "required": [
+        "column",
+        "field"
+      ],
+      "title": "ColumnAssignment",
+      "type": "object"
+    },
+    "HeaderValue": {
+      "additionalProperties": false,
+      "properties": {
+        "field": {
+          "enum": [
+            "customer_name",
+            "customer_po_number",
+            "po_date",
+            "requested_ship_date",
+            "order_total",
+            "currency",
+            "payment_terms",
+            "notes"
+          ],
+          "title": "Field",
+          "type": "string"
+        },
+        "row": {
+          "maximum": 1048576,
+          "minimum": 1,
+          "title": "Row",
+          "type": "integer"
+        },
+        "column": {
+          "pattern": "^[A-Z]{1,3}$",
+          "title": "Column",
+          "type": "string"
+        },
+        "value": {
+          "maxLength": 32767,
+          "minLength": 1,
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "field",
+        "row",
+        "column",
+        "value"
+      ],
+      "title": "HeaderValue",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "column_mapping.v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "document_type": {
+      "enum": [
+        "purchase_order",
+        "not_a_po"
+      ],
+      "title": "Document Type",
+      "type": "string"
+    },
+    "first_data_row": {
+      "anyOf": [
+        {
+          "maximum": 1048576,
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "First Data Row"
+    },
+    "columns": {
+      "items": {
+        "$ref": "#/$defs/ColumnAssignment"
+      },
+      "maxItems": 16,
+      "title": "Columns",
+      "type": "array"
+    },
+    "header_values": {
+      "items": {
+        "$ref": "#/$defs/HeaderValue"
+      },
+      "maxItems": 16,
+      "title": "Header Values",
+      "type": "array"
+    },
+    "addresses": {
+      "items": {
+        "$ref": "#/$defs/AddressCells"
+      },
+      "maxItems": 2,
+      "title": "Addresses",
+      "type": "array"
+    },
+    "footer_rows": {
+      "items": {
+        "maximum": 1048576,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "maxItems": 20,
+      "title": "Footer Rows",
+      "type": "array"
+    },
+    "confidence": {
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Confidence",
+      "type": "number"
+    }
+  },
+  "required": [
+    "schema_version",
+    "document_type",
+    "first_data_row",
+    "columns",
+    "header_values",
+    "addresses",
+    "footer_rows",
+    "confidence"
+  ],
+  "title": "ColumnMapping",
+  "type": "object"
+}

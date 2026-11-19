@@ -42,7 +42,8 @@ class StructuredRequest[T: BaseModel]:
     schema_version: str  # e.g. "po_extraction.v1"
     model: str
     max_output_tokens: int
-    effort: Effort = "medium"
+    # None: not sent, the model's default (for a model that may not support effort).
+    effort: Effort | None = "medium"
 
     def fingerprint(self) -> str:
         """Stable key of everything that decides the output (replay cassettes, PR 7)."""

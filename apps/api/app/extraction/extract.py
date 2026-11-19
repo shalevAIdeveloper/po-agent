@@ -95,11 +95,15 @@ def _spaced(word: str) -> str:
     return _GAP.join(re.escape(letter) for letter in word)
 
 
-_DELIMITER_RE: Final = re.compile(
-    f"[{_LESS_THAN}]{_GAP}(?:[{_SLASH}]{_GAP})?"
-    f"(?:{_spaced('document')}|{_spaced('metadata')}|{_spaced('validation_errors')})",
-    re.IGNORECASE,
-)
+def delimiter_pattern(*names: str) -> re.Pattern[str]:
+    """Opening or closing tags named `names`, with look-alike and invisible tricks."""
+    return re.compile(
+        f"[{_LESS_THAN}]{_GAP}(?:[{_SLASH}]{_GAP})?(?:{'|'.join(_spaced(n) for n in names)})",
+        re.IGNORECASE,
+    )
+
+
+_DELIMITER_RE: Final = delimiter_pattern("document", "metadata", "validation_errors")
 _ROLE_HEADING_RE: Final = re.compile(
     f"^({_INLINE_GAP})([{_HASH}]{_INLINE_GAP}(?:[{_HASH}]{_INLINE_GAP})*+"
     "(?:system|user|assistant|retry)(?![a-z0-9_]))",
@@ -131,7 +135,7 @@ class DocumentInput:
 class ExtractionSettings:
     model: str
     max_output_tokens: int
-    effort: Effort = "medium"
+    effort: Effort | None = "medium"  # None: not sent (the model default)
 
 
 @dataclass(frozen=True, slots=True)
@@ -149,11 +153,11 @@ class ExtractionResult:
     grounding_checked: bool
 
 
-def neutralize(text: str) -> str:
+def neutralize(text: str, delimiters: re.Pattern[str] = _DELIMITER_RE) -> str:
     """Document text made safe to place between our delimiters (otherwise unchanged)."""
     text = text.replace("\r\n", "\n").replace("\r", "\n")
     text = _CONTROL_RE.sub("", text)
-    text = _DELIMITER_RE.sub(lambda match: "&lt;" + match.group(0)[1:], text)
+    text = delimiters.sub(lambda match: "&lt;" + match.group(0)[1:], text)
     return _ROLE_HEADING_RE.sub(lambda match: match.group(1) + "\\" + match.group(2), text)
 
 
