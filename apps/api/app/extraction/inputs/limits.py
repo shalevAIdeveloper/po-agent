@@ -37,6 +37,10 @@ MAX_TABLE_COLUMNS: Final = 64  # columns that hold data; more is `document_too_l
 # million empty rows. Data below this row is `too_many_rows`.
 MAX_ROWS_READ: Final = 20_000
 MAX_CELL_CHARS: Final = 32_767  # Excel's own limit per cell
+# XLSX: the area openpyxl walks (last data row x last data column), empty cells included.
+# Two cells at A1 and XFD20000 would otherwise cost ~327M cells, about 90 s (`sec` M2).
+MAX_CELLS_READ: Final = 2_000_000
+MAX_SHEETS: Final = 64  # sheets in a workbook: each is opened and scanned
 MAX_TABLE_CHARS: Final = 1_000_000
 # Excel's grid: column XFD, row 1,048,576. A reference beyond it is `invalid_file`.
 MAX_SHEET_COLUMN: Final = 16_384

@@ -14,7 +14,9 @@
 - Each sheet's XML is pre-scanned (`xlsx_scan.py`): hidden rows and columns holding
   data are dropped (`hidden_cells_ignored`), uncached formulas are counted
   (`formula_without_value`), and openpyxl's read is bounded by the last visible data
-  row and column. Data below MAX_ROWS_READ is `too_many_rows`.
+  row and column. Data below MAX_ROWS_READ is `too_many_rows`; an area (last row x last
+  column) over MAX_CELLS_READ, or more than MAX_SHEETS sheets, is `document_too_large`,
+  and each sheet part is scanned once (`sec` M2: a tiny file can't hold the child).
 - Hidden sheets are never read (`hidden_sheets_ignored` when one holds data). Other
   visible sheets with data are not read either (`other_sheets_ignored`); their names,
   cleaned and capped, go into the table for the reviewer (never logged, never sent to
@@ -37,13 +39,22 @@ from typing import Any, Final
 import openpyxl.xml
 import openpyxl.xml.functions
 
-from app.extraction.inputs.archive import open_archive, read_content_types, refuse_dtds
+from app.extraction.inputs.archive import (
+    open_archive,
+    parse_xml,
+    read_content_types,
+    read_entry,
+    refuse_dtds,
+)
 from app.extraction.inputs.detect import WORKBOOK_PART, XLSM_MAIN
 from app.extraction.inputs.errors import InputError, InputWarningCode
 from app.extraction.inputs.limits import (
+    MAX_CELLS_READ,
     MAX_ROWS_READ,
     MAX_SHARED_STRINGS_BYTES,
     MAX_SHEET_NAMES,
+    MAX_SHEETS,
+    MAX_ZIP_ENTRY_BYTES,
 )
 from app.extraction.inputs.table import (
     SpreadsheetParse,
@@ -115,11 +126,38 @@ def render_cell(value: Any, number_format: str | None) -> str | None:
     return None  # nothing else is a cached value (openpyxl objects for formulas)
 
 
-def _scan(package: Any, path: object, *, until_content: bool) -> SheetScan:
-    if not isinstance(path, str):
-        raise InputError("invalid_file")
-    with package.open(path) as source:
-        return scan_sheet(source, until_content=until_content)
+_SHEET_TAG: Final = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}sheet"
+
+
+class _Scans:
+    """Each sheet part is scanned at most once, however many sheets name it (`sec` M2).
+
+    A full scan answers every question; an until-content scan only "is there data".
+    """
+
+    def __init__(self, package: Any) -> None:
+        self._package = package
+        self._full: dict[str, SheetScan] = {}
+        self._quick: dict[str, SheetScan] = {}
+
+    def get(self, path: object, *, until_content: bool) -> SheetScan:
+        if not isinstance(path, str):
+            raise InputError("invalid_file")
+        if path in self._full:
+            return self._full[path]
+        if until_content and path in self._quick:
+            return self._quick[path]
+        with self._package.open(path) as source:
+            scan = scan_sheet(source, until_content=until_content)
+        (self._quick if until_content else self._full)[path] = scan
+        return scan
+
+
+def _check_sheet_count(package: Any) -> None:
+    """More than MAX_SHEETS sheets is `document_too_large`, before openpyxl opens any."""
+    root = parse_xml(read_entry(package, WORKBOOK_PART.lstrip("/"), MAX_ZIP_ENTRY_BYTES))
+    if sum(1 for _ in root.iter(_SHEET_TAG)) > MAX_SHEETS:
+        raise InputError("document_too_large")
 
 
 def _check_shared_strings(package: Any) -> bool:
@@ -143,6 +181,7 @@ def parse_xlsx(data: bytes) -> SpreadsheetParse:
         with open_archive(data) as package:
             macros = _check_shared_strings(package)
             refuse_dtds(package)
+            _check_sheet_count(package)
             reader = ExcelReader(
                 io.BytesIO(data),
                 read_only=True,
@@ -167,17 +206,19 @@ def _read(workbook: Any, package: Any, *, macros: bool) -> SpreadsheetParse:
     other_sheets: list[str] = []
     others = 0
     hidden_with_data = False
+    if len(workbook.worksheets) > MAX_SHEETS:
+        raise InputError("document_too_large")
+    scans = _Scans(package)
+    _scan = scans.get
     for sheet in workbook.worksheets:
         path = getattr(sheet, "_worksheet_path", None)
         if sheet.sheet_state != "visible":
-            hidden_with_data = (
-                hidden_with_data or _scan(package, path, until_content=True).has_content
-            )
+            hidden_with_data = hidden_with_data or _scan(path, until_content=True).has_content
         elif chosen is None:
-            candidate = _scan(package, path, until_content=False)
+            candidate = _scan(path, until_content=False)
             if candidate.has_content:
                 chosen, scan = sheet, candidate
-        elif _scan(package, path, until_content=True).has_content:
+        elif _scan(path, until_content=True).has_content:
             others += 1
             name = clean_sheet_name(str(sheet.title))
             if name is not None and len(other_sheets) < MAX_SHEET_NAMES:
@@ -186,6 +227,8 @@ def _read(workbook: Any, package: Any, *, macros: bool) -> SpreadsheetParse:
         raise InputError("empty_document")
     if scan.last_row > MAX_ROWS_READ:
         raise InputError("too_many_rows")
+    if scan.last_row * scan.last_column > MAX_CELLS_READ:
+        raise InputError("document_too_large")  # checked before openpyxl walks the area
 
     chosen.reset_dimensions()  # never trust the <dimension> the file declares
     builder = TableBuilder()
