@@ -62,6 +62,9 @@ import defusedxml
 import openpyxl.xml
 assert openpyxl.xml.DEFUSEDXML is True, "openpyxl must use defusedxml"
 assert openpyxl.xml.LXML is False, "openpyxl must not use lxml"
+# The entry points openpyxl really calls (iterparse, fromstring) come from defusedxml.
+from app.extraction.inputs.xlsx import xml_is_hardened
+assert xml_is_hardened(), "XML parsing must be hardened"
 PY
 ' || fail "api image contents"
 

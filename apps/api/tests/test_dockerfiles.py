@@ -39,6 +39,18 @@ def test_api_image_smoke_asserts_openpyxl_parses_through_defusedxml() -> None:
     assert re.search(r"^import openpyxl\.xml$", check, re.MULTILINE)
     assert re.search(r"^assert openpyxl\.xml\.DEFUSEDXML is True\b", check, re.MULTILINE)
     assert re.search(r"^assert openpyxl\.xml\.LXML is False\b", check, re.MULTILINE)
+    # sec L6: the flags alone don't prove iterparse/fromstring come from defusedxml.
+    assert re.search(
+        r"^from app\.extraction\.inputs\.xlsx import xml_is_hardened$", check, re.MULTILINE
+    )
+    assert re.search(r"^assert xml_is_hardened\(\), ", check, re.MULTILINE)
+
+
+def test_smoke_hardening_check_names_a_real_function() -> None:
+    # A renamed function would only fail in the image job; catch it in unit tests.
+    from app.extraction.inputs.xlsx import xml_is_hardened
+
+    assert xml_is_hardened() is True
 
 
 @pytest.mark.parametrize("dockerfile", DOCKERFILES, ids=lambda p: p.parent.name)
