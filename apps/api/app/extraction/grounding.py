@@ -58,7 +58,10 @@ _LINE_NUMBERS: Final = ("qty", "unit_price", "extended_price")
 class ExtractionWarning:
     """A flag for the reviewer: a code and a field path, never a value."""
 
-    code: Literal["ungrounded"]
+    # ungrounded: not found in the source text (Q16). Spreadsheets (M1 PR 5):
+    # unparsed_value: the cell couldn't be read as the field's type (null, raw_text kept);
+    # negative_value: a negative qty / price / total, kept, shown to the reviewer.
+    code: Literal["ungrounded", "unparsed_value", "negative_value"]
     path: str
 
 
