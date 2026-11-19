@@ -5,7 +5,8 @@
 - openpyxl in read-only mode, `data_only` (cached values only: a formula is never
   evaluated and its text never read), `keep_links=False` (external workbooks never
   read), `keep_vba=False` (macros never read or run; `macros_ignored`). Chart sheets
-  are hidden from openpyxl, so their drawings and images are never parsed.
+  are skipped (openpyxl's chart-sheet reader is replaced), so their drawings and images
+  are never parsed.
 - **openpyxl must parse XML with defusedxml and never lxml**: checked at import, and the
   parser refuses to run otherwise (`parse_failed`, fail closed). Our own XML reads
   (content types, the pre-pass) use defusedxml directly, and before openpyxl runs
@@ -72,7 +73,6 @@ from openpyxl.reader.excel import ExcelReader  # noqa: E402 - only after the che
 SHARED_STRINGS_TYPE: Final = (
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"
 )
-_CHARTSHEETS: Final = "xl/chartsheets/"
 _ZERO_PAD_RE: Final = re.compile(r"0+")
 _SIGNIFICANT_DIGITS: Final = 15
 
@@ -133,6 +133,10 @@ def _check_shared_strings(package: Any) -> bool:
     )
 
 
+def _skip_chartsheet(_sheet: Any, _rel: Any) -> None:
+    return None
+
+
 def parse_xlsx(data: bytes) -> SpreadsheetParse:
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")  # openpyxl warns about unsupported extensions
@@ -146,7 +150,9 @@ def parse_xlsx(data: bytes) -> SpreadsheetParse:
                 data_only=True,
                 keep_links=False,
             )
-            reader.valid_files = [n for n in reader.valid_files if not n.startswith(_CHARTSHEETS)]
+            # openpyxl picks chart sheets by relationship type, wherever the part is, and
+            # reads their drawings and images (Pillow): never (`sec` M1).
+            reader.read_chartsheet = _skip_chartsheet
             reader.read()
             workbook = reader.wb
             try:
