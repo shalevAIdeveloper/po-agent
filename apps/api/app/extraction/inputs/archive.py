@@ -102,15 +102,50 @@ def parse_xml(data: bytes) -> Element:
     return cast(Element, SafeET.fromstring(data, forbid_dtd=True))
 
 
+_XML_SPACE: Final = b" \t\r\n"
+_XML_LEAD: Final = frozenset(b"<" + _XML_SPACE)  # byte values an XML text can start with
+_UTF16_BOMS: Final = (b"\xff\xfe", b"\xfe\xff")
+_UTF8_BOM: Final = b"\xef\xbb\xbf"
+_READ_CHUNK: Final = 64 * 1024
+
+
+def _may_be_xml(archive: zipfile.ZipFile, info: zipfile.ZipInfo) -> bool:
+    """Whether an XML parser could read this entry: decided by its bytes, never its name.
+
+    openpyxl finds parts by content type and relationship (shared strings can be called
+    `xl/strings.bin`), so the name proves nothing. UTF-8 (BOM optional): the first byte
+    after any XML whitespace is `<`. UTF-16 (a BOM, or `<`/whitespace next to a NUL):
+    always checked. Images, `vbaProject.bin` (CFB) and other binaries start otherwise.
+    Reads at most the entry, which the caps already bound.
+    """
+    with archive.open(info) as source:
+        head = source.read(4)
+        if head.startswith(_UTF16_BOMS):
+            return True
+        if len(head) >= 2 and (
+            (head[0] == 0 and head[1] in _XML_LEAD) or (head[1] == 0 and head[0] in _XML_LEAD)
+        ):
+            return True  # UTF-16 without a BOM
+        chunk = head[3:] if head.startswith(_UTF8_BOM) else head
+        while True:
+            rest = chunk.lstrip(_XML_SPACE)
+            if rest:
+                return rest.startswith(b"<")
+            chunk = source.read(_READ_CHUNK)
+            if not chunk:
+                return False  # empty or whitespace only: nothing to parse
+
+
 def refuse_dtds(archive: zipfile.ZipFile) -> None:
     """No XML part may declare a DTD (OOXML never does).
 
     openpyxl's defusedxml calls forbid entities and external references but allow a
-    DTD; this closes that gap for every part it might read. Only each part's prolog is
-    parsed (up to its root element), streamed. defusedxml raises `DTDForbidden`.
+    DTD; this closes that gap for every entry it might parse, whatever its name
+    (`_may_be_xml`). Only each part's prolog is parsed (up to its root element),
+    streamed. defusedxml raises `DTDForbidden`.
     """
     for info in archive.infolist():
-        if info.filename.lower().endswith((".xml", ".rels", ".vml")):
+        if not info.is_dir() and _may_be_xml(archive, info):
             with archive.open(info) as source:
                 for _event in SafeET.iterparse(source, events=("start",), forbid_dtd=True):
                     break
