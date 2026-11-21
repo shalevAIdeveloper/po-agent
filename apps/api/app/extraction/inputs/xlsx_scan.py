@@ -155,9 +155,18 @@ def scan_sheet(source: IO[bytes], *, until_content: bool = False) -> SheetScan:
     row_hidden = False
     row_has_data = False
     sheet_data = None
+    # Open elements, outermost first. A finished element is cleared and detached from its
+    # parent unless it is inside a cell (the cell reads its <v>/<f>/<is> at its end), so
+    # memory stays flat everywhere: rows, mergeCells, conditionalFormatting, extLst, ...
+    # (`sec` L5). Siblings finish one at a time, so a parent holds at most one child.
+    open_elements: list[Element] = []
+    open_cells = 0
     for event, element in SafeET.iterparse(source, events=("start", "end"), forbid_dtd=True):
         tag = element.tag
         if event == "start":
+            open_elements.append(element)
+            if tag == _CELL:
+                open_cells += 1
             if tag == _ROW:
                 ref = element.get("r")
                 if ref is None:
@@ -182,7 +191,9 @@ def scan_sheet(source: IO[bytes], *, until_content: bool = False) -> SheetScan:
                 fmt.default_row_tiny = _is_tiny(element.get("defaultRowHeight"))
                 columns.default_tiny = _is_tiny(element.get("defaultColWidth"))
             continue
+        open_elements.pop()
         if tag == _CELL:
+            open_cells -= 1
             ref = element.get("r")
             if ref is None:
                 number = column + 1
@@ -204,18 +215,18 @@ def scan_sheet(source: IO[bytes], *, until_content: bool = False) -> SheetScan:
                         return _found(row_number, column)
             elif element.find(_FORMULA) is not None and not row_hidden:
                 formula_columns[column] += 1
-            element.clear()
         elif tag == _ROW:
             if row_has_data:
                 if not row_hidden:
                     last_row = row_number
                 else:
                     hidden_row_count += 1
-            element.clear()
-            if sheet_data is not None:
-                sheet_data.clear()  # processed rows: memory stays flat
         elif tag == _COL:
             columns.add(element)
+        if open_cells == 0:
+            element.clear()
+            if open_elements:
+                open_elements[-1].remove(element)
     hidden_columns = columns.all_hidden()
     visible = visible_row_columns - hidden_columns
     return SheetScan(

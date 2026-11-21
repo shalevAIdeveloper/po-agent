@@ -2,6 +2,7 @@
 
 import io
 import time
+import tracemalloc
 from typing import Any
 
 import openpyxl.reader.excel as excel
@@ -225,3 +226,22 @@ def test_every_hidden_row_and_column_is_dropped_counts_are_data_based() -> None:
     assert {3, 4, 5} <= scan.hidden_columns
     assert 2 in scan.hidden_rows
     assert (scan.hidden_row_count, scan.hidden_column_count) == (0, 0)
+
+
+# --- L5: memory stays flat outside sheetData too -------------------------------------------
+
+
+def test_a_large_merge_cells_part_keeps_the_scan_memory_flat() -> None:
+    count = 100_000
+    merges = "".join(f'<mergeCell ref="A{i}:B{i}"/>' for i in range(1, count + 1))
+    extra = f'<mergeCells count="{count}">{merges}</mergeCells><extLst><ext uri="x"/></extLst>'
+    xml = sheet_xml(row(1, inline("A1", "a")), extra=extra).encode()
+    tracemalloc.start()
+    try:
+        scan = scan_sheet(io.BytesIO(xml))
+        peak = tracemalloc.get_traced_memory()[1]
+    finally:
+        tracemalloc.stop()
+    assert scan.has_content
+    # Kept elements cost ~375 bytes each (~37 MB here); cleared, the peak stays small.
+    assert peak < 4 * 1024 * 1024
