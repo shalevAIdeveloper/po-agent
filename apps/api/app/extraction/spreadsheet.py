@@ -17,7 +17,9 @@ write a value that isn't in some cell.
   `unparsed_value` (Q-PR5-6). `header_confidence` is the mapping's confidence.
 - Header facts are the exact substrings the mapping pointed to (checked); dates are
   parsed by code and keep their raw text; `currency` is an ISO code or null. Addresses
-  are `raw_text` only (the referenced cells, one per line; Q-PR5-3).
+  are `raw_text` only (the referenced cells, one per line; Q-PR5-3). A header value must
+  be whole tokens of its cell (`check_mapping`), and `ExtractionResult.sources` keeps the
+  cell (row, column) behind each header fact and address line (`sec` M5).
 - The result is validated against `po_extraction.v1` and grounded against the table's
   text as a self-check. Failure paths are as for `extract_po`; logs carry codes and
   counts only.
@@ -31,7 +33,7 @@ import structlog
 from pydantic import ValidationError
 
 from app.extraction.column_mapping import ColumnMapping, TableIndex, map_columns
-from app.extraction.extract import ExtractionResult, ExtractionSettings
+from app.extraction.extract import ExtractionResult, ExtractionSettings, ValueSource
 from app.extraction.grounding import ExtractionWarning, check_grounding
 from app.extraction.inputs.table import SheetTable
 from app.extraction.schema import SCHEMA_VERSION, PurchaseOrderExtraction
@@ -179,6 +181,20 @@ def _lines(
     return lines
 
 
+def value_sources(mapping: ColumnMapping) -> tuple[ValueSource, ...]:
+    """The cell behind each header fact and each address line (`sec` M5)."""
+    facts = [
+        ValueSource(path=f"header.{fact.field}", row=fact.row, column=fact.column)
+        for fact in mapping.header_values
+    ]
+    cells = [
+        ValueSource(path=f"header.{address.field}", row=ref.row, column=ref.column)
+        for address in mapping.addresses
+        for ref in address.cells
+    ]
+    return (*facts, *cells)
+
+
 def build_extraction(
     mapping: ColumnMapping, table: SheetTable
 ) -> tuple[PurchaseOrderExtraction, tuple[ExtractionWarning, ...]]:
@@ -249,4 +265,5 @@ async def extract_spreadsheet(
         prompt_version=prompt.prompt_version,
         prompt_sha256=prompt.sha256,
         grounding_checked=grounding_checked,
+        sources=value_sources(outcome.parsed),
     )

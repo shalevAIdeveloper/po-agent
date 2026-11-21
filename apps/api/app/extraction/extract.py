@@ -151,6 +151,18 @@ class ExtractionResult:
     # False for image-only input or if the check failed: "no warnings" then means "not
     # checked", never "all grounded" (`sec` L2).
     grounding_checked: bool
+    # Spreadsheets: the cell each header fact and address line came from (`sec` M5).
+    # Beside the extraction, not in it: `po_extraction.v1` is unchanged.
+    sources: tuple["ValueSource", ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class ValueSource:
+    """Where a value was read: a field path and a sheet cell (row number, column letter)."""
+
+    path: str
+    row: int
+    column: str
 
 
 def neutralize(text: str, delimiters: re.Pattern[str] = _DELIMITER_RE) -> str:

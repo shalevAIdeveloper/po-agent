@@ -241,6 +241,48 @@ def _issue(path: str, kind: str, message: str) -> ValidationIssue:
     return ValidationIssue(path=path, type=kind, message=message)
 
 
+# Characters that join two alphanumerics into one token ("12,345.00", "A-32100", "03/04").
+_CONNECTORS: Final = frozenset(".,/-")
+_SIGN_BEFORE: Final = frozenset("-(")
+_SIGN_AFTER: Final = frozenset("-)")
+
+
+def _joined_before(cell: str, start: int) -> bool:
+    if start == 0:
+        return False
+    before = cell[start - 1]
+    if before.isalnum():
+        return True
+    return before in _CONNECTORS and start >= 2 and cell[start - 2].isalnum()
+
+
+def _joined_after(cell: str, end: int) -> bool:
+    if end == len(cell):
+        return False
+    after = cell[end]
+    if after.isalnum():
+        return True
+    return after in _CONNECTORS and end + 1 < len(cell) and cell[end + 1].isalnum()
+
+
+def whole_token_in(cell: str, value: str, *, signed: bool = False) -> bool:
+    """`value` occurs in `cell` as whole tokens (`sec` M5): never a piece of a number or an
+    id ("345.00" of "12,345.00", "45000" of "4500012345"). `signed` (a money total): the
+    value can't leave out a sign printed next to it ("5.00" of "(5.00)")."""
+    start = cell.find(value)
+    while start >= 0:
+        end = start + len(value)
+        ok = not _joined_before(cell, start) and not _joined_after(cell, end)
+        if ok and signed:
+            ok = not (start and cell[start - 1] in _SIGN_BEFORE) and not (
+                end < len(cell) and cell[end] in _SIGN_AFTER
+            )
+        if ok:
+            return True
+        start = cell.find(value, start + 1)
+    return False
+
+
 def _duplicates(values: Iterable[str]) -> bool:
     seen = list(values)
     return len(seen) != len(set(seen))
@@ -289,12 +331,14 @@ def check_mapping(
                     "row and column must be a non-empty cell in the sample",
                 )
             )
-        elif not header.value.strip() or header.value not in cell:
+        elif not header.value.strip() or not whole_token_in(
+            cell, header.value, signed=header.field == "order_total"
+        ):
             issues.append(
                 _issue(
                     f"header_values.{i}.value",
                     "not_in_cell",
-                    "must be the exact characters as they appear in that cell",
+                    "must be whole words or numbers exactly as they appear in that cell",
                 )
             )
     if _duplicates(h.field for h in mapping.header_values):

@@ -294,3 +294,23 @@ async def test_logs_have_counts_never_cells() -> None:
     assert built[0]["line_count"] == 1
     for secret in ("SECRET-PART-1", INJECTION, "4500012345", "Acme"):
         assert secret not in repr(logs)
+
+
+async def test_header_values_and_address_cells_keep_their_source_cells() -> None:
+    # `sec` M5: the reviewer can see which cell each header fact came from.
+    result = await run(STANDARD, FakeResponse(mapped()))
+    assert [(s.path, s.row, s.column) for s in result.sources] == [
+        ("header.customer_po_number", 1, "A"),
+        ("header.ship_to", 2, "B"),
+        ("header.ship_to", 3, "B"),
+    ]
+
+
+async def test_a_pdf_extraction_has_no_sources() -> None:
+    from app.extraction.extract import DocumentInput, extract_po
+    from tests.extraction.test_extract import output
+
+    result = await extract_po(
+        FakeLLMClient([FakeResponse(output())]), DocumentInput(text="PO 4500012345"), SETTINGS
+    )
+    assert result.sources == ()

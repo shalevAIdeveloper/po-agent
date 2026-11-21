@@ -295,3 +295,65 @@ async def test_map_columns_retries_a_refused_mapping_once() -> None:
     retry = client.requests[1].content[-1]
     assert isinstance(retry, TextPart) and "row_not_in_sample" in retry.text
     assert run.prompt.prompt_version == "map_columns/v1"
+
+
+# --- M5: a header value is a whole token of its cell, never a piece of one -------------
+
+
+def _one_cell_table(text: str) -> SheetTable:
+    return SheetTable(
+        columns=(1, 2),
+        rows=(TableRow(1, (text, None)), TableRow(5, ("Item", "Qty")), TableRow(6, ("A1", "1"))),
+    )
+
+
+def _header_issues(cell: str, value: str, field: str = "notes") -> list[str]:
+    value_map = mapping(
+        first_data_row=6,
+        columns=[{"column": "A", "field": "customer_part_number"}],
+        header_values=[{"field": field, "row": 1, "column": "A", "value": value}],
+        addresses=[],
+        footer_rows=[],
+    )
+    return issues_of(value_map, _one_cell_table(cell))
+
+
+@pytest.mark.parametrize(
+    ("cell", "value"),
+    [
+        ("12,345.00", "345.00"),  # `sec` M5: a piece of a number
+        ("4500012345", "45000"),  # a prefix of an id
+        ("PO 4500012345-01", "4500012345"),  # an id cut at its suffix
+        ("A-32100", "32100"),
+        ("03/04/26", "04/26"),
+        ("Net30", "Net"),
+        ("Total 1.234", "234"),
+    ],
+)
+def test_a_piece_of_a_token_is_refused(cell: str, value: str) -> None:
+    assert "header_values.0.value:not_in_cell" in _header_issues(cell, value)
+
+
+@pytest.mark.parametrize(
+    ("cell", "value"),
+    [
+        ("PO#: 4500012345", "4500012345"),
+        ("4500012345", "4500012345"),
+        ("PO 4500012345, rush", "4500012345"),
+        ("Terms: Net 30 days.", "Net 30 days"),
+        ("ACME Corp.", "ACME Corp"),
+        ("Total: $1,234.50", "$1,234.50"),
+        ("Total: $1,234.50", "1,234.50"),
+        ("45000 / 4500012345", "45000"),  # some occurrence is a whole token
+    ],
+)
+def test_a_whole_token_is_accepted(cell: str, value: str) -> None:
+    assert _header_issues(cell, value) == []
+
+
+@pytest.mark.parametrize(
+    ("cell", "value"), [("Total (5.00)", "5.00"), ("Total 5.00-", "5.00"), ("Total -5.00", "5.00")]
+)
+def test_an_order_total_cannot_drop_its_sign(cell: str, value: str) -> None:
+    assert "header_values.0.value:not_in_cell" in _header_issues(cell, value, "order_total")
+    assert _header_issues(cell, cell.removeprefix("Total "), "order_total") == []
