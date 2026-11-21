@@ -9,8 +9,10 @@ import openpyxl.reader.excel as excel
 import pytest
 
 from app.extraction.inputs import xlsx
+from app.extraction.inputs.csvfile import parse_csv
 from app.extraction.inputs.errors import InputError
 from app.extraction.inputs.limits import MAX_CELLS_READ, MAX_SHEETS
+from app.extraction.inputs.table import clean_cell
 from app.extraction.inputs.xlsx import parse_xlsx
 from app.extraction.inputs.xlsx_scan import scan_sheet
 from tests.extraction.inputs.sheets import (
@@ -245,3 +247,29 @@ def test_a_large_merge_cells_part_keeps_the_scan_memory_flat() -> None:
     assert scan.has_content
     # Kept elements cost ~375 bytes each (~37 MB here); cleared, the peak stays small.
     assert peak < 4 * 1024 * 1024
+
+
+# --- L3: format characters (bidi, zero-width) never reach cells -------------------------
+
+ZWSP, RLO, BOM, SHY = chr(0x200B), chr(0x202E), chr(0xFEFF), chr(0x00AD)
+
+
+@pytest.mark.parametrize(
+    ("raw", "clean"),
+    [
+        (f"00123{ZWSP}-A", "00123-A"),
+        (f"{RLO}A-32100", "A-32100"),
+        (f"1{BOM}2{SHY}3", "123"),
+        (f"{ZWSP}{RLO}", None),
+    ],
+)
+def test_format_characters_are_removed_from_cells(raw: str, clean: str | None) -> None:
+    assert clean_cell(raw) == clean
+
+
+def test_cells_raw_text_and_grounding_agree_without_format_characters() -> None:
+    data = f"Item,Qty\n00123{ZWSP}-A,1{RLO}2\n".encode()
+    table = parse_csv(data).table
+    assert table.rows[1].cells == ("00123-A", "12")
+    xml = sheet_xml(row(1, inline("A1", f"PO{ZWSP}#"), inline("B1", f"{RLO}4500")))
+    assert parse_xlsx(make_xlsx([Sheet("PO", xml)])).table.rows[0].cells == ("PO#", "4500")

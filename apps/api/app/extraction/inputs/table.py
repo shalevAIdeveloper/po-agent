@@ -6,7 +6,8 @@
   (1 = A), strictly increasing; every row has one cell per kept column.
 - A cell is text (as rendered by the parser) or None. Text is cleaned for storage and for
   the prompt: line breaks become LF, NUL and other control characters (but tab and LF)
-  are removed, lone surrogates are replaced. Whitespace-only text is None.
+  and format characters (Unicode Cf: bidi, zero-width) are removed, lone surrogates are
+  replaced. Whitespace-only text is None.
 - Caps (limits.py): MAX_TABLE_ROWS non-empty rows (`too_many_rows`), MAX_TABLE_COLUMNS
   columns, MAX_CELL_CHARS per cell and MAX_TABLE_CHARS per table (`document_too_large`).
 
@@ -33,9 +34,17 @@ _CELL_CONTROL_RE: Final = re.compile(r"[\x00-\x08\x0b-\x1f\x7f-\x9f]")
 _NAME_CONTROL_RE: Final = re.compile(r"[\x00-\x1f\x7f-\x9f]")
 
 
+def _without_format_characters(text: str) -> str:
+    """Bidi overrides, zero-width characters, BOM, soft hyphen (Unicode Cf) removed: they
+    can reorder or hide text for the reviewer and split a part number (`sec` L3)."""
+    if text.isascii():
+        return text
+    return "".join(ch for ch in text if unicodedata.category(ch) != "Cf")
+
+
 def clean_cell(text: str) -> str | None:
     text = text.replace("\r\n", "\n").replace("\r", "\n")
-    text = _CELL_CONTROL_RE.sub("", text)
+    text = _CELL_CONTROL_RE.sub("", _without_format_characters(text))
     text = text.encode("utf-8", "replace").decode("utf-8")
     return text if text.strip() else None
 
@@ -46,7 +55,7 @@ def clean_sheet_name(name: str) -> str | None:
     Like cell text, plus: control characters become spaces and format characters (bidi
     overrides, zero-width) are removed, since the name is shown as a label in a warning.
     """
-    name = "".join(ch for ch in name if unicodedata.category(ch) != "Cf")
+    name = _without_format_characters(name)
     flat = _NAME_CONTROL_RE.sub(" ", name).encode("utf-8", "replace").decode("utf-8")
     flat = " ".join(flat.split())[:MAX_SHEET_NAME_CHARS].strip()
     return flat or None
