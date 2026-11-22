@@ -272,8 +272,8 @@ async def test_bytes_to_a_schema_valid_extraction(document: ParsedDocument) -> N
     assert lines[3].raw_text == NOTE
     assert lines[4].unit_price is None  # "N/C": null, flagged, confidence capped
     assert [line.confidence for line in lines] == [0.9, 0.9, 0.9, 0.9, 0.5]
-    # Table-level warnings (sheets, hidden cells) come first, with details (owner, plan (a)).
-    assert [(w.code, w.path) for w in result.warnings if w.path != "table"] == [
+    # Table-level warnings and skipped rows (path "table" / "lines") carry details (owner).
+    assert [(w.code, w.path) for w in result.warnings if w.path not in ("table", "lines")] == [
         ("negative_value", "lines.2.qty"),
         ("unparsed_value", "lines.4.unit_price"),
     ]

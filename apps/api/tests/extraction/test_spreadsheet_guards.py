@@ -37,7 +37,7 @@ async def test_zero_is_not_flagged_as_negative(printed: str) -> None:
     (line,) = result.extraction.lines
     assert line.qty == Decimal(0) and line.unit_price == Decimal(0)
     assert not line.qty.is_signed()  # never "-0"
-    assert result.warnings == ()
+    assert [w.code for w in result.warnings if w.code != "rows_skipped"] == []
 
 
 async def test_the_unparsed_cap_never_raises_a_lower_confidence() -> None:

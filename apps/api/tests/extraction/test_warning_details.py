@@ -10,10 +10,11 @@ from app.extraction.extract import DocumentInput, extract_po
 from app.extraction.grounding import ExtractionWarning, WarningDetails
 from app.extraction.inputs import parse_document
 from app.extraction.inputs.limits import MAX_SHEET_NAME_CHARS, MAX_SHEET_NAMES, MAX_TABLE_ROWS
-from app.extraction.inputs.table import SheetTable
+from app.extraction.inputs.table import SheetTable, TableRow
 from app.extraction.spreadsheet import extract_spreadsheet
 from app.llm.fake import FakeLLMClient, FakeResponse
 from tests.extraction.inputs.sheets import Sheet, inline, make_xlsx, row, sheet_xml, text_rows
+from tests.extraction.test_column_mapping import mapping
 from tests.extraction.test_extract import output
 from tests.extraction.test_spreadsheet import STANDARD, mapped
 
@@ -139,3 +140,88 @@ def test_the_repr_hides_names_and_texts() -> None:
 def test_details_are_typed_and_bounded(bad: dict[str, object]) -> None:
     with pytest.raises(ValueError):
         WarningDetails(**bad)  # type: ignore[arg-type]
+
+
+# --- A (M4): skipped rows with data never disappear silently --------------------------
+
+
+def _po(lines: int) -> SheetTable:
+    rows = [
+        TableRow(1, ("PO#: 4500012345", None, None, None)),
+        TableRow(2, ("Ship to", "Acme Corp", None, None)),
+        TableRow(3, (None, "1 Main St", None, None)),
+        TableRow(5, ("Item", "Description", "Qty", "Price")),
+    ]
+    rows += [TableRow(6 + n, (f"P{n}", f"Widget {n}", str(n + 1), "1.50")) for n in range(lines)]
+    rows.append(TableRow(6 + lines, ("Total", None, None, "9.00")))
+    return SheetTable(columns=(1, 2, 3, 4), rows=tuple(rows))
+
+
+def _skipped(result: object) -> WarningDetails | None:
+    found = [w for w in result.warnings if w.code == "rows_skipped"]  # type: ignore[attr-defined]
+    assert len(found) <= 1
+    return found[0].details if found else None
+
+
+async def _run(table: SheetTable, **changes: object) -> object:
+    response = FakeResponse(json.dumps(mapping(addresses=[], **changes)))
+    return await extract_spreadsheet(FakeLLMClient([response]), table, SETTINGS)
+
+
+async def test_an_injected_first_data_row_lists_every_skipped_data_row() -> None:
+    table = _po(lines=5)  # data rows 6..10, total at 11
+    result = await _run(table, first_data_row=10, footer_rows=[11])
+    assert [line.raw_text for line in result.extraction.lines] == ["P4 | Widget 4 | 5 | 1.50"]
+    details = _skipped(result)
+    assert details is not None
+    assert details.rows == (6, 7, 8, 9, 11)
+    assert details.texts == (
+        "P0 | Widget 0 | 1 | 1.50",
+        "P1 | Widget 1 | 2 | 1.50",
+        "P2 | Widget 2 | 3 | 1.50",
+        "P3 | Widget 3 | 4 | 1.50",
+        "Total | 9.00",
+    )
+    # The header block and the heading row are not skipped data rows.
+    assert not {1, 2, 3, 5} & set(details.rows)
+
+
+async def test_a_real_footer_total_lists_its_row() -> None:
+    result = await _run(_po(lines=2), first_data_row=6, footer_rows=[8])
+    details = _skipped(result)
+    assert details is not None
+    assert (details.rows, details.texts) == ((8,), ("Total | 9.00",))
+
+
+async def test_no_skipped_rows_no_warning() -> None:
+    result = await _run(_po(lines=2), first_data_row=6, footer_rows=[])
+    assert _skipped(result) is None
+
+
+async def test_empty_rows_between_heading_and_data_give_no_warning() -> None:
+    table = _po(lines=2)
+    shifted = SheetTable(
+        columns=table.columns,
+        rows=(*table.rows[:4], *(TableRow(r.number + 3, r.cells) for r in table.rows[4:])),
+    )  # rows 6..8 are empty (not in the table); data starts at 9
+    result = await _run(shifted, first_data_row=9, footer_rows=[])
+    assert _skipped(result) is None
+
+
+async def test_skipped_rows_are_bounded_by_the_table() -> None:
+    rows = [TableRow(1, ("Item", "Description", "Qty", "Price"))]
+    rows += [TableRow(n, (f"P{n}", "w", "1", "1")) for n in range(2, MAX_TABLE_ROWS + 1)]
+    table = SheetTable(columns=(1, 2, 3, 4), rows=tuple(rows))
+    result = await _run(table, first_data_row=MAX_TABLE_ROWS, footer_rows=[], header_values=[])
+    details = _skipped(result)
+    assert details is not None
+    assert details.rows == tuple(range(2, MAX_TABLE_ROWS))
+    assert len(details.rows) <= MAX_TABLE_ROWS
+
+
+async def test_skipped_rows_are_logged_as_a_count_only() -> None:
+    with structlog.testing.capture_logs() as logs:
+        await _run(_po(lines=5), first_data_row=10, footer_rows=[11])
+    built = next(e for e in logs if e["event"] == "extraction.spreadsheet_built")
+    assert built["skipped_rows"] == 5
+    assert "Widget" not in repr(logs) and "Total" not in repr(logs)

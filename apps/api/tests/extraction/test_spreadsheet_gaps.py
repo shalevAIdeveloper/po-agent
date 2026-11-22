@@ -34,7 +34,8 @@ async def test_a_grounding_crash_keeps_the_spreadsheet_extraction_and_its_calls(
     assert result.extraction is not None
     assert len(result.extraction.lines) == 2
     assert result.grounding_checked is False
-    assert result.warnings == ()
+    # The footer total is listed as a skipped row (owner, M4); nothing else.
+    assert [w.code for w in result.warnings] == ["rows_skipped"]
     assert [(c.purpose, c.attempt) for c in result.calls] == [("map_columns", 1)]
     [failed] = [line for line in logs if line["event"] == "extraction.grounding_failed"]
     assert failed["error_type"] == "ArithmeticError"

@@ -50,7 +50,8 @@ async def run(t: SheetTable, *responses: FakeResponse | LLMError) -> Any:
 
 
 def codes(result: Any) -> list[tuple[str, str]]:
-    return [(w.code, w.path) for w in result.warnings]
+    """The value warnings; skipped rows (footers, owner M4) are tested on their own."""
+    return [(w.code, w.path) for w in result.warnings if w.code != "rows_skipped"]
 
 
 # --- building lines -----------------------------------------------------------------------
@@ -76,7 +77,10 @@ async def test_lines_header_and_addresses_come_from_the_cells() -> None:
         None,
     )
     assert second.raw_text == "00124 | Bolt | 3 | 0.25 | rush"  # unmapped cells stay in raw_text
-    assert result.warnings == ()
+    # Only the footer total, listed as a skipped row with its text (owner, M4).
+    [skipped] = result.warnings
+    assert skipped.code == "rows_skipped" and skipped.details is not None
+    assert (skipped.details.rows, skipped.details.texts) == ((8,), ("Total | 3,702.75",))
     assert result.grounding_checked is True
     # Schema-valid, as stored.
     PurchaseOrderExtraction.model_validate_json(extraction.model_dump_json())

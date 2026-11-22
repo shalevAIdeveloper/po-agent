@@ -6,7 +6,9 @@ normalized from it (`values.py`), so nothing is invented and a cell can't make t
 write a value that isn't in some cell.
 
 - Lines: every table row from `first_data_row` on, except the footer rows the mapping
-  names (totals, subtotals: Q-PR5-6). `raw_text` is the row's non-empty cells joined with
+  names (totals, subtotals: Q-PR5-6). Skipped rows with data (footers, and rows between
+  the heading row and `first_data_row`) are never dropped silently: a `rows_skipped`
+  warning lists their numbers and text (owner, M4; `_skipped_rows`). `raw_text` is the row's non-empty cells joined with
   " | ". A row with no value in any mapped column is a `comment` line, otherwise a
   `product` line. Unmapped fields are null (never guessed).
 - Text fields are the cell text without surrounding whitespace. Numbers, line numbers and
@@ -36,7 +38,7 @@ from app.extraction.column_mapping import ColumnMapping, TableIndex, map_columns
 from app.extraction.extract import ExtractionResult, ExtractionSettings, ValueSource
 from app.extraction.grounding import ExtractionWarning, WarningDetails, check_grounding
 from app.extraction.inputs.errors import InputWarningCode
-from app.extraction.inputs.table import SheetTable
+from app.extraction.inputs.table import SheetTable, TableRow
 from app.extraction.schema import SCHEMA_VERSION, PurchaseOrderExtraction
 from app.extraction.values import to_decimal, to_iso_date, to_line_no
 from app.llm.client import LLMClient
@@ -44,6 +46,7 @@ from app.llm.client import LLMClient
 log = structlog.get_logger("app.extraction")
 
 CELL_SEPARATOR: Final = " | "
+LINES_PATH: Final = "lines"
 UNPARSED_CONFIDENCE_CAP: Final = 0.5
 _TEXT_LINE_FIELDS: Final = frozenset(
     {"customer_part_number", "vendor_part_number", "description", "uom"}
@@ -83,6 +86,7 @@ _LINE_FIELDS: Final = (
 class _Builder:
     def __init__(self) -> None:
         self.warnings: list[ExtractionWarning] = []
+        self.skipped: tuple[TableRow, ...] = ()
 
     def flag(self, code: Any, path: str) -> None:
         self.warnings.append(ExtractionWarning(code=code, path=path))
@@ -133,6 +137,47 @@ def _header(mapping: ColumnMapping, index: TableIndex, builder: _Builder) -> dic
     return header
 
 
+_NUMERIC_LINE_FIELDS: Final = ("line_no", "qty", "unit_price", "extended_price")
+
+
+def _skipped_rows(
+    table: SheetTable, first: int, footers: set[int], positions: dict[str, int]
+) -> tuple[TableRow, ...]:
+    """Rows with data that are not lines (owner, M4): footer rows, and rows above
+    `first_data_row` but below the heading row.
+
+    The heading row is the last row above `first_data_row` with text in a mapped column
+    and no number in a mapped numeric column ("Item | Qty | Price"). Without one, the
+    rows above that hold such a number are data rows. The header block above the heading
+    (PO number, addresses) is not flagged. Limit: with no numeric column mapped, the
+    row just above `first_data_row` is taken for the heading.
+    """
+    numeric = [positions[name] for name in _NUMERIC_LINE_FIELDS if name in positions]
+    mapped = list(positions.values())
+
+    def has_number(row: TableRow) -> bool:
+        return any(
+            row.cells[p] is not None and to_decimal(row.cells[p] or "") is not None for p in numeric
+        )
+
+    above = [row for row in table.rows if row.number < first]
+    headings = [
+        row.number
+        for row in above
+        if any(row.cells[p] is not None for p in mapped) and not has_number(row)
+    ]
+    if headings:
+        skipped = [row for row in above if row.number > headings[-1]]
+    else:
+        skipped = [row for row in above if has_number(row)]
+    skipped += [row for row in table.rows if row.number >= first and row.number in footers]
+    return tuple(sorted(skipped, key=lambda row: row.number))
+
+
+def _row_text(row: TableRow) -> str:
+    return CELL_SEPARATOR.join(cell for cell in row.cells if cell is not None)
+
+
 def _lines(
     mapping: ColumnMapping, table: SheetTable, index: TableIndex, builder: _Builder
 ) -> list[dict[str, Any]]:
@@ -145,6 +190,7 @@ def _lines(
         position = index.column_index(assignment.column)
         if position is not None:
             positions[assignment.field] = position
+    builder.skipped = _skipped_rows(table, first, footers, positions)
     lines: list[dict[str, Any]] = []
     for row in table.rows:
         if row.number < first or row.number in footers:
@@ -172,7 +218,7 @@ def _lines(
             unparsed = unparsed or any(
                 w.code == "unparsed_value" for w in builder.warnings[before:]
             )
-        line["raw_text"] = CELL_SEPARATOR.join(cell for cell in row.cells if cell is not None)
+        line["raw_text"] = _row_text(row)
         line["line_type"] = "product" if mapped else "comment"
         line["page"] = None
         line["confidence"] = (
@@ -213,7 +259,19 @@ def build_extraction(
             "lines": lines,
         }
     )
-    return extraction, tuple(builder.warnings)
+    skipped: tuple[ExtractionWarning, ...] = ()
+    if builder.skipped:
+        skipped = (
+            ExtractionWarning(
+                code="rows_skipped",
+                path=LINES_PATH,
+                details=WarningDetails(
+                    rows=tuple(row.number for row in builder.skipped),
+                    texts=tuple(_row_text(row) for row in builder.skipped),
+                ),
+            ),
+        )
+    return extraction, skipped + tuple(builder.warnings)
 
 
 TABLE_PATH: Final = "table"
@@ -302,6 +360,7 @@ async def extract_spreadsheet(
     log.info(
         "extraction.spreadsheet_built",
         line_count=len(extraction.lines),
+        skipped_rows=sum(len(w.details.rows) for w in warnings if w.details is not None),
         warning_count=len(warnings),
         document_type=extraction.document_type,
     )
