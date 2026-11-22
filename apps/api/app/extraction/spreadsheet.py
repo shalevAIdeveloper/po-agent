@@ -8,9 +8,9 @@ write a value that isn't in some cell.
 - Lines: every table row from `first_data_row` on, except the footer rows the mapping
   names (totals, subtotals: Q-PR5-6). Skipped rows with data (footers, and rows between
   the heading row and `first_data_row`) are never dropped silently: a `rows_skipped`
-  warning lists their numbers and text (owner, M4; `_skipped_rows`). `raw_text` is the row's non-empty cells joined with
-  " | ". A row with no value in any mapped column is a `comment` line, otherwise a
-  `product` line. Unmapped fields are null (never guessed).
+  warning lists their numbers and text (owner, M4; `_skipped_rows`). `raw_text` is the
+  row's non-empty cells joined with " | ". A row with no value in any mapped column is a
+  `comment` line, otherwise a `product` line. Unmapped fields are null (never guessed).
 - Text fields are the cell text without surrounding whitespace. Numbers, line numbers and
   dates that don't normalize are null with an `unparsed_value` warning (Q-PR5-2); a
   negative qty, price or total is kept, with a `negative_value` warning (owner,

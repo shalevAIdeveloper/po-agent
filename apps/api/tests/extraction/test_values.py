@@ -134,3 +134,21 @@ def test_dates(text: str, value: date) -> None:
 )
 def test_not_dates(text: str) -> None:
     assert to_iso_date(text) is None
+
+
+@pytest.mark.parametrize(
+    "text",
+    ["0,123", "00,123", "000,000", "$0,123", "(0,123)", "0,123.50", "-0,123", "0,123-", "01,234"],
+)
+def test_a_thousands_group_after_a_leading_zero_is_not_a_number(text: str) -> None:
+    # qa: a European reader means 0.123; the first group can't start with 0.
+    assert to_decimal(text) is None
+
+
+@pytest.mark.parametrize(
+    ("text", "value"),
+    [("0", "0"), ("0.50", "0.50"), ("$0.75", "0.75"), ("1,234", "1234"), ("007", "7")],
+)
+def test_a_leading_zero_without_groups_is_still_fine(text: str, value: str) -> None:
+    result = to_decimal(text)
+    assert result is not None and format(result, "f") == value

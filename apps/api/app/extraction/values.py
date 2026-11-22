@@ -5,10 +5,11 @@ cell's text or normalizes it here. Anything not clearly one value is `None`; the
 adds an `unparsed_value` warning and `raw_text` keeps the cell as written.
 
 - Numbers: digits with an optional fraction, thousands separators only in groups of
-  three (`1,234.50`), an optional `$`, and a sign written as `-5.00`, `(5.00)` or
-  `5.00-`. Refused: units (`12 CS`), European separators (`1.234,50`), `N/C`,
-  exponents, other currencies or codes, more than 40 digits. The printed decimal places
-  are kept (`1234.50`), `.75` is `0.75`, `12.` is `12`; `-0` is `0`.
+  three (`1,234.50`; the first group never starts with 0), an optional `$`, and a sign
+  written as `-5.00`, `(5.00)` or `5.00-`. Refused: `0,123` (a European 0.123), units
+  (`12 CS`), European separators (`1.234,50`), `N/C`, exponents, other currencies or
+  codes, more than 40 digits. The printed decimal places are kept (`1234.50`), `.75` is
+  `0.75`, `12.` is `12`; `-0` is `0`.
 - Line numbers: a whole number of at most 9 digits; `1a`, `10.1`, `#1` are refused.
 - Dates: ISO `YYYY-MM-DD` (what the XLSX parser writes for a date cell, with or without
   a time) or US `M/D/YY` / `M/D/YYYY` (Q5: `03/04/26` is 2026-03-04; a 2-digit year
@@ -21,7 +22,9 @@ from decimal import Decimal
 from typing import Final
 
 MAX_DIGITS: Final = 40  # the same bound as grounding: no quantity or price is longer
-_NUMBER_RE: Final = re.compile(r"(?:[0-9]{1,3}(?:,[0-9]{3})+|[0-9]+)(?:\.[0-9]*)?|\.[0-9]+")
+# With thousands separators the first group starts with 1-9: "0,123" (a European 0.123)
+# and "00,123" are not numbers (qa).
+_NUMBER_RE: Final = re.compile(r"(?:[1-9][0-9]{0,2}(?:,[0-9]{3})+|[0-9]+)(?:\.[0-9]*)?|\.[0-9]+")
 _LINE_NO_RE: Final = re.compile(r"[0-9]{1,9}")
 _ISO_DATE_RE: Final = re.compile(
     r"([0-9]{4})-([0-9]{2})-([0-9]{2})(?:T[0-9]{2}:[0-9]{2}(?::[0-9]{2})?)?"
