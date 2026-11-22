@@ -6,9 +6,10 @@ normalized from it (`values.py`), so nothing is invented and a cell can't make t
 write a value that isn't in some cell.
 
 - Lines: every table row from `first_data_row` on, except the footer rows the mapping
-  names (totals, subtotals: Q-PR5-6). Skipped rows with data (footers, and rows between
-  the heading row and `first_data_row`) are never dropped silently: a `rows_skipped`
-  warning lists their numbers and text (owner, M4; `_skipped_rows`). `raw_text` is the
+  names (totals, subtotals: Q-PR5-6). Skipped rows with data are never dropped
+  silently: a `rows_skipped` warning lists the numbers and text of every footer row and
+  every non-empty row above `first_data_row`, except rows a header reference uses and
+  the heading row directly above (owner, M4; `_skipped_rows`). `raw_text` is the
   row's non-empty cells joined with " | ". A row with no value in any mapped column is a
   `comment` line, otherwise a `product` line. Unmapped fields are null (never guessed).
 - Text fields are the cell text without surrounding whitespace. Numbers, line numbers and
@@ -141,35 +142,40 @@ _NUMERIC_LINE_FIELDS: Final = ("line_no", "qty", "unit_price", "extended_price")
 
 
 def _skipped_rows(
-    table: SheetTable, first: int, footers: set[int], positions: dict[str, int]
+    mapping: ColumnMapping, table: SheetTable, positions: dict[str, int]
 ) -> tuple[TableRow, ...]:
-    """Rows with data that are not lines (owner, M4): footer rows, and rows above
-    `first_data_row` but below the heading row.
+    """Rows with data that are not lines: none disappears silently (owner, M4).
 
-    The heading row is the last row above `first_data_row` with text in a mapped column
-    and no number in a mapped numeric column ("Item | Qty | Price"). Without one, the
-    rows above that hold such a number are data rows. The header block above the heading
-    (PO number, addresses) is not flagged. Limit: with no numeric column mapped, the
-    row just above `first_data_row` is taken for the heading.
+    Every non-empty row above `first_data_row`, and every footer row, is skipped and
+    listed, except:
+    - rows a `header_values` or `addresses` reference uses (their content is in the
+      header, with its source cell);
+    - the single heading row: the row directly above `first_data_row`, if it holds text
+      in a mapped column and no number in a mapped numeric column; with no numeric
+      column mapped, only if every non-empty cell in it is non-numeric text.
     """
+    first = mapping.first_data_row
+    if first is None:
+        return ()
     numeric = [positions[name] for name in _NUMERIC_LINE_FIELDS if name in positions]
     mapped = list(positions.values())
+    used = {fact.row for fact in mapping.header_values}
+    used |= {ref.row for address in mapping.addresses for ref in address.cells}
+    footers = set(mapping.footer_rows)
 
-    def has_number(row: TableRow) -> bool:
-        return any(
-            row.cells[p] is not None and to_decimal(row.cells[p] or "") is not None for p in numeric
-        )
+    def is_number(cell: str | None) -> bool:
+        return cell is not None and to_decimal(cell) is not None
+
+    def is_heading(row: TableRow) -> bool:
+        if not any(row.cells[p] is not None for p in mapped):
+            return False
+        if numeric:
+            return not any(is_number(row.cells[p]) for p in numeric)
+        return not any(is_number(cell) for cell in row.cells)
 
     above = [row for row in table.rows if row.number < first]
-    headings = [
-        row.number
-        for row in above
-        if any(row.cells[p] is not None for p in mapped) and not has_number(row)
-    ]
-    if headings:
-        skipped = [row for row in above if row.number > headings[-1]]
-    else:
-        skipped = [row for row in above if has_number(row)]
+    heading = above[-1].number if above and is_heading(above[-1]) else None
+    skipped = [row for row in above if row.number not in used and row.number != heading]
     skipped += [row for row in table.rows if row.number >= first and row.number in footers]
     return tuple(sorted(skipped, key=lambda row: row.number))
 
@@ -190,7 +196,7 @@ def _lines(
         position = index.column_index(assignment.column)
         if position is not None:
             positions[assignment.field] = position
-    builder.skipped = _skipped_rows(table, first, footers, positions)
+    builder.skipped = _skipped_rows(mapping, table, positions)
     lines: list[dict[str, Any]] = []
     for row in table.rows:
         if row.number < first or row.number in footers:

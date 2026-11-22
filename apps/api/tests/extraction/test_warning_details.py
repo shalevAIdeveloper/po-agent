@@ -163,8 +163,12 @@ def _skipped(result: object) -> WarningDetails | None:
     return found[0].details if found else None
 
 
+_SHIP_TO = [{"field": "ship_to", "cells": [{"row": 2, "column": "B"}, {"row": 3, "column": "B"}]}]
+
+
 async def _run(table: SheetTable, **changes: object) -> object:
-    response = FakeResponse(json.dumps(mapping(addresses=[], **changes)))
+    # By default the header block is used: PO number (row 1, in mapping()) and ship-to.
+    response = FakeResponse(json.dumps(mapping(**{"addresses": _SHIP_TO, **changes})))
     return await extract_spreadsheet(FakeLLMClient([response]), table, SETTINGS)
 
 
@@ -174,16 +178,18 @@ async def test_an_injected_first_data_row_lists_every_skipped_data_row() -> None
     assert [line.raw_text for line in result.extraction.lines] == ["P4 | Widget 4 | 5 | 1.50"]
     details = _skipped(result)
     assert details is not None
-    assert details.rows == (6, 7, 8, 9, 11)
+    # Row 5 is a heading, but not the one directly above row 10: listed too.
+    assert details.rows == (5, 6, 7, 8, 9, 11)
     assert details.texts == (
+        "Item | Description | Qty | Price",
         "P0 | Widget 0 | 1 | 1.50",
         "P1 | Widget 1 | 2 | 1.50",
         "P2 | Widget 2 | 3 | 1.50",
         "P3 | Widget 3 | 4 | 1.50",
         "Total | 9.00",
     )
-    # The header block and the heading row are not skipped data rows.
-    assert not {1, 2, 3, 5} & set(details.rows)
+    # The header block the mapping uses is not listed.
+    assert not {1, 2, 3} & set(details.rows)
 
 
 async def test_a_real_footer_total_lists_its_row() -> None:
@@ -215,7 +221,8 @@ async def test_skipped_rows_are_bounded_by_the_table() -> None:
     result = await _run(table, first_data_row=MAX_TABLE_ROWS, footer_rows=[], header_values=[])
     details = _skipped(result)
     assert details is not None
-    assert details.rows == tuple(range(2, MAX_TABLE_ROWS))
+    # Row 1 (a heading, not directly above) and 4..1999; rows 2-3 are used by ship-to.
+    assert details.rows == (1, *range(4, MAX_TABLE_ROWS))
     assert len(details.rows) <= MAX_TABLE_ROWS
 
 
@@ -223,5 +230,95 @@ async def test_skipped_rows_are_logged_as_a_count_only() -> None:
     with structlog.testing.capture_logs() as logs:
         await _run(_po(lines=5), first_data_row=10, footer_rows=[11])
     built = next(e for e in logs if e["event"] == "extraction.spreadsheet_built")
-    assert built["skipped_rows"] == 5
+    assert built["skipped_rows"] == 6  # rows 5-9 and the footer
     assert "Widget" not in repr(logs) and "Total" not in repr(logs)
+
+
+# --- A, tightened: every row above first_data_row is accounted for ----------------------
+
+_TEXT_ONLY_COLUMNS = [
+    {"column": "A", "field": "customer_part_number"},
+    {"column": "B", "field": "description"},
+]
+
+
+async def test_no_numeric_column_mapped_still_warns_on_every_skipped_data_row() -> None:
+    table = _po(lines=5)  # data rows 6..10 (their qty/price are numbers), total at 11
+    result = await _run(table, first_data_row=10, footer_rows=[11], columns=_TEXT_ONLY_COLUMNS)
+    details = _skipped(result)
+    assert details is not None
+    # 6..8 are data rows; 9 is not the heading either: it holds numbers ("4", "1.50").
+    # Row 5 (a heading, but not directly above row 10) is listed too: nothing above
+    # first_data_row disappears silently.
+    assert details.rows == (5, 6, 7, 8, 9, 11)
+
+
+def _normal_sheet() -> SheetTable:
+    return SheetTable(
+        columns=(1, 2, 3, 4),
+        rows=(
+            TableRow(1, ("PURCHASE ORDER", None, None, None)),
+            TableRow(2, ("PO#: 4500012345", None, None, None)),
+            TableRow(3, ("Ship to", "Acme Corp", None, None)),
+            TableRow(4, (None, "1 Main St", None, None)),
+            TableRow(6, ("Item", "Description", "Qty", "Price")),
+            TableRow(7, ("P1", "Widget", "2", "1.50")),
+            TableRow(8, ("P2", "Bolt", "3", "0.25")),
+        ),
+    )
+
+
+async def test_a_normal_sheet_flags_nothing_in_its_header_block() -> None:
+    result = await _run(
+        _normal_sheet(),
+        first_data_row=7,
+        footer_rows=[],
+        header_values=[
+            {"field": "notes", "row": 1, "column": "A", "value": "PURCHASE ORDER"},
+            {"field": "customer_po_number", "row": 2, "column": "A", "value": "4500012345"},
+        ],
+        addresses=[
+            {"field": "ship_to", "cells": [{"row": 3, "column": "B"}, {"row": 4, "column": "B"}]}
+        ],
+    )
+    assert _skipped(result) is None  # header fields used, heading row 6 above row 7
+
+
+async def test_an_unreferenced_row_above_the_table_is_listed() -> None:
+    # The owner's rule is absolute: an unused title or header row is listed, not dropped.
+    result = await _run(
+        _normal_sheet(),
+        first_data_row=7,
+        footer_rows=[],
+        addresses=[],
+        header_values=[
+            {"field": "customer_po_number", "row": 2, "column": "A", "value": "4500012345"}
+        ],
+    )
+    details = _skipped(result)
+    assert details is not None
+    assert details.rows == (1, 3, 4)
+    assert details.texts == ("PURCHASE ORDER", "Ship to | Acme Corp", "1 Main St")
+
+
+async def test_a_row_used_by_header_values_is_not_flagged() -> None:
+    result = await _run(
+        _normal_sheet(),
+        first_data_row=7,
+        footer_rows=[],
+        addresses=[],
+        header_values=[
+            {"field": "notes", "row": 1, "column": "A", "value": "PURCHASE ORDER"},
+            {"field": "customer_po_number", "row": 2, "column": "A", "value": "4500012345"},
+            {"field": "customer_name", "row": 3, "column": "B", "value": "Acme Corp"},
+            {"field": "payment_terms", "row": 4, "column": "B", "value": "1 Main St"},
+        ],
+    )
+    assert _skipped(result) is None
+
+
+async def test_the_heading_must_hold_no_number_when_nothing_numeric_is_mapped() -> None:
+    # Row 9 (just above first_data_row) holds numbers: it is a data row, not the heading.
+    result = await _run(_po(lines=5), first_data_row=10, footer_rows=[], columns=_TEXT_ONLY_COLUMNS)
+    details = _skipped(result)
+    assert details is not None and 9 in details.rows
