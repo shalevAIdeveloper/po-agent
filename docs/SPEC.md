@@ -58,7 +58,7 @@ Multi-tenant from day one: every business is an `organization`.
 - Extract: customer name, customer PO number, PO date, requested ship date, ship-to, bill-to, notes, and lines (line no, customer part number, description, qty, UoM, unit price, extended price).
 - Unknown/absent fields are `null`. **The model must never guess a value that is not in the document.**
 - Store raw model output, parsed output, model id, prompt version, latency, token cost.
-- Spreadsheets: parse deterministically first (pandas), use the LLM only to map columns.
+- Spreadsheets: parse deterministically first (openpyxl read-only for XLSX, the stdlib `csv` module for CSV; no pandas, owner decision 2026-11-16, ADR 0012), use the LLM only to map columns. The model returns cell references, never values; lines and header values are copied or normalized from the cells by code.
 
 ### F3 — SKU matching (core IP)
 Order of resolution per line:

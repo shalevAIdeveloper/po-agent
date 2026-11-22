@@ -49,6 +49,13 @@ M1 turns documents into `po_extraction.v1` (SPEC F2, §9) with an LLM. CLAUDE.md
   - `ExtractionResult.grounding_checked` says whether the check ran. It is false for image-only input, or when the check itself failed, in which case it logs `extraction.grounding_failed` with the error type only and the extraction and its billed calls are kept (`sec` M1, L2). So "no warnings" never means "checked" by itself.
   - **Limits:** grounding catches values the model made up, not injection, because a value an attacker printed is in the document. Small numbers are almost always found somewhere on the page (page numbers, dates).
 
+### Note: one retry loop for every prompt (M1 PR 5 T8)
+- The schema retry moved out of `extract.py` into `app/extraction/structured_call.py`: `call_with_retry(client, prompt, request, purpose, check=None) -> CallOutcome`. `extract_po` and `map_columns` both use it; PR 3's tests stayed green over the move.
+- **`check`** is an optional code-side check of a schema-valid answer (`map_columns`: references outside the sample, a field used twice, a header value that isn't in its cell). Its issues are retried exactly like `invalid_output`, with the same sanitized `<validation_errors>` block (field paths and fixed messages, never values). If the check itself raises, that is our bug: it is logged by error type only, not retried (it would be paid again), and the outcome is `schema_validation_failed` with the billed calls kept.
+- **Every billed call is a `RecordedCall(purpose, attempt, result)`**: `purpose` is `extract` or `map_columns`, `attempt` is 1, or **2 for the schema retry**. This replaces the separate `retry` purpose in `docs/plans/m1.md` (`llm_calls.purpose` = `extract|map_columns|retry`): a retry is attempt 2 of the same purpose, so a spreadsheet's retry is still counted as mapping cost. PR 10's `llm_calls` table (ADR 0014) therefore gets `purpose` (`extract|map_columns`) plus an `attempt` column.
+- `ExtractionResult.calls` and `ExtractionCallError.calls` carry `RecordedCall`s in order, so the worker (PR 14) stores each one with its purpose and attempt.
+- The mapping call (`map_columns/v1`, `LLM_MAPPING_MODEL`) uses `max_output_tokens` 4000 and sends **no `effort`** until the PR 9 live eval confirms the mapping model accepts it with structured output (Follow-up M1-SHEET-EFFORT). The table sample goes only in the user turn, neutralized like document text, inside `<table_ID>` tags whose ID is a hash of the whole table; the sheet name is never sent.
+
 ## Consequences
 - Adding a provider means adding a module in `providers/`. The Protocol, doubles, pricing and logging stay the same.
 - A model change in env changes the fingerprint, so replay fails until a live run records new cassettes (Q9 enforcement, PR 8/9).
