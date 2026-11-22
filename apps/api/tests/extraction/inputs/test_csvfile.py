@@ -123,12 +123,24 @@ def test_the_table_char_cap() -> None:
     assert code_of(rows) == "document_too_large"
 
 
-def test_a_comma_flood_is_bounded_in_time() -> None:
-    start = time.perf_counter()
+def _flood_seconds(commas: int) -> float:
+    """Best of three: the least noisy estimate under load (pytest-cov, a busy CI host)."""
+    best = float("inf")
+    for _ in range(3):
+        start = time.perf_counter()
+        assert code_of(b"a,b\n" + b"," * commas + b"x\n") == "document_too_large"
+        best = min(best, time.perf_counter() - start)
+    return best
+
+
+def test_a_comma_flood_is_refused_and_linear() -> None:
     assert table_of(b"a,b\n" + b"," * 5_000 + b"x\n").columns == (1, 2, 5_001)
     # A column past Excel's last one (XFD) is more than a purchase order needs.
     assert code_of(b"a,b\n" + b"," * 5_000_000 + b"x\n") == "document_too_large"
-    assert time.perf_counter() - start < 10
+    # Scaling, not a wall-clock limit (it flaked under pytest-cov): 4x the commas must
+    # cost under 8x the time. Linear is ~4x; quadratic would be ~16x.
+    small, large = _flood_seconds(500_000), _flood_seconds(2_000_000)
+    assert large < 8 * max(small, 0.005)
 
 
 def test_an_empty_csv_is_empty() -> None:
