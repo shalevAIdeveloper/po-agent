@@ -272,7 +272,8 @@ async def test_bytes_to_a_schema_valid_extraction(document: ParsedDocument) -> N
     assert lines[3].raw_text == NOTE
     assert lines[4].unit_price is None  # "N/C": null, flagged, confidence capped
     assert [line.confidence for line in lines] == [0.9, 0.9, 0.9, 0.9, 0.5]
-    assert [(w.code, w.path) for w in result.warnings] == [
+    # Table-level warnings (sheets, hidden cells) come first, with details (owner, plan (a)).
+    assert [(w.code, w.path) for w in result.warnings if w.path != "table"] == [
         ("negative_value", "lines.2.qty"),
         ("unparsed_value", "lines.4.unit_price"),
     ]
@@ -567,7 +568,7 @@ async def test_no_log_line_carries_sheet_names_cells_or_prompt_text(
     assert parsed_entry["table_rows"] == len(table.rows)
     assert parsed_entry["table_columns"] == len(table.columns)
     built = next(e for e in entries if e["event"] == "extraction.spreadsheet_built")
-    assert (built["line_count"], built["warning_count"]) == (5, 2)
+    assert (built["line_count"], built["warning_count"]) == (5, len(result.warnings))
     # Nothing through the standard library logger either (openpyxl, the child, asyncio).
     stdlib = [record.getMessage() for record in caplog.records]
     for secret in [*_secrets(), *(t[:60] for t in prompt_text)]:

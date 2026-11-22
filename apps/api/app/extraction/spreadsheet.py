@@ -34,7 +34,8 @@ from pydantic import ValidationError
 
 from app.extraction.column_mapping import ColumnMapping, TableIndex, map_columns
 from app.extraction.extract import ExtractionResult, ExtractionSettings, ValueSource
-from app.extraction.grounding import ExtractionWarning, check_grounding
+from app.extraction.grounding import ExtractionWarning, WarningDetails, check_grounding
+from app.extraction.inputs.errors import InputWarningCode
 from app.extraction.inputs.table import SheetTable
 from app.extraction.schema import SCHEMA_VERSION, PurchaseOrderExtraction
 from app.extraction.values import to_decimal, to_iso_date, to_line_no
@@ -215,10 +216,57 @@ def build_extraction(
     return extraction, tuple(builder.warnings)
 
 
+TABLE_PATH: Final = "table"
+
+
+def table_warnings(
+    table: SheetTable, input_warnings: tuple[InputWarningCode, ...] = ()
+) -> tuple[ExtractionWarning, ...]:
+    """The parser's spreadsheet warnings, with their details (owner, plan item (a)).
+
+    Sheet names are document content: they are shown to the reviewer from here, never
+    logged and never sent to the model (the mapping sample never holds them).
+    """
+    warnings: list[ExtractionWarning] = []
+    if table.other_sheets or "other_sheets_ignored" in input_warnings:
+        warnings.append(
+            ExtractionWarning(
+                code="other_sheets_ignored",
+                path=TABLE_PATH,
+                details=WarningDetails(names=table.other_sheets),
+            )
+        )
+    if table.hidden_rows or table.hidden_columns:
+        warnings.append(
+            ExtractionWarning(
+                code="hidden_cells_ignored",
+                path=TABLE_PATH,
+                details=WarningDetails(
+                    hidden_rows=table.hidden_rows, hidden_columns=table.hidden_columns
+                ),
+            )
+        )
+    if table.formulas_without_value:
+        warnings.append(
+            ExtractionWarning(
+                code="formula_without_value",
+                path=TABLE_PATH,
+                details=WarningDetails(count=table.formulas_without_value),
+            )
+        )
+    return tuple(warnings)
+
+
 async def extract_spreadsheet(
-    client: LLMClient, table: SheetTable, settings: ExtractionSettings
+    client: LLMClient,
+    table: SheetTable,
+    settings: ExtractionSettings,
+    *,
+    input_warnings: tuple[InputWarningCode, ...] = (),
 ) -> ExtractionResult:
-    """`settings`: normally `column_mapping.mapping_settings(LLM_MAPPING_MODEL)`."""
+    """`settings`: normally `column_mapping.mapping_settings(LLM_MAPPING_MODEL)`.
+    `input_warnings`: the `ParsedDocument`'s, so a sheet warning without a usable name
+    still shows."""
     run = await map_columns(client, table, settings)
     outcome, prompt = run.outcome, run.prompt
 
@@ -237,7 +285,8 @@ async def extract_spreadsheet(
     if outcome.failure is not None or outcome.parsed is None:
         return failed(outcome.failure or "schema_validation_failed")
     try:
-        extraction, warnings = build_extraction(outcome.parsed, table)
+        extraction, line_warnings = build_extraction(outcome.parsed, table)
+        warnings = table_warnings(table, input_warnings) + line_warnings
     except ValidationError as error:
         # Our own build broke the schema: a bug, never the document's fault. The billed
         # calls are kept; the log has the error count only, never a value.

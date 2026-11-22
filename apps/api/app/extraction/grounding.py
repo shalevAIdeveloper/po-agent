@@ -27,12 +27,23 @@ Grounding catches values the model made up. It does not catch injection: a value
 attacker printed in the document is, by definition, in the document.
 """
 
+import dataclasses
+import itertools
 import re
 import unicodedata
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 from typing import Final, Literal
 
+from app.extraction.inputs.limits import (
+    MAX_ROWS_READ,
+    MAX_SHEET_COLUMN,
+    MAX_SHEET_NAMES,
+    MAX_TABLE_CHARS,
+    MAX_TABLE_COLUMNS,
+    MAX_TABLE_ROWS,
+)
+from app.extraction.inputs.table import clean_cell, clean_sheet_name
 from app.extraction.schema import PurchaseOrderExtraction
 
 _NUMBER_RE: Final = re.compile(r"[0-9][0-9,]*(?:\.[0-9]+)?|\.[0-9]+")
@@ -54,15 +65,77 @@ _LINE_IDS: Final = ("customer_part_number", "vendor_part_number")
 _LINE_NUMBERS: Final = ("qty", "unit_price", "extended_price")
 
 
+WarningCode = Literal[
+    # Q16: not found in the source text.
+    "ungrounded",
+    # Spreadsheets (M1 PR 5): the cell couldn't be read as the field's type (null,
+    # raw_text kept); a negative qty / price / total, kept, shown to the reviewer.
+    "unparsed_value",
+    "negative_value",
+    # Spreadsheets, with details (owner, approved plan item (a)): other visible sheets not
+    # read (their names), hidden rows / columns dropped (counts), uncached formulas (count).
+    "other_sheets_ignored",
+    "hidden_cells_ignored",
+    "formula_without_value",
+    # Rows with data that are not lines (above first_data_row, below the heading row, or
+    # footer rows): row numbers and their text, so nothing disappears silently (owner, M4).
+    "rows_skipped",
+]
+
+# Bounds on details (they are document content: shown to the reviewer, never logged).
+MAX_DETAIL_ROWS: Final = MAX_TABLE_ROWS
+# A skipped row's text is its non-empty cells joined with " | " (like raw_text).
+MAX_DETAIL_TEXT_CHARS: Final = MAX_TABLE_CHARS + 3 * MAX_TABLE_ROWS * MAX_TABLE_COLUMNS
+_MAX_COUNT: Final = MAX_ROWS_READ * MAX_SHEET_COLUMN
+
+
+def _count(value: int | None) -> None:
+    if value is not None and (type(value) is not int or not 0 <= value <= _MAX_COUNT):
+        raise ValueError("a count must be a non-negative int within the read caps")
+
+
+@dataclass(frozen=True, slots=True)
+class WarningDetails:
+    """What a warning is about. Typed and bounded; checked on construction."""
+
+    names: tuple[str, ...] = dataclasses.field(default=(), repr=False)  # sheet names
+    rows: tuple[int, ...] = ()  # source row numbers, increasing
+    texts: tuple[str, ...] = dataclasses.field(
+        default=(), repr=False
+    )  # one per row: its cells joined
+    hidden_rows: int | None = None
+    hidden_columns: int | None = None
+    count: int | None = None
+
+    def __post_init__(self) -> None:
+        if len(self.names) > MAX_SHEET_NAMES:
+            raise ValueError("too many sheet names")
+        for name in self.names:
+            if not isinstance(name, str) or clean_sheet_name(name) != name:
+                raise ValueError("a sheet name must be cleaned and at most 31 characters")
+        if len(self.rows) > MAX_DETAIL_ROWS or len(self.texts) != len(self.rows):
+            raise ValueError("at most MAX_DETAIL_ROWS rows, one text each")
+        if any(type(row) is not int or not 1 <= row <= MAX_ROWS_READ for row in self.rows):
+            raise ValueError("a row number must be an int within the rows read")
+        if any(a >= b for a, b in itertools.pairwise(self.rows)):
+            raise ValueError("row numbers must increase")
+        if sum(len(text) for text in self.texts) > MAX_DETAIL_TEXT_CHARS:
+            raise ValueError("row texts over the cap")
+        for text in self.texts:
+            if not isinstance(text, str) or clean_cell(text) != text:
+                raise ValueError("a row text must be cleaned cell text")
+        for value in (self.hidden_rows, self.hidden_columns, self.count):
+            _count(value)
+
+
 @dataclass(frozen=True, slots=True)
 class ExtractionWarning:
-    """A flag for the reviewer: a code and a field path, never a value."""
+    """A flag for the reviewer: a code and a field path. Values only in `details`, and only
+    for spreadsheet warnings (never for PDF/image/email or grounding warnings)."""
 
-    # ungrounded: not found in the source text (Q16). Spreadsheets (M1 PR 5):
-    # unparsed_value: the cell couldn't be read as the field's type (null, raw_text kept);
-    # negative_value: a negative qty / price / total, kept, shown to the reviewer.
-    code: Literal["ungrounded", "unparsed_value", "negative_value"]
+    code: WarningCode
     path: str
+    details: WarningDetails | None = None
 
 
 def _fold(text: str) -> str:
