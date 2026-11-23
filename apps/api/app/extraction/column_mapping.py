@@ -274,8 +274,11 @@ def whole_token_in(cell: str, value: str, *, signed: bool = False) -> bool:
         end = start + len(value)
         ok = not _joined_before(cell, start) and not _joined_after(cell, end)
         if ok and signed:
-            ok = not (start and cell[start - 1] in _SIGN_BEFORE) and not (
-                end < len(cell) and cell[end] in _SIGN_AFTER
+            # Whitespace (and a `$`) may sit between the sign and the digits (`sec` L-b).
+            before = cell[:start].rstrip().removesuffix("$").rstrip()
+            after = cell[end:].lstrip()
+            ok = not before.endswith(tuple(_SIGN_BEFORE)) and not after.startswith(
+                tuple(_SIGN_AFTER)
             )
         if ok:
             return True

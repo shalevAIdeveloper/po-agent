@@ -357,3 +357,24 @@ def test_a_whole_token_is_accepted(cell: str, value: str) -> None:
 def test_an_order_total_cannot_drop_its_sign(cell: str, value: str) -> None:
     assert "header_values.0.value:not_in_cell" in _header_issues(cell, value, "order_total")
     assert _header_issues(cell, cell.removeprefix("Total "), "order_total") == []
+
+
+@pytest.mark.parametrize(
+    "cell",
+    [
+        "Total - 5.00",
+        "Total ( 5.00 )",
+        "Total 5.00 -",
+        "Total (\t5.00)",
+        "Total $ 5.00 -",
+        "Total -$5.00",
+        "Total - $ 5.00",
+    ],
+)
+def test_a_sign_with_spaces_cannot_be_dropped(cell: str) -> None:
+    # `sec` L-b: "5.00" from "- 5.00" or "( 5.00 )".
+    assert "header_values.0.value:not_in_cell" in _header_issues(cell, "5.00", "order_total")
+
+
+def test_a_spaced_unsigned_total_is_fine() -> None:
+    assert _header_issues("Total:  5.00  USD", "5.00", "order_total") == []
