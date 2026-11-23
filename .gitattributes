@@ -18,3 +18,7 @@
 *.ico  binary
 *.woff binary
 *.woff2 binary
+
+# Eval fixtures (M1 PR 6): sources are compared byte for byte (CSV CRLF / encodings, EML
+# CRLF), so git must never normalize them, whatever their extension.
+apps/api/evals/fixtures/**/source.* binary

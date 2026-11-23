@@ -56,6 +56,12 @@ ignore_missing_imports = true
 module = ["openpyxl", "openpyxl.*", "defusedxml", "defusedxml.*"]
 ignore_missing_imports = true
 
+# reportlab ships no type information; only the eval generator (`evals/generate/`, dev
+# group) and tests use it.
+[[tool.mypy.overrides]]
+module = ["reportlab", "reportlab.*"]
+ignore_missing_imports = true
+
 [tool.pydantic-mypy]
 init_forbid_extra = true
 init_typed = true
