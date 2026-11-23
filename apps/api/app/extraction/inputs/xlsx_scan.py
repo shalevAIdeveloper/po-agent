@@ -36,6 +36,10 @@ _COL: Final = f"{_NS}col"
 _VALUE: Final = f"{_NS}v"
 _FORMULA: Final = f"{_NS}f"
 _INLINE: Final = f"{_NS}is"
+_TEXT: Final = f"{_NS}t"
+_RUN: Final = f"{_NS}r"
+# Kept elements per cell (value, formula, inline text runs): more is not a real cell.
+MAX_CELL_ELEMENTS: Final = 10_000
 _SHEET_FORMAT: Final = f"{_NS}sheetFormatPr"
 _REF_RE: Final = re.compile(r"\$?([A-Z]{1,3})\$?([0-9]{1,7})")
 _DIGITS_RE: Final = re.compile(r"[0-9]{1,7}")
@@ -79,6 +83,18 @@ def _is_tiny(value: str | None) -> bool:
     except ValueError:
         return False
     return not size >= MIN_VISIBLE_SIZE  # NaN is tiny too
+
+
+def _kept_in_cell(element: Element, open_elements: list[Element]) -> bool:
+    """`<v>`, `<f>` and `<is>` directly in the cell, and the text runs of an `<is>`
+    (`<t>`, `<r>` and an `<r>`'s `<t>`); anything else inside a cell is junk."""
+    parent = open_elements[-1].tag if open_elements else None
+    tag = element.tag
+    if parent == _CELL:
+        return tag in (_VALUE, _FORMULA, _INLINE)
+    if parent == _INLINE:
+        return tag in (_TEXT, _RUN)
+    return parent == _RUN and tag == _TEXT
 
 
 def _has_value(cell: Element) -> bool:
@@ -161,12 +177,14 @@ def scan_sheet(source: IO[bytes], *, until_content: bool = False) -> SheetScan:
     # (`sec` L5). Siblings finish one at a time, so a parent holds at most one child.
     open_elements: list[Element] = []
     open_cells = 0
+    kept_in_cell = 0
     for event, element in SafeET.iterparse(source, events=("start", "end"), forbid_dtd=True):
         tag = element.tag
         if event == "start":
             open_elements.append(element)
             if tag == _CELL:
                 open_cells += 1
+                kept_in_cell = 0
             if tag == _ROW:
                 ref = element.get("r")
                 if ref is None:
@@ -227,6 +245,14 @@ def scan_sheet(source: IO[bytes], *, until_content: bool = False) -> SheetScan:
             element.clear()
             if open_elements:
                 open_elements[-1].remove(element)
+        elif _kept_in_cell(element, open_elements):
+            kept_in_cell += 1
+            if kept_in_cell > MAX_CELL_ELEMENTS:
+                raise InputError("invalid_file")
+        else:
+            # Inside a cell, only what the cell is read from stays (`sec` N3).
+            element.clear()
+            open_elements[-1].remove(element)
     hidden_columns = columns.all_hidden()
     visible = visible_row_columns - hidden_columns
     return SheetScan(

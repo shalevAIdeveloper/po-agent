@@ -76,14 +76,15 @@ def test_other_zip_packages_are_refused_with_a_clear_code(data: bytes, code: str
     assert kind_or_code(data) == code
 
 
-def test_a_workbook_typed_by_a_default_content_type_is_an_xlsx() -> None:
-    # Some writers reassign the `xml` default instead of an override (openpyxl accepts it).
+def test_a_workbook_typed_by_a_default_content_type_is_invalid() -> None:
+    # openpyxl would accept it, but then the workbook part it reads isn't pinned to
+    # /xl/workbook.xml (`sec` N1): refused.
     types = (
         f'{XML_DECL}<Types xmlns="{CT_NS}">'
         '<Default Extension="xml" ContentType="application/vnd.openxmlformats-officedocument.'
         'spreadsheetml.sheet.main+xml"/></Types>'
     )
-    assert detect_kind(make_xlsx(content_types=types)) == "xlsx"
+    assert kind_or_code(make_xlsx(content_types=types)) == "invalid_file"
 
 
 @pytest.mark.parametrize(

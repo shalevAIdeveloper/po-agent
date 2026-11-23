@@ -4,9 +4,10 @@ Order: PNG, JPEG, PDF, ZIP, CFB, EML, a late PDF header, CSV. Anything else (HEI
 WebP, ...) is `unsupported_type` (Q2).
 
 - ZIP: XLSX (and XLSM) only when `[Content_Types].xml` (read with defusedxml) gives
-  `xl/workbook.xml` a workbook content type. `.xlsb` (`xl/workbook.bin`), `.ods` (its
-  ODF `mimetype`) and templates are `unsupported_spreadsheet`; any other ZIP (`.docx`,
-  a plain archive) is `unsupported_type`. The central directory is checked against the
+  `xl/workbook.xml`, and nothing else, a workbook content type (`workbook_content_type`).
+  `.xlsb` (`xl/workbook.bin`), `.ods` (its ODF `mimetype`) and templates are
+  `unsupported_spreadsheet`; any other ZIP (`.docx`, a plain archive) is
+  `unsupported_type`. The central directory is checked against the
   caps before any entry is read (`archive.py`).
 - CFB (legacy Office): a `Workbook`/`Book` stream is `.xls` (`unsupported_spreadsheet`);
   an `EncryptedPackage` stream is a password-protected workbook (`encrypted_spreadsheet`;
@@ -93,6 +94,28 @@ def _looks_like_email(data: bytes) -> bool:
     return b"from" in known and len(known) >= MIN_EMAIL_FIELDS
 
 
+_WORKBOOK_TYPES: Final = frozenset({XLSX_MAIN, XLSM_MAIN, *_TEMPLATE_MAIN})
+
+
+def workbook_content_type(types: archive.ContentTypes) -> str | None:
+    """The workbook part's content type, or None if the package declares no workbook.
+
+    openpyxl reads the first override with a workbook content type, wherever it points,
+    or falls back to a `Default` one. So exactly one override may have a workbook type,
+    it must be `/xl/workbook.xml` (the part detection and our checks read), and no
+    `Default` may have one; anything else is `invalid_file` (`sec` N1: a decoy workbook
+    part).
+    """
+    parts = [name for name, kind in types.overrides.items() if kind in _WORKBOOK_TYPES]
+    if any(kind in _WORKBOOK_TYPES for kind in types.defaults.values()):
+        raise InputError("invalid_file")
+    if not parts:
+        return types.of(WORKBOOK_PART)
+    if parts != [WORKBOOK_PART]:
+        raise InputError("invalid_file")
+    return types.overrides[WORKBOOK_PART]
+
+
 def _zip_kind(data: bytes) -> DocumentKind:
     try:
         with archive.open_archive(data) as package:
@@ -106,7 +129,7 @@ def _zip_kind(data: bytes) -> DocumentKind:
                 raise InputError("unsupported_type")
             if archive.CONTENT_TYPES not in names or WORKBOOK_PART[1:] not in names:
                 raise InputError("unsupported_type")
-            content_type = archive.read_content_types(package).of(WORKBOOK_PART)
+            content_type = workbook_content_type(archive.read_content_types(package))
     except InputError:
         raise
     except Exception:

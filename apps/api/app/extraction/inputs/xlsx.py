@@ -36,17 +36,21 @@ from datetime import date, datetime, time, timedelta
 from decimal import Decimal
 from typing import Any, Final
 
+import defusedxml.ElementTree as SafeET
 import openpyxl.xml
 import openpyxl.xml.functions
 
 from app.extraction.inputs.archive import (
     open_archive,
-    parse_xml,
     read_content_types,
-    read_entry,
     refuse_dtds,
 )
-from app.extraction.inputs.detect import WORKBOOK_PART, XLSM_MAIN
+from app.extraction.inputs.detect import (
+    WORKBOOK_PART,
+    XLSM_MAIN,
+    XLSX_MAIN,
+    workbook_content_type,
+)
 from app.extraction.inputs.errors import InputError, InputWarningCode
 from app.extraction.inputs.limits import (
     MAX_CELLS_READ,
@@ -54,7 +58,6 @@ from app.extraction.inputs.limits import (
     MAX_SHARED_STRINGS_BYTES,
     MAX_SHEET_NAMES,
     MAX_SHEETS,
-    MAX_ZIP_ENTRY_BYTES,
 )
 from app.extraction.inputs.table import (
     SpreadsheetParse,
@@ -154,15 +157,29 @@ class _Scans:
 
 
 def _check_sheet_count(package: Any) -> None:
-    """More than MAX_SHEETS sheets is `document_too_large`, before openpyxl opens any."""
-    root = parse_xml(read_entry(package, WORKBOOK_PART.lstrip("/"), MAX_ZIP_ENTRY_BYTES))
-    if sum(1 for _ in root.iter(_SHEET_TAG)) > MAX_SHEETS:
-        raise InputError("document_too_large")
+    """More than MAX_SHEETS sheets is `document_too_large`, before openpyxl opens any.
+
+    Streamed (defusedxml, DTDs forbidden), elements cleared as they end, stopping as soon
+    as the count passes the cap: a million `<sheet>` elements cost neither time nor
+    memory (`sec` N2). `workbook_content_type` has made sure this is the part openpyxl
+    reads (`sec` N1).
+    """
+    count = 0
+    with package.open(WORKBOOK_PART.lstrip("/")) as source:
+        for _event, element in SafeET.iterparse(source, events=("end",), forbid_dtd=True):
+            if element.tag == _SHEET_TAG:
+                count += 1
+                if count > MAX_SHEETS:
+                    raise InputError("document_too_large")
+            element.clear()
 
 
 def _check_shared_strings(package: Any) -> bool:
     """Whether the workbook has macros; refuses shared strings over the cap."""
     types = read_content_types(package)
+    # The one workbook part openpyxl will read is /xl/workbook.xml (`sec` N1).
+    if workbook_content_type(types) not in (XLSX_MAIN, XLSM_MAIN):
+        raise InputError("invalid_file")
     for part in types.parts_of_type(SHARED_STRINGS_TYPE):
         if package.getinfo(part.lstrip("/")).file_size > MAX_SHARED_STRINGS_BYTES:
             raise InputError("document_too_large")
