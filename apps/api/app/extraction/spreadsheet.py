@@ -35,7 +35,7 @@ from typing import Any, Final
 import structlog
 from pydantic import ValidationError
 
-from app.extraction.column_mapping import ColumnMapping, TableIndex, map_columns
+from app.extraction.column_mapping import ColumnMapping, TableIndex, column_letter, map_columns
 from app.extraction.extract import ExtractionResult, ExtractionSettings, ValueSource
 from app.extraction.grounding import ExtractionWarning, WarningDetails, check_grounding
 from app.extraction.inputs.errors import InputWarningCode
@@ -148,8 +148,9 @@ def _skipped_rows(
 
     Every non-empty row above `first_data_row`, and every footer row, is skipped and
     listed, except:
-    - rows a `header_values` or `addresses` reference uses (their content is in the
-      header, with its source cell);
+    - rows whose every non-empty cell a `header_values` or `addresses` reference uses
+      (their content is in the header, with its source cell); a row with one more,
+      unreferenced cell is listed (`sec` L-c);
     - the single heading row: the row directly above `first_data_row`, if it holds text
       in a mapped column and no number in a mapped numeric column; with no numeric
       column mapped, only if every non-empty cell in it is non-numeric text.
@@ -159,8 +160,18 @@ def _skipped_rows(
         return ()
     numeric = [positions[name] for name in _NUMERIC_LINE_FIELDS if name in positions]
     mapped = list(positions.values())
-    used = {fact.row for fact in mapping.header_values}
-    used |= {ref.row for address in mapping.addresses for ref in address.cells}
+    # Cells (row, column letter) a header reference reads.
+    used = {(fact.row, fact.column) for fact in mapping.header_values}
+    used |= {(ref.row, ref.column) for address in mapping.addresses for ref in address.cells}
+    letters = [column_letter(column) for column in table.columns]
+
+    def fully_used(row: TableRow) -> bool:
+        """Every non-empty cell is referenced: a partly used row still lists (`sec` L-c)."""
+        return all(
+            cell is None or (row.number, letter) in used
+            for cell, letter in zip(row.cells, letters, strict=True)
+        )
+
     footers = set(mapping.footer_rows)
 
     def is_number(cell: str | None) -> bool:
@@ -175,7 +186,7 @@ def _skipped_rows(
 
     above = [row for row in table.rows if row.number < first]
     heading = above[-1].number if above and is_heading(above[-1]) else None
-    skipped = [row for row in above if row.number not in used and row.number != heading]
+    skipped = [row for row in above if not fully_used(row) and row.number != heading]
     skipped += [row for row in table.rows if row.number >= first and row.number in footers]
     return tuple(sorted(skipped, key=lambda row: row.number))
 
@@ -351,10 +362,14 @@ async def extract_spreadsheet(
     try:
         extraction, line_warnings = build_extraction(outcome.parsed, table)
         warnings = table_warnings(table, input_warnings) + line_warnings
-    except ValidationError as error:
-        # Our own build broke the schema: a bug, never the document's fault. The billed
-        # calls are kept; the log has the error count only, never a value.
-        log.error("extraction.spreadsheet_build_failed", error_count=error.error_count())
+    except (ValidationError, ValueError) as error:
+        # Our own build broke the schema or a warning's bounds (`sec` L-a): a bug, never
+        # the document's fault. The billed calls are kept; the log has the error count
+        # or type only, never a value or a message.
+        if isinstance(error, ValidationError):
+            log.error("extraction.spreadsheet_build_failed", error_count=error.error_count())
+        else:
+            log.error("extraction.spreadsheet_build_failed", error_type=type(error).__name__)
         return failed("schema_validation_failed")
     grounding_checked = False
     try:

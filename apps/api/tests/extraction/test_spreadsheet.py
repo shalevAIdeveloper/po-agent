@@ -77,10 +77,14 @@ async def test_lines_header_and_addresses_come_from_the_cells() -> None:
         None,
     )
     assert second.raw_text == "00124 | Bolt | 3 | 0.25 | rush"  # unmapped cells stay in raw_text
-    # Only the footer total, listed as a skipped row with its text (owner, M4).
+    # The footer total and the ship-to row (its "Ship to" label cell is not referenced,
+    # `sec` L-c) are listed as skipped rows with their text (owner, M4).
     [skipped] = result.warnings
     assert skipped.code == "rows_skipped" and skipped.details is not None
-    assert (skipped.details.rows, skipped.details.texts) == ((8,), ("Total | 3,702.75",))
+    assert (skipped.details.rows, skipped.details.texts) == (
+        (2, 8),
+        ("Ship to | Acme Corp", "Total | 3,702.75"),
+    )
     assert result.grounding_checked is True
     # Schema-valid, as stored.
     PurchaseOrderExtraction.model_validate_json(extraction.model_dump_json())
