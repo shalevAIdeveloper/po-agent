@@ -55,6 +55,16 @@ docker run --rm --entrypoint sh "$API_IMAGE" -c '
 import importlib.util as u
 for mod in ("opentelemetry.sdk", "fastapi_cli", "pytest", "reportlab"):
     assert u.find_spec(mod) is None, f"{mod} must not be installed"
+# XLSX parsing (ADR 0012): openpyxl must parse through defusedxml, never lxml; no pandas.
+for mod in ("lxml", "pandas", "numpy"):
+    assert u.find_spec(mod) is None, f"{mod} must not be installed"
+import defusedxml
+import openpyxl.xml
+assert openpyxl.xml.DEFUSEDXML is True, "openpyxl must use defusedxml"
+assert openpyxl.xml.LXML is False, "openpyxl must not use lxml"
+# The entry points openpyxl really calls (iterparse, fromstring) come from defusedxml.
+from app.extraction.inputs.xlsx import xml_is_hardened
+assert xml_is_hardened(), "XML parsing must be hardened"
 PY
 ' || fail "api image contents"
 

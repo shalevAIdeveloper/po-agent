@@ -18,6 +18,8 @@ dependencies = [
     "anthropic~=2.3.0",
     "pypdfium2~=5.14.0",
     "pillow~=13.0.0",
+    "openpyxl~=3.1.5",
+    "defusedxml~=0.7.1",
 ]
 
 [tool.uv]
@@ -47,6 +49,11 @@ ignore_missing_imports = true
 # pypdfium2 ships no type information either; only `app/extraction/inputs/pdf.py` uses it.
 [[tool.mypy.overrides]]
 module = ["pypdfium2", "pypdfium2.*"]
+ignore_missing_imports = true
+
+# openpyxl and defusedxml ship no type information; only `app/extraction/inputs/` uses them.
+[[tool.mypy.overrides]]
+module = ["openpyxl", "openpyxl.*", "defusedxml", "defusedxml.*"]
 ignore_missing_imports = true
 
 [tool.pydantic-mypy]

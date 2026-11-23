@@ -34,8 +34,6 @@ def test_a_pdf_header_after_a_few_junk_bytes_is_a_pdf() -> None:
         b"\x00\x00\x00\x18ftypheic\x00\x00\x00\x00mif1heic",  # HEIC (M6)
         b"GIF89a\x01\x00\x01\x00",
         b"RIFF\x10\x00\x00\x00WEBPVP8 ",
-        b"PK\x03\x04\x14\x00\x06\x00",  # XLSX (PR 5)
-        b"Item,Qty,Price\n00123-A,12,1.50\n",  # CSV (PR 5)
         b"Item: 00123-A\nQty: 12\n\nthanks",  # header-like, but not an email
         b"Subject: hi\nTo: a@b.example\n\nbody",  # no From
         b"From: a@b.example\nSubject: hi\nno blank line, so no body",

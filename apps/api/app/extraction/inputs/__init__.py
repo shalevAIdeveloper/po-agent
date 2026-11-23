@@ -4,7 +4,11 @@
   `Rejection`. The parsing child process (`isolate.py`) calls only this.
 - `parse_document` runs them in this process and logs; the worker uses `parse_isolated`
   (`isolate.py`): the same, in a child process with no secrets, a time and a memory limit.
-- Logs carry codes, sizes and counts only: never a filename, text or header value.
+- Spreadsheets (XLSX/CSV) become a cell table (`table.py`) instead of text: they never go
+  through `extract_po` (`to_document_input` refuses them) but through
+  `app.extraction.spreadsheet.extract_spreadsheet`.
+- Logs carry codes, sizes and counts only: never a filename, text, cell, sheet name or
+  header value.
 """
 
 from dataclasses import dataclass, field, replace
@@ -16,6 +20,7 @@ import structlog
 from app.extraction.inputs.detect import DocumentKind, detect_kind
 from app.extraction.inputs.errors import InputError, InputErrorCode, InputWarningCode
 from app.extraction.inputs.limits import MAX_FILE_BYTES, MAX_TEXT_CHARS, MAX_TOTAL_IMAGE_BYTES
+from app.extraction.inputs.table import SheetTable
 from app.llm.types import ImagePart
 
 if TYPE_CHECKING:
@@ -48,9 +53,15 @@ class ParsedDocument:
     # customer or to decide anything (ADR 0012, Follow-up M6-FROM).
     claimed_from: str | None = field(default=None, repr=False)
     claimed_date: datetime | None = None
+    # XLSX/CSV only (and always for them): the cell table; `text` is None.
+    table: SheetTable | None = field(default=None, repr=False)
 
     def to_document_input(self) -> "DocumentInput":
         """The model sees the claims only as untrusted metadata inside the document block."""
+        if self.table is not None:
+            # A spreadsheet's cells never go to `extract_po`: only the column mapping
+            # call sees a sample of them (`extract_spreadsheet`).
+            raise ValueError("a spreadsheet is extracted with extract_spreadsheet")
         # Imported here: `extract` builds a large character set at import, which the
         # parsing child process doesn't need.
         from app.extraction.extract import DocumentInput
@@ -85,6 +96,23 @@ def _parse(kind: DocumentKind, data: bytes) -> ParsedDocument:
         return ParsedDocument(
             kind=kind, text=None, images=(parse_image(data),), page_count=1, warnings=()
         )
+    if kind in ("xlsx", "csv"):
+        if kind == "xlsx":
+            from app.extraction.inputs.xlsx import parse_xlsx
+
+            sheet = parse_xlsx(data)
+        else:
+            from app.extraction.inputs.csvfile import parse_csv
+
+            sheet = parse_csv(data)
+        return ParsedDocument(
+            kind=kind,
+            text=None,
+            images=(),
+            page_count=1,
+            warnings=sheet.warnings,
+            table=sheet.table,
+        )
     from app.extraction.inputs.email import parse_email
 
     email = parse_email(data)
@@ -112,7 +140,7 @@ def _check_size(document: ParsedDocument) -> None:
         raise InputError("document_too_large")
     if sum(len(image.data) for image in document.images) > MAX_TOTAL_IMAGE_BYTES:
         raise InputError("document_too_large")
-    if document.text is None and not document.images:
+    if document.text is None and not document.images and document.table is None:
         raise InputError("empty_document")
 
 
@@ -156,6 +184,8 @@ def log_outcome(outcome: ParsedDocument | Rejection, size_bytes: int) -> ParsedD
         image_count=len(outcome.images),
         image_bytes=sum(len(image.data) for image in outcome.images),
         text_chars=0 if outcome.text is None else len(outcome.text),
+        table_rows=0 if outcome.table is None else len(outcome.table.rows),
+        table_columns=0 if outcome.table is None else len(outcome.table.columns),
         warnings=list(outcome.warnings),
     )
     return outcome

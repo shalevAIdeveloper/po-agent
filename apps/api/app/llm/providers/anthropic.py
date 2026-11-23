@@ -195,9 +195,11 @@ class AnthropicLLMClient:
         user_turn: UserMessageParam = {"role": "user", "content": _content_blocks(request.content)}
         messages: list[MessageParam] = [user_turn]
         output_config: OutputConfigParam = {
-            "effort": request.effort,
             "format": {"type": "json_schema", "schema": provider_schema(request.output_model)},
         }
+        if request.effort is not None:
+            # None: the model's default (a model without effort support rejects the key).
+            output_config["effort"] = request.effort
         started = time.perf_counter()
         trace = _CallTrace()
         token = _call_trace.set(trace)

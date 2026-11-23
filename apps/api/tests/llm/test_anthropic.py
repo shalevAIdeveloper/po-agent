@@ -8,8 +8,9 @@ from typing import Any
 import anthropic
 import httpx2
 import pytest
-from pydantic import SecretStr, ValidationError
+from pydantic import BaseModel, SecretStr, ValidationError
 
+from app.extraction.column_mapping import ColumnMapping
 from app.extraction.schema import PurchaseOrderExtraction
 from app.llm.errors import LLMError
 from app.llm.providers import anthropic as adapter_module
@@ -505,6 +506,20 @@ async def test_failure_log_line_has_code_and_no_provider_text() -> None:
     assert line["outcome"] == "llm_bad_request"
 
 
+async def test_no_effort_means_the_key_is_not_sent() -> None:
+    # The mapping model (Haiku) may not support `effort`: None leaves the model default.
+    seen: list[httpx2.Request] = []
+
+    def handler(request: httpx2.Request) -> httpx2.Response:
+        seen.append(request)
+        return ok_response()
+
+    await adapter(handler).extract(make_request(effort=None))
+    [request] = seen
+    assert "effort" not in body_of(request)["output_config"]
+    assert "format" in body_of(request)["output_config"]
+
+
 # ----- schema sent to the provider -----
 
 _UNSUPPORTED = (
@@ -533,8 +548,9 @@ def _walk(node: Any) -> list[dict[str, Any]]:
     return found
 
 
-def test_extraction_schema_is_in_the_providers_supported_subset() -> None:
-    schema = provider_schema(PurchaseOrderExtraction)
+@pytest.mark.parametrize("model", [PurchaseOrderExtraction, ColumnMapping])
+def test_extraction_schema_is_in_the_providers_supported_subset(model: type[BaseModel]) -> None:
+    schema = provider_schema(model)
 
     for node in _walk(schema):
         for keyword in _UNSUPPORTED:

@@ -4,7 +4,8 @@ A prompt file has `## <Section>` headings (letters only); `System` and `User` ar
 Text before the first heading is a title and is ignored (but hashed). Any other line that
 starts with `#` (`## System Prompt`, `### Retry`, `##Retry`, an indented `## User`) is an
 error, so a misspelled heading can't silently become part of the section before it.
-Placeholders are `{{lower_snake}}`:
+Placeholders are `{{lower_snake}}`; a brace touching one (`{{{x}}}`) or any other run of
+three braces is an error (M1-BRACES):
 
 - The system section has none: document data never reaches the system prompt.
 - Substitution is strict (a missing or unknown value is an error) and single-pass, so a
@@ -35,6 +36,9 @@ _OTHER_LINE_BREAK_RE: Final = re.compile(
 )
 _TITLE_RE: Final = re.compile(r"# [^\n]*")
 _PLACEHOLDER_RE: Final = re.compile(r"\{\{([a-z][a-z0-9_]*)\}\}")
+# A brace touching a placeholder (`{{{name}}}`, `{{name}}}`) always forms a run of three;
+# the placeholder regex would match inside it and leave a stray `{`/`}` (M1-BRACES).
+_TRIPLE_BRACE_RE: Final = re.compile(r"\{\{\{|\}\}\}")
 _REQUIRED_SECTIONS: Final = ("System", "User")
 
 
@@ -137,7 +141,7 @@ def parse_prompt(name: str, version: int, text: str) -> Prompt:
         if not body:
             raise PromptError(f"{label}: empty section {title!r}")
         leftover = _PLACEHOLDER_RE.sub("", body)
-        if "{{" in leftover or "}}" in leftover:
+        if "{{" in leftover or "}}" in leftover or _TRIPLE_BRACE_RE.search(body):
             raise PromptError(f"{label}: malformed placeholder in section {title!r}")
         sections[title] = body
     for required in _REQUIRED_SECTIONS:
