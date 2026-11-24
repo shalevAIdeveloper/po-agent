@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-from evals.generate.spec import Case
+from evals.generate.spec import Case, PdfDoc
 
 
 @dataclass(frozen=True, slots=True)
@@ -14,4 +14,10 @@ class Rendered:
 
 def render(case: Case) -> Rendered:
     # Renderers are imported when needed: each pulls in reportlab / pypdfium2 / openpyxl.
-    raise NotImplementedError(type(case.document).__name__)
+    document = case.document
+    if isinstance(document, PdfDoc):
+        from evals.generate import render_pdf
+
+        result = render_pdf.render(case, document)
+        return Rendered(result.data, result.pages, result.line_pages)
+    raise NotImplementedError(type(document).__name__)

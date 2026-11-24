@@ -200,7 +200,8 @@ class PdfDoc:
     notes_label: str = "Notes"
     blocks: tuple[Block, ...] = ()
     show_vendor: bool = True
-    issuer: str | None = None  # who prints the document; default: the customer
+    issuer: str | None = None  # the name on the letterhead; default: header.customer_name
+    letterhead: tuple[str, ...] = ()  # lines under the issuer's name (street, city, phone)
 
 
 @dataclass(frozen=True, slots=True)
