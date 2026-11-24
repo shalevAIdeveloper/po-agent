@@ -306,7 +306,8 @@ class Case:
     received_at: datetime
     tags: tuple[str, ...] = ()
     document_type: Literal["purchase_order", "not_a_po"] = "purchase_order"
-    not_scored: tuple[str, ...] = ()
+    # (field path, why the path can't or mustn't be scored); meta.not_scored(_reasons).
+    not_scored: tuple[tuple[str, str], ...] = ()
     known_gap: tuple[str, ...] = ()
     # raw_text of the lines a known gap makes the pipeline add (meta.known_gap_raw_texts).
     known_gap_raw_texts: tuple[str, ...] = ()

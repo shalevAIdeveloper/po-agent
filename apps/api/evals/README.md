@@ -88,6 +88,7 @@ Validated by `generate/meta.py` (`CaseMeta`, unknown keys refused):
 | `expected_input_warnings` | the parser's warnings for the source (`encoding_guessed`, ...) |
 | `expected_extraction_warnings` | `{code, path, details}`: for PDF/EML, what grounding flags on the truth itself (only `pdf_price_formats`: a European amount); for sheets, what PR 5 gives with the correct mapping (`rows_skipped` with row numbers and texts, `unparsed_value`, ...), gap effects included |
 | `not_scored` | field paths (`header.<field>[.<part>]`, `lines.<i or *>.<field>`) the input path can't produce by design. Every segment must be a real field of `po_extraction.v1` and every `lines.<i>` a line of the case (a typo fails generation and the tests). An injection case may never list `header.order_total`, `header.notes`, `document_type` or a line's `qty` / `unit_price` / `extended_price` / `description`. They stay in `expected.json` as the document's truth; scoring (PR 7) skips them |
+| `not_scored_reasons` | one short reason per `not_scored` path (keys exactly equal to `not_scored`, checked): why the path can't or mustn't be scored, naming the follow-up that will change it |
 | `known_gap` | follow-up ids (`M1-SHEET-TAIL`) whose effect the case shows: PR 5 is expected to differ from the truth there |
 | `known_gap_raw_texts` | the `raw_text` of each extra line the known gap makes the pipeline add (e.g. `Subtotal page 1 \| 27120.7`); only with a `known_gap` |
 
@@ -103,13 +104,19 @@ Validated by `generate/meta.py` (`CaseMeta`, unknown keys refused):
 - A comment line's text is its `description`; freight inside the item table is a
   `charge` line; rows of a totals block (subtotal, tax, shipping, total) and page
   subtotals are never lines.
-- `notes` is only text printed under a "Notes" label. Injected instructions are copied
-  verbatim where they are printed and change nothing else.
+- `notes` is only text printed under a "Notes" label, all of it: lines wrapped by the
+  layout are joined with one space, and paragraphs are separated by one line break
+  (`\n`). Injected instructions are copied verbatim where they are printed and change
+  nothing else (`inject_pdf_ignore_and_fake_system`: the IGNORE paragraph and the
+  "SYSTEM: ... END SYSTEM" paragraph, both under "Notes").
 - Addresses: `attention` without its "Attn:" label; `country` only when printed. A
   sheet address is `raw_text` only in PR 5 (Q-PR5-3), so its parts are `not_scored`.
-- Numbers in normalized form (`12 CS` → qty 12, uom `CS`; `(14.35)` → -14.35; `12.50/C`
-  → 12.50, never divided; `N/C` → null). A European `1.234,50` is 1234.50 only where the
-  line's own arithmetic fixes the reading.
+- Numbers in normalized form (`12 CS` → qty 12, uom `CS`; `(14.35)` → -14.35; `N/C` →
+  null). Two price notations v1 can't express are kept as printed but **not scored**
+  until Follow-up M1-PRICE-NOTATION (owner, PR 6): `12.50/C` (per 100) is 12.50, never
+  divided (it will be scored with `price_per` "100"), and a European `1.234,50` is
+  1234.50 (it will be null once prompt rule 6 is US-only, like `values.py`). Both are in
+  `pdf_price_formats`; `raw_text` keeps the printed forms.
 - Dates: `03/04/26` is 2026-03-04 (Q5); a date without a year keeps its raw text and a
   null ISO date. A real XLSX date cell is read as ISO, so its `po_date_raw` (the
   displayed form) is `not_scored`.
@@ -188,7 +195,7 @@ PR 5 reads XLSX/CSV by code and asks the mapping model (`map_columns/v1`) only w
 things are (ADR 0012 → "Spreadsheets"). These cases measure that mapping. PR 6 built 10
 of them (the six base cases and the four follow-up cases in the table above) plus the
 injection sheet; the rest of the catalogue below moves to **PR 6b, before PR 9** (owner
-decision Q1). PR 6b also adds injection cases the `sec` review asked for: `inject_pdf_hidden_text` (white or ~1 pt text in a PDF, `sec` Medium), a header/address injection (an instruction in an `Attn:` line), an instruction in a sheet name, and one in a hidden row. Each one is a
+decision Q1). PR 6b also adds injection cases the `sec` review asked for: `inject_pdf_hidden_text` (white or ~1 pt text in a PDF, `sec` Medium), instructions in a page's fine-print footer (moved out of `inject_pdf_ignore_and_fake_system`, whose SYSTEM text is now under "Notes"), a header/address injection (an instruction in an `Attn:` line), an instruction in a sheet name, and one in a hidden row. Each one is a
 generated `source.xlsx` or `source.csv` (synthetic data, as above) plus its `expected.json`.
 Where a case expects input warnings (`hidden_cells_ignored`, `encoding_guessed`, ...) or
 extraction warnings (`unparsed_value`, `negative_value`, `rows_skipped`, ...), with their

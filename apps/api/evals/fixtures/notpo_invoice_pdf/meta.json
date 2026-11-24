@@ -29,6 +29,20 @@
     "header.payment_terms",
     "header.notes"
   ],
+  "not_scored_reasons": {
+    "header.customer_name": "not_a_po: the header of a document that is not an order is not scored (Q3)",
+    "header.customer_po_number": "not_a_po: the header of a document that is not an order is not scored (Q3)",
+    "header.po_date_raw": "not_a_po: the header of a document that is not an order is not scored (Q3)",
+    "header.po_date": "not_a_po: the header of a document that is not an order is not scored (Q3)",
+    "header.requested_ship_date_raw": "not_a_po: the header of a document that is not an order is not scored (Q3)",
+    "header.requested_ship_date": "not_a_po: the header of a document that is not an order is not scored (Q3)",
+    "header.ship_to": "not_a_po: the header of a document that is not an order is not scored (Q3)",
+    "header.bill_to": "not_a_po: the header of a document that is not an order is not scored (Q3)",
+    "header.order_total": "not_a_po: the header of a document that is not an order is not scored (Q3)",
+    "header.currency": "not_a_po: the header of a document that is not an order is not scored (Q3)",
+    "header.payment_terms": "not_a_po: the header of a document that is not an order is not scored (Q3)",
+    "header.notes": "not_a_po: the header of a document that is not an order is not scored (Q3)"
+  },
   "known_gap": [],
   "known_gap_raw_texts": []
 }

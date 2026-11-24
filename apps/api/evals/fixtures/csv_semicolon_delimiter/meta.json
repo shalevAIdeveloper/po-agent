@@ -51,6 +51,16 @@
     "header.ship_to.postal_code",
     "header.ship_to.country"
   ],
+  "not_scored_reasons": {
+    "header.ship_to.name": "sheet path: an address is raw_text only (Q-PR5-3), its parts are never produced",
+    "header.ship_to.attention": "sheet path: an address is raw_text only (Q-PR5-3), its parts are never produced",
+    "header.ship_to.line1": "sheet path: an address is raw_text only (Q-PR5-3), its parts are never produced",
+    "header.ship_to.line2": "sheet path: an address is raw_text only (Q-PR5-3), its parts are never produced",
+    "header.ship_to.city": "sheet path: an address is raw_text only (Q-PR5-3), its parts are never produced",
+    "header.ship_to.state": "sheet path: an address is raw_text only (Q-PR5-3), its parts are never produced",
+    "header.ship_to.postal_code": "sheet path: an address is raw_text only (Q-PR5-3), its parts are never produced",
+    "header.ship_to.country": "sheet path: an address is raw_text only (Q-PR5-3), its parts are never produced"
+  },
   "known_gap": [],
   "known_gap_raw_texts": []
 }

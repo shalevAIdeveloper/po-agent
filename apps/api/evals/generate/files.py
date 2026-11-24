@@ -64,7 +64,8 @@ def case_meta(case: Case, rendered: Rendered) -> meta.CaseMeta:
             )
             for w in case.expected_extraction_warnings
         ],
-        not_scored=list(case.not_scored),
+        not_scored=[path for path, _ in case.not_scored],
+        not_scored_reasons=dict(case.not_scored),
         known_gap=list(case.known_gap),
         known_gap_raw_texts=list(case.known_gap_raw_texts),
     )

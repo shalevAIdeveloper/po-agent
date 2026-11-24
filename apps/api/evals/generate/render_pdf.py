@@ -49,6 +49,7 @@ LEADING: Final = 11.5
 MARGIN: Final = 40.0
 BOTTOM: Final = 54.0  # the page footer ("Page 1 of 2") sits below this
 GRAY: Final = 0.88
+PARAGRAPH_GAP: Final = 4.0  # between paragraphs of one text block (e.g. notes)
 
 
 @dataclass(frozen=True, slots=True)
@@ -118,11 +119,15 @@ class _Pen:
     def paragraph(
         self, x: float, value: str, width: float, *, font: str = FONT, size: float = SIZE
     ) -> None:
+        """Paragraphs split at line breaks, each wrapped to `width`, a small gap between them."""
         leading = size + 2.5
-        for line in self.wrap(value, width, font=font, size=size):
-            self.need(leading)
-            self.y -= leading
-            self.text(x, self.y, line, font=font, size=size)
+        for number, part in enumerate(value.split("\n")):
+            if number:
+                self.y -= PARAGRAPH_GAP
+            for line in self.wrap(part, width, font=font, size=size):
+                self.need(leading)
+                self.y -= leading
+                self.text(x, self.y, line, font=font, size=size)
 
     def rule(self, y: float, x0: float | None = None, x1: float | None = None) -> None:
         self.pdf.setLineWidth(0.6)

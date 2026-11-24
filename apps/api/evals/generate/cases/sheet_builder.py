@@ -243,6 +243,11 @@ def _index(column: str) -> int:
     return number - 1
 
 
-def address_not_scored(name: str) -> tuple[str, ...]:
+ADDRESS_PARTS_REASON: Final = (
+    "sheet path: an address is raw_text only (Q-PR5-3), its parts are never produced"
+)
+
+
+def address_not_scored(name: str) -> tuple[tuple[str, str], ...]:
     """A sheet address is raw_text only in PR 5 (Q-PR5-3): its parts can't be produced."""
-    return tuple(f"header.{name}.{part}" for part in ADDRESS_PARTS)
+    return tuple((f"header.{name}.{part}", ADDRESS_PARTS_REASON) for part in ADDRESS_PARTS)

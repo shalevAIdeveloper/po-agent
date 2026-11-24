@@ -101,6 +101,7 @@ def _meta(**changes: Any) -> dict[str, Any]:
         "expected_input_warnings": [],
         "expected_extraction_warnings": [],
         "not_scored": [],
+        "not_scored_reasons": {},
         "known_gap": [],
         "known_gap_raw_texts": [],
     }
@@ -216,7 +217,29 @@ def test_allowed_domain(domain: str, allowed: bool) -> None:
     ],
 )
 def test_not_scored_takes_field_paths(path: str) -> None:
-    assert meta.load(json.dumps(_meta(not_scored=[path])).encode()).not_scored == [path]
+    raw = _meta(not_scored=[path], not_scored_reasons={path: "why"})
+    assert meta.load(json.dumps(raw).encode()).not_scored == [path]
+
+
+@pytest.mark.parametrize(
+    "reasons",
+    [
+        {},
+        {"header.notes": "why"},
+        {"header.notes": "why", "header.ship_to": "why", "header.bill_to": "extra"},
+        {"header.notes": "", "header.ship_to": "why"},
+        {"header.notes": "   ", "header.ship_to": "why"},
+    ],
+)
+def test_every_not_scored_path_has_exactly_one_reason(reasons: dict[str, str]) -> None:
+    raw = _meta(not_scored=["header.notes", "header.ship_to"], not_scored_reasons=reasons)
+    with pytest.raises(ValidationError):
+        meta.load(json.dumps(raw).encode())
+
+
+def test_a_reason_without_a_not_scored_path_is_refused() -> None:
+    with pytest.raises(ValidationError):
+        meta.load(json.dumps(_meta(not_scored_reasons={"header.notes": "why"})).encode())
 
 
 # --- expected.json -------------------------------------------------------------------------
@@ -466,7 +489,7 @@ def test_case_meta_carries_the_case() -> None:
 
     case = _case(
         tags=("letterhead",),
-        not_scored=("header.ship_to.city",),
+        not_scored=(("header.ship_to.city", "a sheet address is raw_text only"),),
         known_gap=("M1-SHEET-TAIL",),
         expected_input_warnings=("encoding_guessed",),
         expected_extraction_warnings=(
@@ -499,13 +522,27 @@ def test_case_meta_carries_the_case() -> None:
 
 
 def test_a_line_index_must_be_within_the_case_lines() -> None:
-    data = meta.load(json.dumps(_meta(not_scored=["lines.2.qty", "lines.*.uom"])).encode())
+    data = meta.load(
+        json.dumps(
+            _meta(
+                not_scored=["lines.2.qty", "lines.*.uom"],
+                not_scored_reasons={"lines.2.qty": "r", "lines.*.uom": "r"},
+            )
+        ).encode()
+    )
 
     meta.check_line_paths(data, 3)
     with pytest.raises(ValueError, match=r"lines.2.qty"):
         meta.check_line_paths(data, 2)
     with pytest.raises(ValueError, match="no lines"):
-        meta.check_line_paths(meta.load(json.dumps(_meta(not_scored=["lines.*.uom"])).encode()), 0)
+        meta.check_line_paths(
+            meta.load(
+                json.dumps(
+                    _meta(not_scored=["lines.*.uom"], not_scored_reasons={"lines.*.uom": "r"})
+                ).encode()
+            ),
+            0,
+        )
 
 
 def test_known_gap_raw_texts_need_a_known_gap() -> None:

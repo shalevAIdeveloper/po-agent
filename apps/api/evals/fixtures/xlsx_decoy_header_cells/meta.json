@@ -49,6 +49,7 @@
     }
   ],
   "not_scored": [],
+  "not_scored_reasons": {},
   "known_gap": [],
   "known_gap_raw_texts": []
 }

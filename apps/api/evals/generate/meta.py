@@ -74,6 +74,12 @@ def check_line_paths(meta: "CaseMeta", line_count: int) -> None:
             raise ValueError(f"{path}: the case has {line_count} line(s)")
 
 
+def _reason(value: str) -> str:
+    if not value.strip():
+        raise ValueError("a not_scored reason must say why")
+    return value
+
+
 def _follow_up(value: str) -> str:
     if not _FOLLOW_UP_RE.fullmatch(value):
         raise ValueError("must be a follow-up id from docs/progress.md, e.g. M1-SHEET-TAIL")
@@ -117,11 +123,21 @@ class CaseMeta(_Model):
     expected_input_warnings: list[InputWarningCode]
     expected_extraction_warnings: list[WarningMeta]
     not_scored: list[Annotated[str, AfterValidator(_path)]]
+    # Why each path is not scored (owner, PR 6): keys are exactly `not_scored`.
+    not_scored_reasons: dict[str, Annotated[str, AfterValidator(_reason)]]
     known_gap: list[Annotated[str, AfterValidator(_follow_up)]]
     # The raw_text of every line the pipeline is expected to add because of a known gap
     # (dev M2). PR 7 scores and reports these lines, but leaves them out of the
     # regression gate (evals/README.md).
     known_gap_raw_texts: list[Annotated[str, Field(min_length=1)]]
+
+    @model_validator(mode="after")
+    def _one_reason_per_not_scored_path(self) -> Self:
+        if len(set(self.not_scored)) != len(self.not_scored):
+            raise ValueError("not_scored lists a path twice")
+        if set(self.not_scored_reasons) != set(self.not_scored):
+            raise ValueError("not_scored_reasons must have exactly one reason per not_scored path")
+        return self
 
     @model_validator(mode="after")
     def _gap_lines_need_a_gap(self) -> Self:

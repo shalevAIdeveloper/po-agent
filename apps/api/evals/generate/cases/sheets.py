@@ -93,7 +93,7 @@ def sheet_case(
     *,
     day: int,
     group: Group = "sheet",
-    not_scored: tuple[str, ...] = (),
+    not_scored: tuple[tuple[str, str], ...] = (),
     known_gap: tuple[str, ...] = (),
     checks: str = "",
     tags: tuple[str, ...] = (),
@@ -172,7 +172,12 @@ def _header_block_row9() -> Case:
         b,
         header,
         day=12,
-        not_scored=("header.po_date_raw",),
+        not_scored=(
+            (
+                "header.po_date_raw",
+                "sheet path: a real date cell is read as ISO, not in its displayed form",
+            ),
+        ),
         checks="a title and header block (a real date cell, a four-cell ship-to) above "
         "headings in row 9; a footer total",
     )
