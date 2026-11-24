@@ -1,0 +1,42 @@
+{
+  "synthetic": true,
+  "schema_version": "eval_case_meta.v1",
+  "generator": "evals.generate",
+  "generator_version": 1,
+  "seed": 905,
+  "input_type": "csv",
+  "group": "sheet",
+  "tags": [
+    "csv",
+    "sheet",
+    "spreadsheet"
+  ],
+  "pages": 1,
+  "sender_email": "casey@kestrelwick.example.com",
+  "received_at": "2026-11-20T15:20:00Z",
+  "expected_input_warnings": [],
+  "expected_extraction_warnings": [
+    {
+      "code": "rows_skipped",
+      "path": "lines",
+      "details": {
+        "names": [],
+        "rows": [
+          1,
+          2,
+          10
+        ],
+        "texts": [
+          "Purchase Order | KMW-55960",
+          "Customer | Kestrelwick Marine Works",
+          "Total | 1,062.45"
+        ],
+        "hidden_rows": null,
+        "hidden_columns": null,
+        "count": null
+      }
+    }
+  ],
+  "not_scored": [],
+  "known_gap": []
+}

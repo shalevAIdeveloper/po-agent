@@ -5,11 +5,11 @@ import io
 import pytest
 from PIL import Image
 
-from app.extraction.inputs import ParsedDocument, run_parsers
 from evals.generate import files, meta, render_scan
 from evals.generate.cases import CASES
 from evals.generate.spec import Case, ScanDoc
 from evals.run import FIXTURES_DIR
+from tests.evals.support import parsed
 
 MAX_RASTER_BYTES = 600 * 1024  # the plan's cap: rasters stay around 400 KB
 SCANS = [pytest.param(c, id=c.name) for c in CASES if isinstance(c.document, ScanDoc)]
@@ -31,10 +31,9 @@ def test_a_scan_is_under_the_raster_cap(case: Case) -> None:
 
 @pytest.mark.parametrize("case", SCANS)
 def test_a_scan_has_no_text_layer(case: Case) -> None:
-    parsed = run_parsers(_source(case))
-    assert isinstance(parsed, ParsedDocument)
-    assert parsed.text is None
-    assert parsed.images
+    document = parsed(case.name)
+    assert document.text is None
+    assert document.images
 
 
 PDF_SCANS = [

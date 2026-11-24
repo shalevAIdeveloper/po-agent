@@ -1,0 +1,38 @@
+{
+  "synthetic": true,
+  "schema_version": "eval_case_meta.v1",
+  "generator": "evals.generate",
+  "generator_version": 1,
+  "seed": 904,
+  "input_type": "xlsx",
+  "group": "sheet",
+  "tags": [
+    "sheet",
+    "spreadsheet",
+    "xlsx"
+  ],
+  "pages": 1,
+  "sender_email": "r.okonkwo@tallowfen.example.com",
+  "received_at": "2026-11-19T15:20:00Z",
+  "expected_input_warnings": [],
+  "expected_extraction_warnings": [
+    {
+      "code": "rows_skipped",
+      "path": "lines",
+      "details": {
+        "names": [],
+        "rows": [
+          9
+        ],
+        "texts": [
+          "Total | 4802.1"
+        ],
+        "hidden_rows": null,
+        "hidden_columns": null,
+        "count": null
+      }
+    }
+  ],
+  "not_scored": [],
+  "known_gap": []
+}

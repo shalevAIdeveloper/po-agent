@@ -1,6 +1,6 @@
 """The registry: every committed case, once. `fixtures/<name>/` must match it exactly."""
 
-from evals.generate.cases import emails, pdf_clean, pdf_special, scans
+from evals.generate.cases import emails, pdf_clean, pdf_special, scans, sheets
 from evals.generate.spec import Case
 
 CASES: tuple[Case, ...] = (
@@ -8,6 +8,7 @@ CASES: tuple[Case, ...] = (
     *pdf_special.CASES,
     *scans.CASES,
     *emails.CASES,
+    *sheets.CASES,
 )
 
 

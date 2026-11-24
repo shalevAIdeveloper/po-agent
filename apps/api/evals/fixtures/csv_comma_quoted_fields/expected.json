@@ -1,0 +1,91 @@
+{
+  "schema_version": "po_extraction.v1",
+  "document_type": "purchase_order",
+  "header": {
+    "customer_name": "Kestrelwick Marine Works",
+    "customer_po_number": "KMW-55960",
+    "po_date_raw": null,
+    "po_date": null,
+    "requested_ship_date_raw": null,
+    "requested_ship_date": null,
+    "ship_to": null,
+    "bill_to": null,
+    "order_total": "1062.45",
+    "currency": null,
+    "payment_terms": null,
+    "notes": null
+  },
+  "header_confidence": 1.0,
+  "lines": [
+    {
+      "raw_text": "1 | KMW-10422 | Hex bolt, zinc, 3/8-16 x 2 in | 10 | BX | 18.40 | 184.00",
+      "line_no": 1,
+      "line_type": "product",
+      "customer_part_number": "KMW-10422",
+      "vendor_part_number": null,
+      "description": "Hex bolt, zinc, 3/8-16 x 2 in",
+      "qty": "10",
+      "uom": "BX",
+      "unit_price": "18.40",
+      "extended_price": "184.00",
+      "page": null,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "2 | KMW-77001 | Rope, 1/2\" nylon, \"marine grade\", 600 ft | 2 | RL | 212.50 | 425.00",
+      "line_no": 2,
+      "line_type": "product",
+      "customer_part_number": "KMW-77001",
+      "vendor_part_number": null,
+      "description": "Rope, 1/2\" nylon, \"marine grade\", 600 ft",
+      "qty": "2",
+      "uom": "RL",
+      "unit_price": "212.50",
+      "extended_price": "425.00",
+      "page": null,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "3 | KMW-77014 | Battery charger, 12V\nwith clamps and cables | 3 | EA | 84.95 | 254.85",
+      "line_no": 3,
+      "line_type": "product",
+      "customer_part_number": "KMW-77014",
+      "vendor_part_number": null,
+      "description": "Battery charger, 12V\nwith clamps and cables",
+      "qty": "3",
+      "uom": "EA",
+      "unit_price": "84.95",
+      "extended_price": "254.85",
+      "page": null,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "4 | KMW-72150 | Safety glasses, clear, anti-fog | 24 | EA | 2.95 | 70.80",
+      "line_no": 4,
+      "line_type": "product",
+      "customer_part_number": "KMW-72150",
+      "vendor_part_number": null,
+      "description": "Safety glasses, clear, anti-fog",
+      "qty": "24",
+      "uom": "EA",
+      "unit_price": "2.95",
+      "extended_price": "70.80",
+      "page": null,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "5 | KMW-77020 | Deck cleaner; teak safe, 1 gal | 6 | EA | 21.30 | 127.80",
+      "line_no": 5,
+      "line_type": "product",
+      "customer_part_number": "KMW-77020",
+      "vendor_part_number": null,
+      "description": "Deck cleaner; teak safe, 1 gal",
+      "qty": "6",
+      "uom": "EA",
+      "unit_price": "21.30",
+      "extended_price": "127.80",
+      "page": null,
+      "confidence": 1.0
+    }
+  ]
+}

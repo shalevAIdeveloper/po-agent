@@ -17,6 +17,7 @@ from evals.generate import expected, files, meta, render_pdf
 from evals.generate.cases import CASES
 from evals.generate.spec import Case, PdfDoc, ScanDoc
 from evals.run import FIXTURES_DIR
+from tests.evals.support import parsed
 
 MAX_FILE_BYTES = 2 * 1024 * 1024
 KINDS = {"pdf": "pdf", "png": "png", "jpg": "jpeg", "xlsx": "xlsx", "csv": "csv", "eml": "eml"}
@@ -33,12 +34,8 @@ def _folder(case: Case) -> Path:
     return FIXTURES_DIR / case.name
 
 
-@functools.cache
 def _parsed(name: str) -> ParsedDocument:
-    case = next(c for c in CASES if c.name == name)
-    outcome = run_parsers((_folder(case) / case.source_name).read_bytes())
-    assert isinstance(outcome, ParsedDocument), outcome
-    return outcome
+    return parsed(name)
 
 
 @functools.cache
