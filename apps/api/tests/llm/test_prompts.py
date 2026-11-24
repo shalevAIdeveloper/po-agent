@@ -2,7 +2,9 @@ import hashlib
 from pathlib import Path
 
 import pytest
+from pydantic import BaseModel
 
+from app.extraction.schema import PurchaseOrderHeader, PurchaseOrderLine
 from app.llm.prompts import PROMPTS_DIR, PromptError, load_prompt, parse_prompt
 
 GOOD = """# demo — v1
@@ -228,3 +230,35 @@ def test_the_committed_extract_po_prompt_loads() -> None:
     assert prompt.prompt_version == "extract_po/v1"
     assert (PROMPTS_DIR / "extract_po" / "v1.md").is_file()
     assert {"System", "User", "Retry"} <= set(prompt.sections)
+
+
+# Fields extract_po v1 never named before M1-PRICE-NOTATION; the model fills them from the
+# schema alone. Naming them changes the prompt beyond that PR's scope (open point for the
+# owner); any field added from now on must be named.
+_UNNAMED_BEFORE_PRICE_NOTATION = frozenset(
+    {
+        "customer_name",
+        "customer_po_number",
+        "ship_to",
+        "bill_to",
+        "payment_terms",
+        "notes",
+        "description",
+    }
+)
+
+
+@pytest.mark.parametrize("model", [PurchaseOrderHeader, PurchaseOrderLine])
+def test_every_extraction_field_is_named_in_the_extract_po_prompt(model: type[BaseModel]) -> None:
+    system = load_prompt("extract_po", 1).sections["System"]
+    missing = [name for name in model.model_fields if name not in system]
+    assert set(missing) <= _UNNAMED_BEFORE_PRICE_NOTATION, missing
+    assert "price_per" in system
+
+
+def test_the_extract_po_prompt_reads_us_notation_only_and_states_price_per() -> None:
+    # Owner, 2026-11-24 (M1-PRICE-NOTATION): a European number is null (raw_text keeps
+    # it); "/C" and "/M" give price_per, a pack size never does, nothing is divided.
+    system = load_prompt("extract_po", 1).sections["System"]
+    for needle in ('"1.234,50"', "groups of three", '"/C"', '"/M"', '"/EA"', '"BX/100"'):
+        assert needle in system, needle

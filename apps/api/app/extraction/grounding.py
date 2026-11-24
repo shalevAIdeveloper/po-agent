@@ -23,6 +23,9 @@ Matching errs toward fewer warnings (a false alarm trains reviewers to ignore th
   ignored ("1,234.50" grounds 1234.5; "(5.00)" grounds -5); more than 40 digits never
   matches.
 
+`price_per` is not grounded: it is read from a notation next to the price ("/C" is 100),
+so its value is usually not printed as a number (M1-PRICE-NOTATION).
+
 Grounding catches values the model made up. It does not catch injection: a value an
 attacker printed in the document is, by definition, in the document.
 """

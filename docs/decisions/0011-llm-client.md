@@ -48,6 +48,8 @@ M1 turns documents into `po_extraction.v1` (SPEC F2, §9) with an LLM. CLAUDE.md
   - Numbers are compared exactly (`Decimal(str)` and `copy_abs()`, no context), so a huge number can't raise `Overflow`. A number with more than 40 digits never matches.
   - `ExtractionResult.grounding_checked` says whether the check ran. It is false for image-only input, or when the check itself failed, in which case it logs `extraction.grounding_failed` with the error type only and the extraction and its billed calls are kept (`sec` M1, L2). So "no warnings" never means "checked" by itself.
   - **Limits:** grounding catches values the model made up, not injection, because a value an attacker printed is in the document. Small numbers are almost always found somewhere on the page (page numbers, dates).
+  - **`price_per` is not grounded** (M1-PRICE-NOTATION, owner 2026-11-24): it is read from a notation next to the price (`/C` is 100, `/M` is 1000), so its value is usually not printed as a number. The schema limits it to a positive whole number of at most 6 digits, and the reviewer sees it next to `raw_text`.
+  - Numbers are read in US notation only, by the prompt (rule 6) as by `values.py`: a comma as the decimal mark (`1.234,50`) or commas not in groups of three give null, and `raw_text` keeps the printed form. Grounding reads US notation too, so it never grounds a European reading.
 
 ### Note: one retry loop for every prompt (M1 PR 5 T8)
 - The schema retry moved out of `extract.py` into `app/extraction/structured_call.py`: `call_with_retry(client, prompt, request, purpose, check=None) -> CallOutcome`. `extract_po` and `map_columns` both use it; PR 3's tests stayed green over the move.
