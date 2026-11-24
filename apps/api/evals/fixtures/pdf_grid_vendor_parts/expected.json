@@ -1,0 +1,111 @@
+{
+  "schema_version": "po_extraction.v1",
+  "document_type": "purchase_order",
+  "header": {
+    "customer_name": "Harrowmoss Mechanical",
+    "customer_po_number": "HCM-0419",
+    "po_date_raw": "Nov 3, 2026",
+    "po_date": "2026-11-03",
+    "requested_ship_date_raw": null,
+    "requested_ship_date": null,
+    "ship_to": {
+      "raw_text": "Harrowmoss Mechanical\n88 Tinmouth Road\nQuarry Bend, PA 15992",
+      "name": "Harrowmoss Mechanical",
+      "attention": null,
+      "line1": "88 Tinmouth Road",
+      "line2": null,
+      "city": "Quarry Bend",
+      "state": "PA",
+      "postal_code": "15992",
+      "country": null
+    },
+    "bill_to": {
+      "raw_text": "Harrowmoss Mechanical\n88 Tinmouth Road\nQuarry Bend, PA 15992",
+      "name": "Harrowmoss Mechanical",
+      "attention": null,
+      "line1": "88 Tinmouth Road",
+      "line2": null,
+      "city": "Quarry Bend",
+      "state": "PA",
+      "postal_code": "15992",
+      "country": null
+    },
+    "order_total": "3372.65",
+    "currency": null,
+    "payment_terms": "2% 10 Net 30",
+    "notes": null
+  },
+  "header_confidence": 1.0,
+  "lines": [
+    {
+      "raw_text": "1 NP-80430 Toggle switch, single pole, 15A 47 EA 1.95 91.65",
+      "line_no": 1,
+      "line_type": "product",
+      "customer_part_number": null,
+      "vendor_part_number": "NP-80430",
+      "description": "Toggle switch, single pole, 15A",
+      "qty": "47",
+      "uom": "EA",
+      "unit_price": "1.95",
+      "extended_price": "91.65",
+      "page": 1,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "2 NP-93101 Extension cord, 12/3, 50 ft 39 EA 39.90 1,556.10",
+      "line_no": 2,
+      "line_type": "product",
+      "customer_part_number": null,
+      "vendor_part_number": "NP-93101",
+      "description": "Extension cord, 12/3, 50 ft",
+      "qty": "39",
+      "uom": "EA",
+      "unit_price": "39.90",
+      "extended_price": "1556.10",
+      "page": 1,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "3 NP-60021 Toilet tissue, 2-ply, 500 sheets 31 CS 47.25 1,464.75",
+      "line_no": 3,
+      "line_type": "product",
+      "customer_part_number": null,
+      "vendor_part_number": "NP-60021",
+      "description": "Toilet tissue, 2-ply, 500 sheets",
+      "qty": "31",
+      "uom": "CS",
+      "unit_price": "47.25",
+      "extended_price": "1464.75",
+      "page": 1,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "4 NP-40260 PVC cement, medium body, 8 oz 25 EA 8.95 223.75",
+      "line_no": 4,
+      "line_type": "product",
+      "customer_part_number": null,
+      "vendor_part_number": "NP-40260",
+      "description": "PVC cement, medium body, 8 oz",
+      "qty": "25",
+      "uom": "EA",
+      "unit_price": "8.95",
+      "extended_price": "223.75",
+      "page": 1,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "5 NP-93160 Cable ties, 11 in, natural, 100 per bag 7 BG 5.20 36.40",
+      "line_no": 5,
+      "line_type": "product",
+      "customer_part_number": null,
+      "vendor_part_number": "NP-93160",
+      "description": "Cable ties, 11 in, natural, 100 per bag",
+      "qty": "7",
+      "uom": "BG",
+      "unit_price": "5.20",
+      "extended_price": "36.40",
+      "page": 1,
+      "confidence": 1.0
+    }
+  ]
+}

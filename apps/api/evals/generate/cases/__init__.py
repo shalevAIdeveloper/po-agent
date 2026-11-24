@@ -1,8 +1,9 @@
 """The registry: every committed case, once. `fixtures/<name>/` must match it exactly."""
 
+from evals.generate.cases import pdf_clean
 from evals.generate.spec import Case
 
-CASES: tuple[Case, ...] = ()
+CASES: tuple[Case, ...] = (*pdf_clean.CASES,)
 
 
 def by_name() -> dict[str, Case]:

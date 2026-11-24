@@ -1,0 +1,20 @@
+{
+  "synthetic": true,
+  "schema_version": "eval_case_meta.v1",
+  "generator": "evals.generate",
+  "generator_version": 1,
+  "seed": 604,
+  "input_type": "pdf",
+  "group": "clean_pdf",
+  "tags": [
+    "clean_pdf",
+    "pdf"
+  ],
+  "pages": 1,
+  "sender_email": "r.okonkwo@tallowfen.example.com",
+  "received_at": "2026-11-05T09:30:00Z",
+  "expected_input_warnings": [],
+  "expected_extraction_warnings": [],
+  "not_scored": [],
+  "known_gap": []
+}

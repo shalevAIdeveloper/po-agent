@@ -1,0 +1,253 @@
+%PDF-1.3
+%“Œ‹ž ReportLab Generated PDF document (opensource)
+1 0 obj
+<<
+/F1 2 0 R /F2 3 0 R
+>>
+endobj
+2 0 obj
+<<
+/BaseFont /Helvetica /Encoding /WinAnsiEncoding /Name /F1 /Subtype /Type1 /Type /Font
+>>
+endobj
+3 0 obj
+<<
+/BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding /Name /F2 /Subtype /Type1 /Type /Font
+>>
+endobj
+4 0 obj
+<<
+/Contents 8 0 R /MediaBox [ 0 0 612 792 ] /Parent 7 0 R /Resources <<
+/Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
+>> /Rotate 0 /Trans <<
+
+>> 
+  /Type /Page
+>>
+endobj
+5 0 obj
+<<
+/PageMode /UseNone /Pages 7 0 R /Type /Catalog
+>>
+endobj
+6 0 obj
+<<
+/Author (evals.generate) /CreationDate (D:20000101000000+00'00') /Creator (evals.generate) /Keywords () /ModDate (D:20000101000000+00'00') /Producer (ReportLab PDF Library - \(opensource\)) 
+  /Subject (synthetic eval fixture) /Title (eval case pdf_grid_wrapped_descriptions) /Trapped /False
+>>
+endobj
+7 0 obj
+<<
+/Count 1 /Kids [ 4 0 R ] /Type /Pages
+>>
+endobj
+8 0 obj
+<<
+/Length 5986
+>>
+stream
+1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
+BT /F2 14 Tf 16.8 TL ET
+BT 1 0 0 1 40 738 Tm (Oakspurrow Transit Authority) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 726.5 Tm (2 Depot Square) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 715 Tm (Lantern Ridge, WV 25998) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 703.5 Tm (\(304\) 555-0174) Tj T* ET
+BT /F2 18 Tf 21.6 TL ET
+BT 1 0 0 1 401 736 Tm (PURCHASE ORDER) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 716.5 Tm (PO Number:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 420.506 716.5 Tm (OTA-24-00917) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 705 Tm (PO Date:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 420.506 705 Tm (11/10/2026) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 693.5 Tm (Terms:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 420.506 693.5 Tm (Net 30) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 682 Tm (Buyer:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 420.506 682 Tm (Drew Castellano) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 664 Tm (Vendor:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 652.5 Tm (Vellumgrove Industrial Supply) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 641 Tm (2750 Copperleaf Parkway) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 629.5 Tm (Alder Falls, OH 45990) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 217.3333 664 Tm (Ship To:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 217.3333 652.5 Tm (Oakspurrow Transit Authority) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 217.3333 641 Tm (Attn: Fleet Maintenance) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 217.3333 629.5 Tm (2 Depot Square) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 217.3333 618 Tm (Lantern Ridge, WV 25998) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 394.6667 664 Tm (Bill To:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 394.6667 652.5 Tm (Oakspurrow Transit Authority) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 394.6667 641 Tm (2 Depot Square) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 394.6667 629.5 Tm (Lantern Ridge, WV 25998) Tj T* ET
+.88 g
+n 40 587.5 532 16.5 re f*
+0 g
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 593.5 Tm (Line) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 593.5 Tm (Our Item #) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 593.5 Tm (Description) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 407.997 593.5 Tm (Qty) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 593.5 Tm (UoM) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 472.988 593.5 Tm (Unit Price) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 535.007 593.5 Tm (Amount) Tj T* ET
+.5 w
+n 40 587.5 532 16.5 re S
+n 70 587.5 m 70 604 l S
+n 148 587.5 m 148 604 l S
+n 390 587.5 m 390 604 l S
+n 426 587.5 m 426 604 l S
+n 462 587.5 m 462 604 l S
+n 518 587.5 m 518 604 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 577 Tm (1) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 577 Tm (OTA-2107) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 577 Tm (Wire rope assembly, galvanized steel, 3/8 in x 25 ft, with) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 565.5 Tm (thimble eyes on both ends and a load tag) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 417.996 577 Tm (4) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 577 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 492.482 577 Tm (48.60) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 541.478 577 Tm (194.40) Tj T* ET
+.5 w
+n 40 560.5 532 27 re S
+n 70 560.5 m 70 587.5 l S
+n 148 560.5 m 148 587.5 l S
+n 390 560.5 m 390 587.5 l S
+n 426 560.5 m 426 587.5 l S
+n 462 560.5 m 462 587.5 l S
+n 518 560.5 m 518 587.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 550 Tm (2) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 550 Tm (OTA-2114) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 550 Tm (Replacement seat cushion kit for transit bench model) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 538.5 Tm (TB-40, vinyl, charcoal, includes mounting hardware) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 550 Tm (12) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 550 Tm (KT) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 487.478 550 Tm (112.75) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 533.972 550 Tm (1,353.00) Tj T* ET
+.5 w
+n 40 533.5 532 27 re S
+n 70 533.5 m 70 560.5 l S
+n 148 533.5 m 148 560.5 l S
+n 390 533.5 m 390 560.5 l S
+n 426 533.5 m 426 560.5 l S
+n 462 533.5 m 462 560.5 l S
+n 518 533.5 m 518 560.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 523 Tm (3) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 523 Tm (OTA-2121) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 523 Tm (Anti-slip stair tread tape, 4 in x 60 ft roll, black with yellow) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 511.5 Tm (safety border) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 417.996 523 Tm (6) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 523 Tm (RL) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 492.482 523 Tm (39.20) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 541.478 523 Tm (235.20) Tj T* ET
+.5 w
+n 40 506.5 532 27 re S
+n 70 506.5 m 70 533.5 l S
+n 148 506.5 m 148 533.5 l S
+n 390 506.5 m 390 533.5 l S
+n 426 506.5 m 426 533.5 l S
+n 462 506.5 m 462 533.5 l S
+n 518 506.5 m 518 533.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 496 Tm (4) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 496 Tm (OTA-2128) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 496 Tm (Fluorescent-to-LED retrofit kit for 4 ft two-lamp fixtures,) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 484.5 Tm (ballast bypass, 4000K, includes driver and wiring harness) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 496 Tm (20) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 496 Tm (KT) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 492.482 496 Tm (57.90) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 533.972 496 Tm (1,158.00) Tj T* ET
+.5 w
+n 40 479.5 532 27 re S
+n 70 479.5 m 70 506.5 l S
+n 148 479.5 m 148 506.5 l S
+n 390 479.5 m 390 506.5 l S
+n 426 479.5 m 426 506.5 l S
+n 462 479.5 m 462 506.5 l S
+n 518 479.5 m 518 506.5 l S
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 533.972 466 Tm (2,940.60) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 484.502 466 Tm (Total:) Tj T* ET
+ 
+endstream
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000061 00000 n 
+0000000102 00000 n 
+0000000209 00000 n 
+0000000321 00000 n 
+0000000514 00000 n 
+0000000582 00000 n 
+0000000895 00000 n 
+0000000954 00000 n 
+trailer
+<<
+/ID 
+[<b8b186fae1a36acb9f3e8c282d3566da><b8b186fae1a36acb9f3e8c282d3566da>]
+% ReportLab generated PDF document -- digest (opensource)
+
+/Info 6 0 R
+/Root 5 0 R
+/Size 9
+>>
+startxref
+6991
+%%EOF

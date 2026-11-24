@@ -1,0 +1,265 @@
+%PDF-1.3
+%“Œ‹ž ReportLab Generated PDF document (opensource)
+1 0 obj
+<<
+/F1 2 0 R /F2 3 0 R
+>>
+endobj
+2 0 obj
+<<
+/BaseFont /Helvetica /Encoding /WinAnsiEncoding /Name /F1 /Subtype /Type1 /Type /Font
+>>
+endobj
+3 0 obj
+<<
+/BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding /Name /F2 /Subtype /Type1 /Type /Font
+>>
+endobj
+4 0 obj
+<<
+/Contents 8 0 R /MediaBox [ 0 0 612 792 ] /Parent 7 0 R /Resources <<
+/Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
+>> /Rotate 0 /Trans <<
+
+>> 
+  /Type /Page
+>>
+endobj
+5 0 obj
+<<
+/PageMode /UseNone /Pages 7 0 R /Type /Catalog
+>>
+endobj
+6 0 obj
+<<
+/Author (evals.generate) /CreationDate (D:20000101000000+00'00') /Creator (evals.generate) /Keywords () /ModDate (D:20000101000000+00'00') /Producer (ReportLab PDF Library - \(opensource\)) 
+  /Subject (synthetic eval fixture) /Title (eval case pdf_grid_vendor_parts) /Trapped /False
+>>
+endobj
+7 0 obj
+<<
+/Count 1 /Kids [ 4 0 R ] /Type /Pages
+>>
+endobj
+8 0 obj
+<<
+/Length 6008
+>>
+stream
+1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
+BT /F2 14 Tf 16.8 TL ET
+BT 1 0 0 1 40 738 Tm (Harrowmoss Mechanical) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 726.5 Tm (88 Tinmouth Road) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 715 Tm (Quarry Bend, PA 15992) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 703.5 Tm (\(412\) 555-0117) Tj T* ET
+BT /F2 18 Tf 21.6 TL ET
+BT 1 0 0 1 401 736 Tm (PURCHASE ORDER) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 716.5 Tm (PO Number:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 420.506 716.5 Tm (HCM-0419) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 705 Tm (PO Date:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 420.506 705 Tm (Nov 3, 2026) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 693.5 Tm (Terms:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 420.506 693.5 Tm (2% 10 Net 30) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 682 Tm (Buyer:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 420.506 682 Tm (Jordan Pike) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 664 Tm (Vendor:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 652.5 Tm (Vellumgrove Industrial Supply) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 641 Tm (2750 Copperleaf Parkway) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 629.5 Tm (Alder Falls, OH 45990) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 217.3333 664 Tm (Ship To:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 217.3333 652.5 Tm (Harrowmoss Mechanical) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 217.3333 641 Tm (88 Tinmouth Road) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 217.3333 629.5 Tm (Quarry Bend, PA 15992) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 394.6667 664 Tm (Bill To:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 394.6667 652.5 Tm (Harrowmoss Mechanical) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 394.6667 641 Tm (88 Tinmouth Road) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 394.6667 629.5 Tm (Quarry Bend, PA 15992) Tj T* ET
+.88 g
+n 40 599 522 16.5 re f*
+0 g
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 605 Tm (Line) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 605 Tm (Vellumgrove Part #) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 169 605 Tm (Description) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 397.997 605 Tm (Qty) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 419 605 Tm (UoM) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 462.988 605 Tm (Unit Price) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 525.007 605 Tm (Amount) Tj T* ET
+.5 w
+n 40 599 522 16.5 re S
+n 70 599 m 70 615.5 l S
+n 166 599 m 166 615.5 l S
+n 380 599 m 380 615.5 l S
+n 416 599 m 416 615.5 l S
+n 452 599 m 452 615.5 l S
+n 508 599 m 508 615.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 588.5 Tm (1) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 588.5 Tm (NP-80430) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 169 588.5 Tm (Toggle switch, single pole, 15A) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 402.992 588.5 Tm (47) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 419 588.5 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 487.486 588.5 Tm (1.95) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 536.482 588.5 Tm (91.65) Tj T* ET
+.5 w
+n 40 583.5 522 15.5 re S
+n 70 583.5 m 70 599 l S
+n 166 583.5 m 166 599 l S
+n 380 583.5 m 380 599 l S
+n 416 583.5 m 416 599 l S
+n 452 583.5 m 452 599 l S
+n 508 583.5 m 508 599 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 573 Tm (2) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 573 Tm (NP-93101) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 169 573 Tm (Extension cord, 12/3, 50 ft) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 402.992 573 Tm (39) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 419 573 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 482.482 573 Tm (39.90) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 523.972 573 Tm (1,556.10) Tj T* ET
+.5 w
+n 40 568 522 15.5 re S
+n 70 568 m 70 583.5 l S
+n 166 568 m 166 583.5 l S
+n 380 568 m 380 583.5 l S
+n 416 568 m 416 583.5 l S
+n 452 568 m 452 583.5 l S
+n 508 568 m 508 583.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 557.5 Tm (3) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 557.5 Tm (NP-60021) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 169 557.5 Tm (Toilet tissue, 2-ply, 500 sheets) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 402.992 557.5 Tm (31) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 419 557.5 Tm (CS) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 482.482 557.5 Tm (47.25) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 523.972 557.5 Tm (1,464.75) Tj T* ET
+.5 w
+n 40 552.5 522 15.5 re S
+n 70 552.5 m 70 568 l S
+n 166 552.5 m 166 568 l S
+n 380 552.5 m 380 568 l S
+n 416 552.5 m 416 568 l S
+n 452 552.5 m 452 568 l S
+n 508 552.5 m 508 568 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 542 Tm (4) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 542 Tm (NP-40260) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 169 542 Tm (PVC cement, medium body, 8 oz) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 402.992 542 Tm (25) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 419 542 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 487.486 542 Tm (8.95) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 531.478 542 Tm (223.75) Tj T* ET
+.5 w
+n 40 537 522 15.5 re S
+n 70 537 m 70 552.5 l S
+n 166 537 m 166 552.5 l S
+n 380 537 m 380 552.5 l S
+n 416 537 m 416 552.5 l S
+n 452 537 m 452 552.5 l S
+n 508 537 m 508 552.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 526.5 Tm (5) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 526.5 Tm (NP-93160) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 169 526.5 Tm (Cable ties, 11 in, natural, 100 per bag) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 407.996 526.5 Tm (7) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 419 526.5 Tm (BG) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 487.486 526.5 Tm (5.20) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 536.482 526.5 Tm (36.40) Tj T* ET
+.5 w
+n 40 521.5 522 15.5 re S
+n 70 521.5 m 70 537 l S
+n 166 521.5 m 166 537 l S
+n 380 521.5 m 380 537 l S
+n 416 521.5 m 416 537 l S
+n 452 521.5 m 452 537 l S
+n 508 521.5 m 508 537 l S
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 523.972 508 Tm (3,372.65) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 474.502 508 Tm (Total:) Tj T* ET
+ 
+endstream
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000061 00000 n 
+0000000102 00000 n 
+0000000209 00000 n 
+0000000321 00000 n 
+0000000514 00000 n 
+0000000582 00000 n 
+0000000887 00000 n 
+0000000946 00000 n 
+trailer
+<<
+/ID 
+[<9c642e11bb49ae6d46c184b32ed17b21><9c642e11bb49ae6d46c184b32ed17b21>]
+% ReportLab generated PDF document -- digest (opensource)
+
+/Info 6 0 R
+/Root 5 0 R
+/Size 9
+>>
+startxref
+7005
+%%EOF

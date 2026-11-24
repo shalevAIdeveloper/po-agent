@@ -58,7 +58,9 @@ GROUP_MINIMUMS: dict[Group, int] = {
     "not_a_po": 1,
 }
 LineType = Literal["product", "charge", "comment"]
-ColKey = Literal["no", "cpn", "vpn", "desc", "qty", "uom", "price", "ext"]
+# The extra keys are columns that map to no schema field (cost center, need-by date...):
+# printed from `Line.cells` only, and part of raw_text.
+ColKey = Literal["no", "cpn", "vpn", "desc", "qty", "uom", "price", "ext", "x1", "x2", "x3"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -156,7 +158,7 @@ class Line:
             "uom": self.uom,
             "price": self.price,
             "ext": self.ext,
-        }[key]
+        }.get(key)
         return value.printed if isinstance(value, Num) else value
 
 

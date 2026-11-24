@@ -1,0 +1,97 @@
+{
+  "schema_version": "po_extraction.v1",
+  "document_type": "purchase_order",
+  "header": {
+    "customer_name": "Kestrelwick Marine Works",
+    "customer_po_number": "KMW-55821",
+    "po_date_raw": "11/06/26",
+    "po_date": "2026-11-06",
+    "requested_ship_date_raw": "11/20/26",
+    "requested_ship_date": "2026-11-20",
+    "ship_to": {
+      "raw_text": "Kestrelwick Marine Works\nAttn: Building 4 Loading Bay\n21 Harbor Spur\nGullhaven, ME 04995",
+      "name": "Kestrelwick Marine Works",
+      "attention": "Building 4 Loading Bay",
+      "line1": "21 Harbor Spur",
+      "line2": null,
+      "city": "Gullhaven",
+      "state": "ME",
+      "postal_code": "04995",
+      "country": null
+    },
+    "bill_to": {
+      "raw_text": "Kestrelwick Marine Works\nAttn: Accounts Payable\n301 Dockside Lane\nGullhaven, ME 04995\nUSA",
+      "name": "Kestrelwick Marine Works",
+      "attention": "Accounts Payable",
+      "line1": "301 Dockside Lane",
+      "line2": null,
+      "city": "Gullhaven",
+      "state": "ME",
+      "postal_code": "04995",
+      "country": "USA"
+    },
+    "order_total": "2565.40",
+    "currency": "USD",
+    "payment_terms": "Net 45",
+    "notes": null
+  },
+  "header_confidence": 1.0,
+  "lines": [
+    {
+      "raw_text": "1 KMW-92244 NP-92244 Floor finish, high gloss, 5 gal 4 PL 71.20 284.80",
+      "line_no": 1,
+      "line_type": "product",
+      "customer_part_number": "KMW-92244",
+      "vendor_part_number": "NP-92244",
+      "description": "Floor finish, high gloss, 5 gal",
+      "qty": "4",
+      "uom": "PL",
+      "unit_price": "71.20",
+      "extended_price": "284.80",
+      "page": 1,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "2 KMW-91140 NP-91140 Air filter, MERV 13, 24x24x2 24 EA 15.30 367.20",
+      "line_no": 2,
+      "line_type": "product",
+      "customer_part_number": "KMW-91140",
+      "vendor_part_number": "NP-91140",
+      "description": "Air filter, MERV 13, 24x24x2",
+      "qty": "24",
+      "uom": "EA",
+      "unit_price": "15.30",
+      "extended_price": "367.20",
+      "page": 1,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "3 KMW-96035 NP-96035 Batteries, AAA, 24 per pack 16 PK 13.80 220.80",
+      "line_no": 3,
+      "line_type": "product",
+      "customer_part_number": "KMW-96035",
+      "vendor_part_number": "NP-96035",
+      "description": "Batteries, AAA, 24 per pack",
+      "qty": "16",
+      "uom": "PK",
+      "unit_price": "13.80",
+      "extended_price": "220.80",
+      "page": 1,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "4 KMW-60033 NP-60033 Hand soap, foam, 1000 mL refill 31 CS 54.60 1,692.60",
+      "line_no": 4,
+      "line_type": "product",
+      "customer_part_number": "KMW-60033",
+      "vendor_part_number": "NP-60033",
+      "description": "Hand soap, foam, 1000 mL refill",
+      "qty": "31",
+      "uom": "CS",
+      "unit_price": "54.60",
+      "extended_price": "1692.60",
+      "page": 1,
+      "confidence": 1.0
+    }
+  ]
+}

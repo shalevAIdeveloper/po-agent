@@ -5,6 +5,7 @@ the same document on every machine.
 """
 
 import random
+from collections.abc import Sequence
 from datetime import UTC, date, datetime
 from decimal import Decimal
 from typing import Final
@@ -98,14 +99,14 @@ def products(
     ]
 
 
-def total(lines: list[Line] | tuple[Line, ...]) -> Decimal:
+def total(lines: Sequence[Line]) -> Decimal:
     return sum(
         (line.ext.value for line in lines if line.ext is not None and line.ext.value is not None),
         Decimal(0),
     )
 
 
-def total_num(lines: list[Line] | tuple[Line, ...]) -> Num:
+def total_num(lines: Sequence[Line]) -> Num:
     return n(money(total(lines)))
 
 

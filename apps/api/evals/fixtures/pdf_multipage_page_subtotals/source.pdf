@@ -1,0 +1,1123 @@
+%PDF-1.3
+%“Œ‹ž ReportLab Generated PDF document (opensource)
+1 0 obj
+<<
+/F1 2 0 R /F2 3 0 R
+>>
+endobj
+2 0 obj
+<<
+/BaseFont /Helvetica /Encoding /WinAnsiEncoding /Name /F1 /Subtype /Type1 /Type /Font
+>>
+endobj
+3 0 obj
+<<
+/BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding /Name /F2 /Subtype /Type1 /Type /Font
+>>
+endobj
+4 0 obj
+<<
+/Contents 9 0 R /MediaBox [ 0 0 612 792 ] /Parent 8 0 R /Resources <<
+/Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
+>> /Rotate 0 /Trans <<
+
+>> 
+  /Type /Page
+>>
+endobj
+5 0 obj
+<<
+/Contents 10 0 R /MediaBox [ 0 0 612 792 ] /Parent 8 0 R /Resources <<
+/Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
+>> /Rotate 0 /Trans <<
+
+>> 
+  /Type /Page
+>>
+endobj
+6 0 obj
+<<
+/PageMode /UseNone /Pages 8 0 R /Type /Catalog
+>>
+endobj
+7 0 obj
+<<
+/Author (evals.generate) /CreationDate (D:20000101000000+00'00') /Creator (evals.generate) /Keywords () /ModDate (D:20000101000000+00'00') /Producer (ReportLab PDF Library - \(opensource\)) 
+  /Subject (synthetic eval fixture) /Title (eval case pdf_multipage_page_subtotals) /Trapped /False
+>>
+endobj
+8 0 obj
+<<
+/Count 2 /Kids [ 4 0 R 5 0 R ] /Type /Pages
+>>
+endobj
+9 0 obj
+<<
+/Length 18642
+>>
+stream
+1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
+BT /F2 14 Tf 16.8 TL ET
+BT 1 0 0 1 40 738 Tm (Brindlewood Facilities Co.) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 726.5 Tm (4410 Larkspur Way) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 715 Tm (Fernhill, OH 45991) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 703.5 Tm (\(614\) 555-0142) Tj T* ET
+BT /F2 18 Tf 21.6 TL ET
+BT 1 0 0 1 401 736 Tm (PURCHASE ORDER) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 716.5 Tm (PO Number:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 420.506 716.5 Tm (4500012399) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 705 Tm (PO Date:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 420.506 705 Tm (11/13/2026) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 693.5 Tm (Terms:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 420.506 693.5 Tm (Net 30) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 682 Tm (Buyer:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 420.506 682 Tm (Morgan Ellery) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 664 Tm (Vendor:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 652.5 Tm (Vellumgrove Industrial Supply) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 641 Tm (2750 Copperleaf Parkway) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 629.5 Tm (Alder Falls, OH 45990) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 217.3333 664 Tm (Ship To:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 217.3333 652.5 Tm (Brindlewood Facilities Co.) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 217.3333 641 Tm (Attn: Receiving Dock B) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 217.3333 629.5 Tm (915 Gristmill Road) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 217.3333 618 Tm (Fernhill, OH 45991) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 394.6667 664 Tm (Bill To:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 394.6667 652.5 Tm (Brindlewood Facilities Co.) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 394.6667 641 Tm (4410 Larkspur Way) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 394.6667 629.5 Tm (Fernhill, OH 45991) Tj T* ET
+.88 g
+n 40 587.5 532 16.5 re f*
+0 g
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 593.5 Tm (Line) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 593.5 Tm (Our Item #) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 593.5 Tm (Vendor Item #) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 593.5 Tm (Description) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 407.997 593.5 Tm (Qty) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 593.5 Tm (UoM) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 472.988 593.5 Tm (Unit Price) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 535.007 593.5 Tm (Amount) Tj T* ET
+.5 w
+n 40 587.5 532 16.5 re S
+n 70 587.5 m 70 604 l S
+n 148 587.5 m 148 604 l S
+n 220 587.5 m 220 604 l S
+n 390 587.5 m 390 604 l S
+n 426 587.5 m 426 604 l S
+n 462 587.5 m 462 604 l S
+n 518 587.5 m 518 604 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 577 Tm (1) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 577 Tm (BFC-31095) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 577 Tm (NP-31095) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 577 Tm (LED PAR38 lamp, 15W, 3000K) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 577 Tm (12) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 577 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 497.486 577 Tm (8.70) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 541.478 577 Tm (104.40) Tj T* ET
+.5 w
+n 40 572 532 15.5 re S
+n 70 572 m 70 587.5 l S
+n 148 572 m 148 587.5 l S
+n 220 572 m 220 587.5 l S
+n 390 572 m 390 587.5 l S
+n 426 572 m 426 587.5 l S
+n 462 572 m 462 587.5 l S
+n 518 572 m 518 587.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 561.5 Tm (2) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 561.5 Tm (BFC-51400) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 561.5 Tm (NP-51400) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 561.5 Tm (Duct tape, silver, 2 in x 60 yd) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 561.5 Tm (44) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 561.5 Tm (RL) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 497.486 561.5 Tm (5.95) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 541.478 561.5 Tm (261.80) Tj T* ET
+.5 w
+n 40 556.5 532 15.5 re S
+n 70 556.5 m 70 572 l S
+n 148 556.5 m 148 572 l S
+n 220 556.5 m 220 572 l S
+n 390 556.5 m 390 572 l S
+n 426 556.5 m 426 572 l S
+n 462 556.5 m 462 572 l S
+n 518 556.5 m 518 572 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 546 Tm (3) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 546 Tm (BFC-80412) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 546 Tm (NP-80412) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 546 Tm (Duplex receptacle, 20A, white) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 546 Tm (28) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 546 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 497.486 546 Tm (2.85) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 546.482 546 Tm (79.80) Tj T* ET
+.5 w
+n 40 541 532 15.5 re S
+n 70 541 m 70 556.5 l S
+n 148 541 m 148 556.5 l S
+n 220 541 m 220 556.5 l S
+n 390 541 m 390 556.5 l S
+n 426 541 m 426 556.5 l S
+n 462 541 m 462 556.5 l S
+n 518 541 m 518 556.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 530.5 Tm (4) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 530.5 Tm (BFC-40233) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 530.5 Tm (NP-40233) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 530.5 Tm (PVC pipe, 1 in x 10 ft, Sch 40) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 417.996 530.5 Tm (1) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 530.5 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 497.486 530.5 Tm (7.40) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 551.486 530.5 Tm (7.40) Tj T* ET
+.5 w
+n 40 525.5 532 15.5 re S
+n 70 525.5 m 70 541 l S
+n 148 525.5 m 148 541 l S
+n 220 525.5 m 220 541 l S
+n 390 525.5 m 390 541 l S
+n 426 525.5 m 426 541 l S
+n 462 525.5 m 462 541 l S
+n 518 525.5 m 518 541 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 515 Tm (5) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 515 Tm (BFC-80350) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 515 Tm (NP-80350) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 515 Tm (THHN wire, 12 AWG, white, 500 ft) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 515 Tm (40) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 515 Tm (RL) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 492.482 515 Tm (96.00) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 533.972 515 Tm (3,840.00) Tj T* ET
+.5 w
+n 40 510 532 15.5 re S
+n 70 510 m 70 525.5 l S
+n 148 510 m 148 525.5 l S
+n 220 510 m 220 525.5 l S
+n 390 510 m 390 525.5 l S
+n 426 510 m 426 525.5 l S
+n 462 510 m 462 525.5 l S
+n 518 510 m 518 525.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 499.5 Tm (6) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 499.5 Tm (BFC-20140) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 499.5 Tm (NP-20140) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 499.5 Tm (Cut-resistant gloves, level A3, size 9) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 499.5 Tm (38) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 499.5 Tm (PR) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 497.486 499.5 Tm (7.65) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 541.478 499.5 Tm (290.70) Tj T* ET
+.5 w
+n 40 494.5 532 15.5 re S
+n 70 494.5 m 70 510 l S
+n 148 494.5 m 148 510 l S
+n 220 494.5 m 220 510 l S
+n 390 494.5 m 390 510 l S
+n 426 494.5 m 426 510 l S
+n 462 494.5 m 462 510 l S
+n 518 494.5 m 518 510 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 484 Tm (7) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 484 Tm (BFC-96027) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 484 Tm (NP-96027) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 484 Tm (Batteries, 9V, 4 per pack) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 417.996 484 Tm (1) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 484 Tm (PK) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 497.486 484 Tm (9.60) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 551.486 484 Tm (9.60) Tj T* ET
+.5 w
+n 40 479 532 15.5 re S
+n 70 479 m 70 494.5 l S
+n 148 479 m 148 494.5 l S
+n 220 479 m 220 494.5 l S
+n 390 479 m 390 494.5 l S
+n 426 479 m 426 494.5 l S
+n 462 479 m 462 494.5 l S
+n 518 479 m 518 494.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 468.5 Tm (8) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 468.5 Tm (BFC-92250) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 468.5 Tm (NP-92250) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 468.5 Tm (Floor stripper, 5 gal) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 468.5 Tm (17) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 468.5 Tm (PL) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 492.482 468.5 Tm (64.50) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 533.972 468.5 Tm (1,096.50) Tj T* ET
+.5 w
+n 40 463.5 532 15.5 re S
+n 70 463.5 m 70 479 l S
+n 148 463.5 m 148 479 l S
+n 220 463.5 m 220 479 l S
+n 390 463.5 m 390 479 l S
+n 426 463.5 m 426 479 l S
+n 462 463.5 m 462 479 l S
+n 518 463.5 m 518 479 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 453 Tm (9) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 453 Tm (BFC-10450) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 453 Tm (NP-10450) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 453 Tm (Lock nut, nylon insert, 3/8-16) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 453 Tm (35) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 453 Tm (BX) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 497.486 453 Tm (9.15) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 541.478 453 Tm (320.25) Tj T* ET
+.5 w
+n 40 448 532 15.5 re S
+n 70 448 m 70 463.5 l S
+n 148 448 m 148 463.5 l S
+n 220 448 m 220 463.5 l S
+n 390 448 m 390 463.5 l S
+n 426 448 m 426 463.5 l S
+n 462 448 m 462 463.5 l S
+n 518 448 m 518 463.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 437.5 Tm (10) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 437.5 Tm (BFC-10422) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 437.5 Tm (NP-10422) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 437.5 Tm (Hex bolt, zinc, 3/8-16 x 2 in) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 437.5 Tm (42) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 437.5 Tm (BX) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 492.482 437.5 Tm (18.40) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 541.478 437.5 Tm (772.80) Tj T* ET
+.5 w
+n 40 432.5 532 15.5 re S
+n 70 432.5 m 70 448 l S
+n 148 432.5 m 148 448 l S
+n 220 432.5 m 220 448 l S
+n 390 432.5 m 390 448 l S
+n 426 432.5 m 426 448 l S
+n 462 432.5 m 462 448 l S
+n 518 432.5 m 518 448 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 422 Tm (11) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 422 Tm (BFC-90061) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 422 Tm (NP-90061) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 422 Tm (Pipe thread sealant, 4 oz) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 422 Tm (43) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 422 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 497.486 422 Tm (6.15) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 541.478 422 Tm (264.45) Tj T* ET
+.5 w
+n 40 417 532 15.5 re S
+n 70 417 m 70 432.5 l S
+n 148 417 m 148 432.5 l S
+n 220 417 m 220 432.5 l S
+n 390 417 m 390 432.5 l S
+n 426 417 m 426 432.5 l S
+n 462 417 m 462 432.5 l S
+n 518 417 m 518 432.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 406.5 Tm (12) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 406.5 Tm (BFC-40210) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 406.5 Tm (NP-40210) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 406.5 Tm (PVC elbow 90 deg, 1 in, Sch 40) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 417.996 406.5 Tm (3) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 406.5 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 497.486 406.5 Tm (0.82) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 551.486 406.5 Tm (2.46) Tj T* ET
+.5 w
+n 40 401.5 532 15.5 re S
+n 70 401.5 m 70 417 l S
+n 148 401.5 m 148 417 l S
+n 220 401.5 m 220 417 l S
+n 390 401.5 m 390 417 l S
+n 426 401.5 m 426 417 l S
+n 462 401.5 m 462 417 l S
+n 518 401.5 m 518 417 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 391 Tm (13) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 391 Tm (BFC-31140) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 391 Tm (NP-31140) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 391 Tm (Exit sign, LED, battery backup) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 391 Tm (45) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 391 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 492.482 391 Tm (31.45) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 533.972 391 Tm (1,415.25) Tj T* ET
+.5 w
+n 40 386 532 15.5 re S
+n 70 386 m 70 401.5 l S
+n 148 386 m 148 401.5 l S
+n 220 386 m 220 401.5 l S
+n 390 386 m 390 401.5 l S
+n 426 386 m 426 401.5 l S
+n 462 386 m 462 401.5 l S
+n 518 386 m 518 401.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 375.5 Tm (14) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 375.5 Tm (BFC-72210) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 375.5 Tm (NP-72210) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 375.5 Tm (Ear plugs, foam, 200 pairs) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 375.5 Tm (23) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 375.5 Tm (BX) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 492.482 375.5 Tm (24.60) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 541.478 375.5 Tm (565.80) Tj T* ET
+.5 w
+n 40 370.5 532 15.5 re S
+n 70 370.5 m 70 386 l S
+n 148 370.5 m 148 386 l S
+n 220 370.5 m 220 386 l S
+n 390 370.5 m 390 386 l S
+n 426 370.5 m 426 386 l S
+n 462 370.5 m 462 386 l S
+n 518 370.5 m 518 386 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 360 Tm (15) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 360 Tm (BFC-93160) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 360 Tm (NP-93160) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 360 Tm (Cable ties, 11 in, natural, 100 per bag) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 360 Tm (48) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 360 Tm (BG) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 497.486 360 Tm (5.20) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 541.478 360 Tm (249.60) Tj T* ET
+.5 w
+n 40 355 532 15.5 re S
+n 70 355 m 70 370.5 l S
+n 148 355 m 148 370.5 l S
+n 220 355 m 220 370.5 l S
+n 390 355 m 390 370.5 l S
+n 426 355 m 426 370.5 l S
+n 462 355 m 462 370.5 l S
+n 518 355 m 518 370.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 344.5 Tm (16) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 344.5 Tm (BFC-20119) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 344.5 Tm (NP-20119) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 344.5 Tm (Nitrile gloves, x-large, 100 per box) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 344.5 Tm (18) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 344.5 Tm (BX) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 492.482 344.5 Tm (12.40) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 541.478 344.5 Tm (223.20) Tj T* ET
+.5 w
+n 40 339.5 532 15.5 re S
+n 70 339.5 m 70 355 l S
+n 148 339.5 m 148 355 l S
+n 220 339.5 m 220 355 l S
+n 390 339.5 m 390 355 l S
+n 426 339.5 m 426 355 l S
+n 462 339.5 m 462 355 l S
+n 518 339.5 m 518 355 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 329 Tm (17) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 329 Tm (BFC-93150) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 329 Tm (NP-93150) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 329 Tm (Cable ties, 8 in, black, 100 per bag) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 329 Tm (44) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 329 Tm (BG) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 497.486 329 Tm (3.60) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 541.478 329 Tm (158.40) Tj T* ET
+.5 w
+n 40 324 532 15.5 re S
+n 70 324 m 70 339.5 l S
+n 148 324 m 148 339.5 l S
+n 220 324 m 220 339.5 l S
+n 390 324 m 390 339.5 l S
+n 426 324 m 426 339.5 l S
+n 462 324 m 462 339.5 l S
+n 518 324 m 518 339.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 313.5 Tm (18) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 313.5 Tm (BFC-91140) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 313.5 Tm (NP-91140) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 313.5 Tm (Air filter, MERV 13, 24x24x2) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 313.5 Tm (22) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 313.5 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 492.482 313.5 Tm (15.30) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 541.478 313.5 Tm (336.60) Tj T* ET
+.5 w
+n 40 308.5 532 15.5 re S
+n 70 308.5 m 70 324 l S
+n 148 308.5 m 148 324 l S
+n 220 308.5 m 220 324 l S
+n 390 308.5 m 390 324 l S
+n 426 308.5 m 426 324 l S
+n 462 308.5 m 462 324 l S
+n 518 308.5 m 518 324 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 298 Tm (19) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 298 Tm (BFC-92210) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 298 Tm (NP-92210) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 298 Tm (Mop head, cotton, 24 oz) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 298 Tm (29) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 298 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 497.486 298 Tm (7.85) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 541.478 298 Tm (227.65) Tj T* ET
+.5 w
+n 40 293 532 15.5 re S
+n 70 293 m 70 308.5 l S
+n 148 293 m 148 308.5 l S
+n 220 293 m 220 308.5 l S
+n 390 293 m 390 308.5 l S
+n 426 293 m 426 308.5 l S
+n 462 293 m 462 308.5 l S
+n 518 293 m 518 308.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 282.5 Tm (20) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 282.5 Tm (BFC-94410) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 282.5 Tm (NP-94410) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 282.5 Tm (Deck screw, 3 in, 5 lb box) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 282.5 Tm (10) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 282.5 Tm (BX) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 492.482 282.5 Tm (26.40) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 541.478 282.5 Tm (264.00) Tj T* ET
+.5 w
+n 40 277.5 532 15.5 re S
+n 70 277.5 m 70 293 l S
+n 148 277.5 m 148 293 l S
+n 220 277.5 m 220 293 l S
+n 390 277.5 m 390 293 l S
+n 426 277.5 m 426 293 l S
+n 462 277.5 m 462 293 l S
+n 518 277.5 m 518 293 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 267 Tm (21) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 267 Tm (BFC-40215) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 267 Tm (NP-40215) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 267 Tm (PVC tee, 1 in, Sch 40) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 267 Tm (13) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 267 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 497.486 267 Tm (1.10) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 546.482 267 Tm (14.30) Tj T* ET
+.5 w
+n 40 262 532 15.5 re S
+n 70 262 m 70 277.5 l S
+n 148 262 m 148 277.5 l S
+n 220 262 m 220 277.5 l S
+n 390 262 m 390 277.5 l S
+n 426 262 m 426 277.5 l S
+n 462 262 m 462 277.5 l S
+n 518 262 m 518 277.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 528.968 248.5 Tm (10,504.96) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 451.463 248.5 Tm (Page subtotal:) Tj T* ET
+BT /F1 8 Tf 9.6 TL ET
+BT 1 0 0 1 285.54 30 Tm (Page 1 of 2) Tj T* ET
+ 
+endstream
+endobj
+10 0 obj
+<<
+/Length 12451
+>>
+stream
+1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
+BT /F2 11 Tf 13.2 TL ET
+BT 1 0 0 1 40 740 Tm (Purchase Order 4500012399 \(continued\)) Tj T* ET
+.88 g
+n 40 705.5 532 16.5 re f*
+0 g
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 711.5 Tm (Line) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 711.5 Tm (Our Item #) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 711.5 Tm (Vendor Item #) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 711.5 Tm (Description) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 407.997 711.5 Tm (Qty) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 711.5 Tm (UoM) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 472.988 711.5 Tm (Unit Price) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 535.007 711.5 Tm (Amount) Tj T* ET
+.5 w
+n 40 705.5 532 16.5 re S
+n 70 705.5 m 70 722 l S
+n 148 705.5 m 148 722 l S
+n 220 705.5 m 220 722 l S
+n 390 705.5 m 390 722 l S
+n 426 705.5 m 426 722 l S
+n 462 705.5 m 462 722 l S
+n 518 705.5 m 518 722 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 695 Tm (22) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 695 Tm (BFC-95518) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 695 Tm (NP-95518) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 695 Tm (Spray paint, flat black, 12 oz) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 695 Tm (41) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 695 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 497.486 695 Tm (5.40) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 541.478 695 Tm (221.40) Tj T* ET
+.5 w
+n 40 690 532 15.5 re S
+n 70 690 m 70 705.5 l S
+n 148 690 m 148 705.5 l S
+n 220 690 m 220 705.5 l S
+n 390 690 m 390 705.5 l S
+n 426 690 m 426 705.5 l S
+n 462 690 m 462 705.5 l S
+n 518 690 m 518 705.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 679.5 Tm (23) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 679.5 Tm (BFC-60040) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 679.5 Tm (NP-60040) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 679.5 Tm (Glass cleaner, ready to use, 32 oz) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 417.996 679.5 Tm (8) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 679.5 Tm (CS) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 492.482 679.5 Tm (29.90) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 541.478 679.5 Tm (239.20) Tj T* ET
+.5 w
+n 40 674.5 532 15.5 re S
+n 70 674.5 m 70 690 l S
+n 148 674.5 m 148 690 l S
+n 220 674.5 m 220 690 l S
+n 390 674.5 m 390 690 l S
+n 426 674.5 m 426 690 l S
+n 462 674.5 m 462 690 l S
+n 518 674.5 m 518 690 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 664 Tm (24) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 664 Tm (BFC-80310) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 664 Tm (NP-80310) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 664 Tm (Wire nut, red, 100 per bag) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 664 Tm (47) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 664 Tm (BG) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 497.486 664 Tm (4.35) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 541.478 664 Tm (204.45) Tj T* ET
+.5 w
+n 40 659 532 15.5 re S
+n 70 659 m 70 674.5 l S
+n 148 659 m 148 674.5 l S
+n 220 659 m 220 674.5 l S
+n 390 659 m 390 674.5 l S
+n 426 659 m 426 674.5 l S
+n 462 659 m 462 674.5 l S
+n 518 659 m 518 674.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 648.5 Tm (25) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 648.5 Tm (BFC-91130) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 648.5 Tm (NP-91130) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 648.5 Tm (Air filter, MERV 11, 20x25x4) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 648.5 Tm (27) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 648.5 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 492.482 648.5 Tm (18.90) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 541.478 648.5 Tm (510.30) Tj T* ET
+.5 w
+n 40 643.5 532 15.5 re S
+n 70 643.5 m 70 659 l S
+n 148 643.5 m 148 659 l S
+n 220 643.5 m 220 659 l S
+n 390 643.5 m 390 659 l S
+n 426 643.5 m 426 659 l S
+n 462 643.5 m 462 659 l S
+n 518 643.5 m 518 659 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 633 Tm (26) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 633 Tm (BFC-60021) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 633 Tm (NP-60021) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 633 Tm (Toilet tissue, 2-ply, 500 sheets) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 417.996 633 Tm (4) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 633 Tm (CS) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 492.482 633 Tm (47.25) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 541.478 633 Tm (189.00) Tj T* ET
+.5 w
+n 40 628 532 15.5 re S
+n 70 628 m 70 643.5 l S
+n 148 628 m 148 643.5 l S
+n 220 628 m 220 643.5 l S
+n 390 628 m 390 643.5 l S
+n 426 628 m 426 643.5 l S
+n 462 628 m 462 643.5 l S
+n 518 628 m 518 643.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 617.5 Tm (27) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 617.5 Tm (BFC-51490) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 617.5 Tm (NP-51490) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 617.5 Tm (Packing tape, clear, 2 in x 110 yd) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 617.5 Tm (34) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 617.5 Tm (RL) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 497.486 617.5 Tm (4.40) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 541.478 617.5 Tm (149.60) Tj T* ET
+.5 w
+n 40 612.5 532 15.5 re S
+n 70 612.5 m 70 628 l S
+n 148 612.5 m 148 628 l S
+n 220 612.5 m 220 628 l S
+n 390 612.5 m 390 628 l S
+n 426 612.5 m 426 628 l S
+n 462 612.5 m 462 628 l S
+n 518 612.5 m 518 628 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 602 Tm (28) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 602 Tm (BFC-94460) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 602 Tm (NP-94460) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 602 Tm (Wood shim, 8 in, 42 per bundle) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 417.996 602 Tm (2) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 602 Tm (BD) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 497.486 602 Tm (4.75) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 551.486 602 Tm (9.50) Tj T* ET
+.5 w
+n 40 597 532 15.5 re S
+n 70 597 m 70 612.5 l S
+n 148 597 m 148 612.5 l S
+n 220 597 m 220 612.5 l S
+n 390 597 m 390 612.5 l S
+n 426 597 m 426 612.5 l S
+n 462 597 m 462 612.5 l S
+n 518 597 m 518 612.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 586.5 Tm (29) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 586.5 Tm (BFC-96035) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 586.5 Tm (NP-96035) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 586.5 Tm (Batteries, AAA, 24 per pack) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 586.5 Tm (45) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 586.5 Tm (PK) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 492.482 586.5 Tm (13.80) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 541.478 586.5 Tm (621.00) Tj T* ET
+.5 w
+n 40 581.5 532 15.5 re S
+n 70 581.5 m 70 597 l S
+n 148 581.5 m 148 597 l S
+n 220 581.5 m 220 597 l S
+n 390 581.5 m 390 597 l S
+n 426 581.5 m 426 597 l S
+n 462 581.5 m 462 597 l S
+n 518 581.5 m 518 597 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 571 Tm (30) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 571 Tm (BFC-72160) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 571 Tm (NP-72160) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 571 Tm (Safety glasses, gray lens) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 571 Tm (19) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 571 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 497.486 571 Tm (3.10) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 546.482 571 Tm (58.90) Tj T* ET
+.5 w
+n 40 566 532 15.5 re S
+n 70 566 m 70 581.5 l S
+n 148 566 m 148 581.5 l S
+n 220 566 m 220 581.5 l S
+n 390 566 m 390 581.5 l S
+n 426 566 m 426 581.5 l S
+n 462 566 m 462 581.5 l S
+n 518 566 m 518 581.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 555.5 Tm (31) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 555.5 Tm (BFC-10431) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 555.5 Tm (NP-10431) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 555.5 Tm (Flat washer, zinc, 3/8 in) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 555.5 Tm (33) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 555.5 Tm (BX) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 497.486 555.5 Tm (6.25) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 541.478 555.5 Tm (206.25) Tj T* ET
+.5 w
+n 40 550.5 532 15.5 re S
+n 70 550.5 m 70 566 l S
+n 148 550.5 m 148 566 l S
+n 220 550.5 m 220 566 l S
+n 390 550.5 m 390 566 l S
+n 426 550.5 m 426 566 l S
+n 462 550.5 m 462 566 l S
+n 518 550.5 m 518 566 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 540 Tm (32) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 540 Tm (BFC-94470) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 540 Tm (NP-94470) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 540 Tm (Construction adhesive, 10 oz) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 540 Tm (44) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 540 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 497.486 540 Tm (4.95) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 541.478 540 Tm (217.80) Tj T* ET
+.5 w
+n 40 535 532 15.5 re S
+n 70 535 m 70 550.5 l S
+n 148 535 m 148 550.5 l S
+n 220 535 m 220 550.5 l S
+n 390 535 m 390 550.5 l S
+n 426 535 m 426 550.5 l S
+n 462 535 m 462 550.5 l S
+n 518 535 m 518 550.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 524.5 Tm (33) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 524.5 Tm (BFC-72190) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 524.5 Tm (NP-72190) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 524.5 Tm (Hard hat, type 1, white) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 524.5 Tm (47) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 524.5 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 492.482 524.5 Tm (14.95) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 541.478 524.5 Tm (702.65) Tj T* ET
+.5 w
+n 40 519.5 532 15.5 re S
+n 70 519.5 m 70 535 l S
+n 148 519.5 m 148 535 l S
+n 220 519.5 m 220 535 l S
+n 390 519.5 m 390 535 l S
+n 426 519.5 m 426 535 l S
+n 462 519.5 m 462 535 l S
+n 518 519.5 m 518 535 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 509 Tm (34) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 509 Tm (BFC-92230) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 509 Tm (NP-92230) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 509 Tm (Wet mop handle, 60 in, fiberglass) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 509 Tm (37) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 509 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 492.482 509 Tm (12.40) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 541.478 509 Tm (458.80) Tj T* ET
+.5 w
+n 40 504 532 15.5 re S
+n 70 504 m 70 519.5 l S
+n 148 504 m 148 519.5 l S
+n 220 504 m 220 519.5 l S
+n 390 504 m 390 519.5 l S
+n 426 504 m 426 519.5 l S
+n 462 504 m 462 519.5 l S
+n 518 504 m 518 519.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 493.5 Tm (35) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 493.5 Tm (BFC-93101) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 493.5 Tm (NP-93101) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 493.5 Tm (Extension cord, 12/3, 50 ft) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 493.5 Tm (38) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 493.5 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 492.482 493.5 Tm (39.90) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 533.972 493.5 Tm (1,516.20) Tj T* ET
+.5 w
+n 40 488.5 532 15.5 re S
+n 70 488.5 m 70 504 l S
+n 148 488.5 m 148 504 l S
+n 220 488.5 m 220 504 l S
+n 390 488.5 m 390 504 l S
+n 426 488.5 m 426 504 l S
+n 462 488.5 m 462 504 l S
+n 518 488.5 m 518 504 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 478 Tm (36) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 478 Tm (BFC-80344) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 478 Tm (NP-80344) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 478 Tm (THHN wire, 12 AWG, black, 500 ft) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 478 Tm (15) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 478 Tm (RL) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 492.482 478 Tm (96.00) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 533.972 478 Tm (1,440.00) Tj T* ET
+.5 w
+n 40 473 532 15.5 re S
+n 70 473 m 70 488.5 l S
+n 148 473 m 148 488.5 l S
+n 220 473 m 220 488.5 l S
+n 390 473 m 390 488.5 l S
+n 426 473 m 426 488.5 l S
+n 462 473 m 462 488.5 l S
+n 518 473 m 518 488.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 533.972 459.5 Tm (6,745.05) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 451.463 459.5 Tm (Page subtotal:) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 528.968 446 Tm (17,250.01) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 484.502 446 Tm (Total:) Tj T* ET
+BT /F1 8 Tf 9.6 TL ET
+BT 1 0 0 1 285.54 30 Tm (Page 2 of 2) Tj T* ET
+ 
+endstream
+endobj
+xref
+0 11
+0000000000 65535 f 
+0000000061 00000 n 
+0000000102 00000 n 
+0000000209 00000 n 
+0000000321 00000 n 
+0000000514 00000 n 
+0000000708 00000 n 
+0000000776 00000 n 
+0000001088 00000 n 
+0000001153 00000 n 
+0000019847 00000 n 
+trailer
+<<
+/ID 
+[<ec97aed2eae780e4a272c4df6ebb0e3d><ec97aed2eae780e4a272c4df6ebb0e3d>]
+% ReportLab generated PDF document -- digest (opensource)
+
+/Info 7 0 R
+/Root 6 0 R
+/Size 11
+>>
+startxref
+32351
+%%EOF

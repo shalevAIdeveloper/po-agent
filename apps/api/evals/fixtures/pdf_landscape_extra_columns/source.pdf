@@ -1,0 +1,381 @@
+%PDF-1.3
+%“Œ‹ž ReportLab Generated PDF document (opensource)
+1 0 obj
+<<
+/F1 2 0 R /F2 3 0 R
+>>
+endobj
+2 0 obj
+<<
+/BaseFont /Helvetica /Encoding /WinAnsiEncoding /Name /F1 /Subtype /Type1 /Type /Font
+>>
+endobj
+3 0 obj
+<<
+/BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding /Name /F2 /Subtype /Type1 /Type /Font
+>>
+endobj
+4 0 obj
+<<
+/Contents 8 0 R /MediaBox [ 0 0 792 612 ] /Parent 7 0 R /Resources <<
+/Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
+>> /Rotate 0 /Trans <<
+
+>> 
+  /Type /Page
+>>
+endobj
+5 0 obj
+<<
+/PageMode /UseNone /Pages 7 0 R /Type /Catalog
+>>
+endobj
+6 0 obj
+<<
+/Author (evals.generate) /CreationDate (D:20000101000000+00'00') /Creator (evals.generate) /Keywords () /ModDate (D:20000101000000+00'00') /Producer (ReportLab PDF Library - \(opensource\)) 
+  /Subject (synthetic eval fixture) /Title (eval case pdf_landscape_extra_columns) /Trapped /False
+>>
+endobj
+7 0 obj
+<<
+/Count 1 /Kids [ 4 0 R ] /Type /Pages
+>>
+endobj
+8 0 obj
+<<
+/Length 9583
+>>
+stream
+1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
+BT /F2 14 Tf 16.8 TL ET
+BT 1 0 0 1 40 558 Tm (Corvanthe Building Maintenance) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 546.5 Tm (7735 Ironweed Boulevard) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 535 Tm (Millbrook Station, IN 46996) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 523.5 Tm (\(317\) 555-0139) Tj T* ET
+BT /F2 18 Tf 21.6 TL ET
+BT 1 0 0 1 581 556 Tm (PURCHASE ORDER) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 542 536.5 Tm (PO Number:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 600.506 536.5 Tm (CBM-PO-30552) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 542 525 Tm (PO Date:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 600.506 525 Tm (11/07/2026) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 542 513.5 Tm (Terms:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 600.506 513.5 Tm (Net 30) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 542 502 Tm (Buyer:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 600.506 502 Tm (Taylor Brannigan) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 484 Tm (Vendor:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 472.5 Tm (Vellumgrove Industrial Supply) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 461 Tm (2750 Copperleaf Parkway) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 449.5 Tm (Alder Falls, OH 45990) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 277.3333 484 Tm (Ship To:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 277.3333 472.5 Tm (Corvanthe Building Maintenance) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 277.3333 461 Tm (7735 Ironweed Boulevard) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 277.3333 449.5 Tm (Millbrook Station, IN 46996) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 514.6667 484 Tm (Bill To:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 514.6667 472.5 Tm (Corvanthe Building Maintenance) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 514.6667 461 Tm (7735 Ironweed Boulevard) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 514.6667 449.5 Tm (Millbrook Station, IN 46996) Tj T* ET
+.88 g
+n 40 419 674 16.5 re f*
+0 g
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 425 Tm (Ln) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 69 425 Tm (Our Item #) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 143 425 Tm (Supplier Item) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 213 425 Tm (Description) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 403 425 Tm (Cost Center) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 467 425 Tm (Need By) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 537.997 425 Tm (Qty) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 559 425 Tm (Unit) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 607.004 425 Tm (Unit Cost) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 668.493 425 Tm (Line Total) Tj T* ET
+.5 w
+n 40 419 674 16.5 re S
+n 66 419 m 66 435.5 l S
+n 140 419 m 140 435.5 l S
+n 210 419 m 210 435.5 l S
+n 400 419 m 400 435.5 l S
+n 464 419 m 464 435.5 l S
+n 518 419 m 518 435.5 l S
+n 556 419 m 556 435.5 l S
+n 590 419 m 590 435.5 l S
+n 650 419 m 650 435.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 408.5 Tm (1) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 69 408.5 Tm (CBM-40233) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 143 408.5 Tm (NP-40233) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 213 408.5 Tm (PVC pipe, 1 in x 10 ft, Sch 40) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 403 408.5 Tm (CC-4410) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 467 408.5 Tm (12/01/26) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 542.992 408.5 Tm (30) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 559 408.5 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 629.486 408.5 Tm (7.40) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 683.478 408.5 Tm (222.00) Tj T* ET
+.5 w
+n 40 403.5 674 15.5 re S
+n 66 403.5 m 66 419 l S
+n 140 403.5 m 140 419 l S
+n 210 403.5 m 210 419 l S
+n 400 403.5 m 400 419 l S
+n 464 403.5 m 464 419 l S
+n 518 403.5 m 518 419 l S
+n 556 403.5 m 556 419 l S
+n 590 403.5 m 590 419 l S
+n 650 403.5 m 650 419 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 393 Tm (2) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 69 393 Tm (CBM-93101) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 143 393 Tm (NP-93101) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 213 393 Tm (Extension cord, 12/3, 50 ft) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 403 393 Tm (CC-4410) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 467 393 Tm (12/01/26) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 542.992 393 Tm (31) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 559 393 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 624.482 393 Tm (39.90) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 675.972 393 Tm (1,236.90) Tj T* ET
+.5 w
+n 40 388 674 15.5 re S
+n 66 388 m 66 403.5 l S
+n 140 388 m 140 403.5 l S
+n 210 388 m 210 403.5 l S
+n 400 388 m 400 403.5 l S
+n 464 388 m 464 403.5 l S
+n 518 388 m 518 403.5 l S
+n 556 388 m 556 403.5 l S
+n 590 388 m 590 403.5 l S
+n 650 388 m 650 403.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 377.5 Tm (3) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 69 377.5 Tm (CBM-60021) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 143 377.5 Tm (NP-60021) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 213 377.5 Tm (Toilet tissue, 2-ply, 500 sheets) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 403 377.5 Tm (CC-5120) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 467 377.5 Tm (12/08/26) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 542.992 377.5 Tm (29) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 559 377.5 Tm (CS) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 624.482 377.5 Tm (47.25) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 675.972 377.5 Tm (1,370.25) Tj T* ET
+.5 w
+n 40 372.5 674 15.5 re S
+n 66 372.5 m 66 388 l S
+n 140 372.5 m 140 388 l S
+n 210 372.5 m 210 388 l S
+n 400 372.5 m 400 388 l S
+n 464 372.5 m 464 388 l S
+n 518 372.5 m 518 388 l S
+n 556 372.5 m 556 388 l S
+n 590 372.5 m 590 388 l S
+n 650 372.5 m 650 388 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 362 Tm (4) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 69 362 Tm (CBM-95518) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 143 362 Tm (NP-95518) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 213 362 Tm (Spray paint, flat black, 12 oz) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 403 362 Tm (CC-5120) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 467 362 Tm (12/08/26) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 542.992 362 Tm (11) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 559 362 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 629.486 362 Tm (5.40) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 688.482 362 Tm (59.40) Tj T* ET
+.5 w
+n 40 357 674 15.5 re S
+n 66 357 m 66 372.5 l S
+n 140 357 m 140 372.5 l S
+n 210 357 m 210 372.5 l S
+n 400 357 m 400 372.5 l S
+n 464 357 m 464 372.5 l S
+n 518 357 m 518 372.5 l S
+n 556 357 m 556 372.5 l S
+n 590 357 m 590 372.5 l S
+n 650 357 m 650 372.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 346.5 Tm (5) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 69 346.5 Tm (CBM-94470) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 143 346.5 Tm (NP-94470) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 213 346.5 Tm (Construction adhesive, 10 oz) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 403 346.5 Tm (CC-7031) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 467 346.5 Tm (12/15/26) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 542.992 346.5 Tm (43) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 559 346.5 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 629.486 346.5 Tm (4.95) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 683.478 346.5 Tm (212.85) Tj T* ET
+.5 w
+n 40 341.5 674 15.5 re S
+n 66 341.5 m 66 357 l S
+n 140 341.5 m 140 357 l S
+n 210 341.5 m 210 357 l S
+n 400 341.5 m 400 357 l S
+n 464 341.5 m 464 357 l S
+n 518 341.5 m 518 357 l S
+n 556 341.5 m 556 357 l S
+n 590 341.5 m 590 357 l S
+n 650 341.5 m 650 357 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 331 Tm (6) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 69 331 Tm (CBM-92244) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 143 331 Tm (NP-92244) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 213 331 Tm (Floor finish, high gloss, 5 gal) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 403 331 Tm (CC-7031) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 467 331 Tm (12/15/26) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 542.992 331 Tm (12) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 559 331 Tm (PL) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 624.482 331 Tm (71.20) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 683.478 331 Tm (854.40) Tj T* ET
+.5 w
+n 40 326 674 15.5 re S
+n 66 326 m 66 341.5 l S
+n 140 326 m 140 341.5 l S
+n 210 326 m 210 341.5 l S
+n 400 326 m 400 341.5 l S
+n 464 326 m 464 341.5 l S
+n 518 326 m 518 341.5 l S
+n 556 326 m 556 341.5 l S
+n 590 326 m 590 341.5 l S
+n 650 326 m 650 341.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 315.5 Tm (7) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 69 315.5 Tm (CBM-51400) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 143 315.5 Tm (NP-51400) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 213 315.5 Tm (Duct tape, silver, 2 in x 60 yd) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 403 315.5 Tm (CC-4410) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 467 315.5 Tm (12/01/26) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 542.992 315.5 Tm (42) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 559 315.5 Tm (RL) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 629.486 315.5 Tm (5.95) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 683.478 315.5 Tm (249.90) Tj T* ET
+.5 w
+n 40 310.5 674 15.5 re S
+n 66 310.5 m 66 326 l S
+n 140 310.5 m 140 326 l S
+n 210 310.5 m 210 326 l S
+n 400 310.5 m 400 326 l S
+n 464 310.5 m 464 326 l S
+n 518 310.5 m 518 326 l S
+n 556 310.5 m 556 326 l S
+n 590 310.5 m 590 326 l S
+n 650 310.5 m 650 326 l S
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 675.972 297 Tm (4,205.70) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 616.502 297 Tm (Total:) Tj T* ET
+ 
+endstream
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000061 00000 n 
+0000000102 00000 n 
+0000000209 00000 n 
+0000000321 00000 n 
+0000000514 00000 n 
+0000000582 00000 n 
+0000000893 00000 n 
+0000000952 00000 n 
+trailer
+<<
+/ID 
+[<4ce024ad1b7f02907b0e0dad3ca5c91f><4ce024ad1b7f02907b0e0dad3ca5c91f>]
+% ReportLab generated PDF document -- digest (opensource)
+
+/Info 6 0 R
+/Root 5 0 R
+/Size 9
+>>
+startxref
+10586
+%%EOF

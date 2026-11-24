@@ -1,0 +1,314 @@
+%PDF-1.3
+%“Œ‹ž ReportLab Generated PDF document (opensource)
+1 0 obj
+<<
+/F1 2 0 R /F2 3 0 R
+>>
+endobj
+2 0 obj
+<<
+/BaseFont /Helvetica /Encoding /WinAnsiEncoding /Name /F1 /Subtype /Type1 /Type /Font
+>>
+endobj
+3 0 obj
+<<
+/BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding /Name /F2 /Subtype /Type1 /Type /Font
+>>
+endobj
+4 0 obj
+<<
+/Contents 8 0 R /MediaBox [ 0 0 612 792 ] /Parent 7 0 R /Resources <<
+/Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
+>> /Rotate 0 /Trans <<
+
+>> 
+  /Type /Page
+>>
+endobj
+5 0 obj
+<<
+/PageMode /UseNone /Pages 7 0 R /Type /Catalog
+>>
+endobj
+6 0 obj
+<<
+/Author (evals.generate) /CreationDate (D:20000101000000+00'00') /Creator (evals.generate) /Keywords () /ModDate (D:20000101000000+00'00') /Producer (ReportLab PDF Library - \(opensource\)) 
+  /Subject (synthetic eval fixture) /Title (eval case pdf_grid_basic) /Trapped /False
+>>
+endobj
+7 0 obj
+<<
+/Count 1 /Kids [ 4 0 R ] /Type /Pages
+>>
+endobj
+8 0 obj
+<<
+/Length 7543
+>>
+stream
+1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
+BT /F2 14 Tf 16.8 TL ET
+BT 1 0 0 1 40 738 Tm (Brindlewood Facilities Co.) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 726.5 Tm (4410 Larkspur Way) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 715 Tm (Fernhill, OH 45991) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 703.5 Tm (\(614\) 555-0142) Tj T* ET
+BT /F2 18 Tf 21.6 TL ET
+BT 1 0 0 1 401 736 Tm (PURCHASE ORDER) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 716.5 Tm (PO Number:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 461.015 716.5 Tm (4500012345) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 705 Tm (PO Date:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 461.015 705 Tm (11/02/2026) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 693.5 Tm (Requested Ship Date:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 461.015 693.5 Tm (11/16/2026) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 682 Tm (Terms:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 461.015 682 Tm (Net 30) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 670.5 Tm (Buyer:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 461.015 670.5 Tm (Morgan Ellery) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 652.5 Tm (Vendor:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 641 Tm (Vellumgrove Industrial Supply) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 629.5 Tm (2750 Copperleaf Parkway) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 618 Tm (Alder Falls, OH 45990) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 217.3333 652.5 Tm (Ship To:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 217.3333 641 Tm (Brindlewood Facilities Co.) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 217.3333 629.5 Tm (Attn: Receiving Dock B) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 217.3333 618 Tm (915 Gristmill Road) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 217.3333 606.5 Tm (Fernhill, OH 45991) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 394.6667 652.5 Tm (Bill To:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 394.6667 641 Tm (Brindlewood Facilities Co.) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 394.6667 629.5 Tm (4410 Larkspur Way) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 394.6667 618 Tm (Fernhill, OH 45991) Tj T* ET
+.88 g
+n 40 576 532 16.5 re f*
+0 g
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 582 Tm (Line) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 582 Tm (Our Item #) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 582 Tm (Vendor Item #) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 582 Tm (Description) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 407.997 582 Tm (Qty) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 582 Tm (UoM) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 472.988 582 Tm (Unit Price) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 535.007 582 Tm (Amount) Tj T* ET
+.5 w
+n 40 576 532 16.5 re S
+n 70 576 m 70 592.5 l S
+n 148 576 m 148 592.5 l S
+n 220 576 m 220 592.5 l S
+n 390 576 m 390 592.5 l S
+n 426 576 m 426 592.5 l S
+n 462 576 m 462 592.5 l S
+n 518 576 m 518 592.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 565.5 Tm (1) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 565.5 Tm (BFC-93150) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 565.5 Tm (NP-93150) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 565.5 Tm (Cable ties, 8 in, black, 100 per bag) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 417.996 565.5 Tm (7) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 565.5 Tm (BG) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 497.486 565.5 Tm (3.60) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 546.482 565.5 Tm (25.20) Tj T* ET
+.5 w
+n 40 560.5 532 15.5 re S
+n 70 560.5 m 70 576 l S
+n 148 560.5 m 148 576 l S
+n 220 560.5 m 220 576 l S
+n 390 560.5 m 390 576 l S
+n 426 560.5 m 426 576 l S
+n 462 560.5 m 462 576 l S
+n 518 560.5 m 518 576 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 550 Tm (2) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 550 Tm (BFC-60040) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 550 Tm (NP-60040) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 550 Tm (Glass cleaner, ready to use, 32 oz) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 550 Tm (30) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 550 Tm (CS) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 492.482 550 Tm (29.90) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 541.478 550 Tm (897.00) Tj T* ET
+.5 w
+n 40 545 532 15.5 re S
+n 70 545 m 70 560.5 l S
+n 148 545 m 148 560.5 l S
+n 220 545 m 220 560.5 l S
+n 390 545 m 390 560.5 l S
+n 426 545 m 426 560.5 l S
+n 462 545 m 462 560.5 l S
+n 518 545 m 518 560.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 534.5 Tm (3) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 534.5 Tm (BFC-31140) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 534.5 Tm (NP-31140) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 534.5 Tm (Exit sign, LED, battery backup) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 534.5 Tm (47) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 534.5 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 492.482 534.5 Tm (31.45) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 533.972 534.5 Tm (1,478.15) Tj T* ET
+.5 w
+n 40 529.5 532 15.5 re S
+n 70 529.5 m 70 545 l S
+n 148 529.5 m 148 545 l S
+n 220 529.5 m 220 545 l S
+n 390 529.5 m 390 545 l S
+n 426 529.5 m 426 545 l S
+n 462 529.5 m 462 545 l S
+n 518 529.5 m 518 545 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 519 Tm (4) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 519 Tm (BFC-31012) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 519 Tm (NP-31012) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 519 Tm (LED wall pack, 40W, 5000K) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 519 Tm (25) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 519 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 492.482 519 Tm (88.30) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 533.972 519 Tm (2,207.50) Tj T* ET
+.5 w
+n 40 514 532 15.5 re S
+n 70 514 m 70 529.5 l S
+n 148 514 m 148 529.5 l S
+n 220 514 m 220 529.5 l S
+n 390 514 m 390 529.5 l S
+n 426 514 m 426 529.5 l S
+n 462 514 m 462 529.5 l S
+n 518 514 m 518 529.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 503.5 Tm (5) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 503.5 Tm (BFC-72190) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 503.5 Tm (NP-72190) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 503.5 Tm (Hard hat, type 1, white) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 503.5 Tm (32) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 503.5 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 492.482 503.5 Tm (14.95) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 541.478 503.5 Tm (478.40) Tj T* ET
+.5 w
+n 40 498.5 532 15.5 re S
+n 70 498.5 m 70 514 l S
+n 148 498.5 m 148 514 l S
+n 220 498.5 m 220 514 l S
+n 390 498.5 m 390 514 l S
+n 426 498.5 m 426 514 l S
+n 462 498.5 m 462 514 l S
+n 518 498.5 m 518 514 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 488 Tm (6) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 488 Tm (BFC-20117) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 488 Tm (NP-20117) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 488 Tm (Nitrile gloves, large, 100 per box) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 417.996 488 Tm (1) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 488 Tm (BX) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 492.482 488 Tm (11.90) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 546.482 488 Tm (11.90) Tj T* ET
+.5 w
+n 40 483 532 15.5 re S
+n 70 483 m 70 498.5 l S
+n 148 483 m 148 498.5 l S
+n 220 483 m 220 498.5 l S
+n 390 483 m 390 498.5 l S
+n 426 483 m 426 498.5 l S
+n 462 483 m 462 498.5 l S
+n 518 483 m 518 498.5 l S
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 533.972 469.5 Tm (5,098.15) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 484.502 469.5 Tm (Total:) Tj T* ET
+ 
+endstream
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000061 00000 n 
+0000000102 00000 n 
+0000000209 00000 n 
+0000000321 00000 n 
+0000000514 00000 n 
+0000000582 00000 n 
+0000000880 00000 n 
+0000000939 00000 n 
+trailer
+<<
+/ID 
+[<20da59c889ca281e77f6a61c67121cce><20da59c889ca281e77f6a61c67121cce>]
+% ReportLab generated PDF document -- digest (opensource)
+
+/Info 6 0 R
+/Root 5 0 R
+/Size 9
+>>
+startxref
+8533
+%%EOF
