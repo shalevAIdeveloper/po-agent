@@ -133,3 +133,39 @@ def test_every_line_is_printed_on_its_page(case: Case) -> None:
 def test_the_case_regenerates_to_the_committed_files(case: Case) -> None:
     # Per format (owner decision Q2): bytes, or decoded pixels, or ZIP entries.
     assert files.problems(files.build_files(case), FIXTURES_DIR) == []
+
+
+def _text_values(truth: PurchaseOrderExtraction) -> list[tuple[str, str]]:
+    """Every text value of the truth that must be printed: (path, value)."""
+    h = truth.header
+    found: list[tuple[str, str | None]] = [
+        ("header.customer_name", h.customer_name),
+        ("header.customer_po_number", h.customer_po_number),
+        ("header.po_date_raw", h.po_date_raw),
+        ("header.requested_ship_date_raw", h.requested_ship_date_raw),
+        ("header.payment_terms", h.payment_terms),
+        ("header.notes", h.notes),
+    ]
+    for name in ("ship_to", "bill_to"):
+        address = getattr(h, name)
+        if address is not None:
+            found += [(f"header.{name}.raw_text", part) for part in address.raw_text.split("\n")]
+            for part in ("name", "attention", "line1", "line2", "city", "state", "postal_code"):
+                found.append((f"header.{name}.{part}", getattr(address, part)))
+    for i, line in enumerate(truth.lines):
+        for name in ("customer_part_number", "vendor_part_number", "description", "uom"):
+            found.append((f"lines.{i}.{name}", getattr(line, name)))
+        found.append((f"lines.{i}.raw_text", line.raw_text))
+    return [(path, value) for path, value in found if value is not None]
+
+
+@pytest.mark.parametrize("case", _cases(lambda c: c.input_type in ("pdf", "eml")))
+def test_every_text_value_of_the_truth_is_printed(case: Case) -> None:
+    # Grounding covers ids and numbers only; this covers names, descriptions, units, dates,
+    # notes and address parts (whitespace-insensitive: PDF text layers re-space words).
+    parsed = _parsed(case.name)
+    if parsed.text is None:
+        pytest.skip("no text layer (a scan)")
+    text = _fold(parsed.text)
+    missing = [path for path, value in _text_values(_expected(case)) if _fold(value) not in text]
+    assert missing == []

@@ -1,0 +1,204 @@
+%PDF-1.3
+%“Œ‹ž ReportLab Generated PDF document (opensource)
+1 0 obj
+<<
+/F1 2 0 R /F2 3 0 R
+>>
+endobj
+2 0 obj
+<<
+/BaseFont /Helvetica /Encoding /WinAnsiEncoding /Name /F1 /Subtype /Type1 /Type /Font
+>>
+endobj
+3 0 obj
+<<
+/BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding /Name /F2 /Subtype /Type1 /Type /Font
+>>
+endobj
+4 0 obj
+<<
+/Contents 8 0 R /MediaBox [ 0 0 612 792 ] /Parent 7 0 R /Resources <<
+/Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
+>> /Rotate 0 /Trans <<
+
+>> 
+  /Type /Page
+>>
+endobj
+5 0 obj
+<<
+/PageMode /UseNone /Pages 7 0 R /Type /Catalog
+>>
+endobj
+6 0 obj
+<<
+/Author (evals.generate) /CreationDate (D:20000101000000+00'00') /Creator (evals.generate) /Keywords () /ModDate (D:20000101000000+00'00') /Producer (ReportLab PDF Library - \(opensource\)) 
+  /Subject (synthetic eval fixture) /Title (eval case pdf_no_prices) /Trapped /False
+>>
+endobj
+7 0 obj
+<<
+/Count 1 /Kids [ 4 0 R ] /Type /Pages
+>>
+endobj
+8 0 obj
+<<
+/Length 4522
+>>
+stream
+1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
+BT /F2 14 Tf 16.8 TL ET
+BT 1 0 0 1 40 738 Tm (Silverquill Grove Apartments) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 726.5 Tm (19 Thistledown Circle) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 715 Tm (Harrow Point, WI 53990) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 703.5 Tm (\(414\) 555-0108) Tj T* ET
+BT /F2 18 Tf 21.6 TL ET
+BT 1 0 0 1 401 736 Tm (PURCHASE ORDER) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 716.5 Tm (PO Number:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 420.506 716.5 Tm (SGA-1047) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 705 Tm (PO Date:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 420.506 705 Tm (11/17/2026) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 693.5 Tm (Buyer:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 420.506 693.5 Tm (Jamie Holloway) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 675.5 Tm (Vendor:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 664 Tm (Vellumgrove Industrial Supply) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 652.5 Tm (2750 Copperleaf Parkway) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 641 Tm (Alder Falls, OH 45990) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 217.3333 675.5 Tm (Ship To:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 217.3333 664 Tm (Silverquill Grove Apartments) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 217.3333 652.5 Tm (19 Thistledown Circle) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 217.3333 641 Tm (Harrow Point, WI 53990) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 394.6667 675.5 Tm (Bill To:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 394.6667 664 Tm (Silverquill Grove Apartments) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 394.6667 652.5 Tm (19 Thistledown Circle) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 394.6667 641 Tm (Harrow Point, WI 53990) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 616.5 Tm (Line) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 616.5 Tm (Item #) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 163 616.5 Tm (Description) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 467.997 616.5 Tm (Qty) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 489 616.5 Tm (UoM) Tj T* ET
+.6 w
+n 40 610.5 m 522 610.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 600 Tm (1) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 600 Tm (SGA-40215) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 163 600 Tm (PVC tee, 1 in, Sch 40) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 472.992 600 Tm (39) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 489 600 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 584.5 Tm (2) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 584.5 Tm (SGA-20118) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 163 584.5 Tm (Nitrile gloves, medium, 100 per box) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 472.992 584.5 Tm (28) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 489 584.5 Tm (BX) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 569 Tm (3) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 569 Tm (SGA-80350) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 163 569 Tm (THHN wire, 12 AWG, white, 500 ft) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 477.996 569 Tm (1) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 489 569 Tm (RL) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 553.5 Tm (4) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 553.5 Tm (SGA-10488) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 163 553.5 Tm (Carriage bolt, zinc, 1/2-13 x 4 in) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 472.992 553.5 Tm (26) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 489 553.5 Tm (BX) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 538 Tm (5) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 538 Tm (SGA-51490) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 163 538 Tm (Packing tape, clear, 2 in x 110 yd) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 472.992 538 Tm (45) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 489 538 Tm (RL) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 522.5 Tm (6) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 522.5 Tm (SGA-91120) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 163 522.5 Tm (Air filter, MERV 8, 20x20x2) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 472.992 522.5 Tm (21) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 489 522.5 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 507 Tm (7) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 507 Tm (SGA-10422) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 163 507 Tm (Hex bolt, zinc, 3/8-16 x 2 in) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 472.992 507 Tm (10) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 489 507 Tm (BX) Tj T* ET
+ 
+endstream
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000061 00000 n 
+0000000102 00000 n 
+0000000209 00000 n 
+0000000321 00000 n 
+0000000514 00000 n 
+0000000582 00000 n 
+0000000879 00000 n 
+0000000938 00000 n 
+trailer
+<<
+/ID 
+[<810c5dc37efede8acb681d58ad05aee1><810c5dc37efede8acb681d58ad05aee1>]
+% ReportLab generated PDF document -- digest (opensource)
+
+/Info 6 0 R
+/Root 5 0 R
+/Size 9
+>>
+startxref
+5511
+%%EOF

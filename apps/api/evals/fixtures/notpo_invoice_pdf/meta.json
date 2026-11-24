@@ -1,0 +1,33 @@
+{
+  "synthetic": true,
+  "schema_version": "eval_case_meta.v1",
+  "generator": "evals.generate",
+  "generator_version": 1,
+  "seed": 661,
+  "input_type": "pdf",
+  "group": "not_a_po",
+  "tags": [
+    "not_a_po",
+    "pdf"
+  ],
+  "pages": 1,
+  "sender_email": "ar@vellumgrove.example.com",
+  "received_at": "2026-11-14T09:30:00Z",
+  "expected_input_warnings": [],
+  "expected_extraction_warnings": [],
+  "not_scored": [
+    "header.customer_name",
+    "header.customer_po_number",
+    "header.po_date_raw",
+    "header.po_date",
+    "header.requested_ship_date_raw",
+    "header.requested_ship_date",
+    "header.ship_to",
+    "header.bill_to",
+    "header.order_total",
+    "header.currency",
+    "header.payment_terms",
+    "header.notes"
+  ],
+  "known_gap": []
+}

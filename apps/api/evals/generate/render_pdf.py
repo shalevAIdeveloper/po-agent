@@ -138,7 +138,12 @@ class _Renderer:
         self.pdf.setTitle(f"eval case {case.name}")
         self.pdf.setSubject("synthetic eval fixture")
         self.pen = _Pen(self.pdf, self.size)
-        self.groups = page_groups(doc, len(case.lines))
+        # The table's rows: the order lines, or (a document that isn't an order) rows that
+        # are printed but are not lines of the truth.
+        self.rows = case.lines if doc.table_lines is None else doc.table_lines
+        if doc.table_lines is not None and case.lines:
+            raise ValueError(f"{case.name}: table_lines replace the lines, never both")
+        self.groups = page_groups(doc, len(self.rows))
         terms = [b for b in doc.blocks if b.where == "terms_page"]
         self.total_pages = len(self.groups) + (1 if terms else 0)
         self.page = 1
@@ -150,7 +155,7 @@ class _Renderer:
         width = sum(col.width for col in self.doc.columns)
         if width > self.pen.right - MARGIN + 0.01:
             raise ValueError(f"{self.case.name}: columns are wider than the page")
-        for line in self.case.lines:
+        for line in self.rows:
             for col in self.doc.columns:
                 cell = line.cell(col.key)
                 if cell and col.key != "desc" and not _fits(cell, col.width - 6):
@@ -365,7 +370,7 @@ class _Renderer:
     def _page_subtotal(self, group: range) -> str:
         total = Decimal(0)
         for index in group:
-            ext = self.case.lines[index].ext
+            ext = self.rows[index].ext
             if ext is not None and ext.value is not None:
                 total += ext.value
         return money(total)
@@ -380,7 +385,7 @@ class _Renderer:
             if number == 0 or self.doc.repeat_header:
                 self._heading()
             for index in group:
-                self._row(self.case.lines[index])
+                self._row(self.rows[index])
             if self.doc.page_subtotals and number < last:
                 self._label_row("Page subtotal:", self._page_subtotal(group))
             if number < last:

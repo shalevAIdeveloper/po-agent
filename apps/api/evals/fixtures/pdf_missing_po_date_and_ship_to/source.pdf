@@ -1,0 +1,271 @@
+%PDF-1.3
+%“Œ‹ž ReportLab Generated PDF document (opensource)
+1 0 obj
+<<
+/F1 2 0 R /F2 3 0 R
+>>
+endobj
+2 0 obj
+<<
+/BaseFont /Helvetica /Encoding /WinAnsiEncoding /Name /F1 /Subtype /Type1 /Type /Font
+>>
+endobj
+3 0 obj
+<<
+/BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding /Name /F2 /Subtype /Type1 /Type /Font
+>>
+endobj
+4 0 obj
+<<
+/Contents 8 0 R /MediaBox [ 0 0 612 792 ] /Parent 7 0 R /Resources <<
+/Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
+>> /Rotate 0 /Trans <<
+
+>> 
+  /Type /Page
+>>
+endobj
+5 0 obj
+<<
+/PageMode /UseNone /Pages 7 0 R /Type /Catalog
+>>
+endobj
+6 0 obj
+<<
+/Author (evals.generate) /CreationDate (D:20000101000000+00'00') /Creator (evals.generate) /Keywords () /ModDate (D:20000101000000+00'00') /Producer (ReportLab PDF Library - \(opensource\)) 
+  /Subject (synthetic eval fixture) /Title (eval case pdf_missing_po_date_and_ship_to) /Trapped /False
+>>
+endobj
+7 0 obj
+<<
+/Count 1 /Kids [ 4 0 R ] /Type /Pages
+>>
+endobj
+8 0 obj
+<<
+/Length 6102
+>>
+stream
+1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
+BT /F2 14 Tf 16.8 TL ET
+BT 1 0 0 1 40 738 Tm (Quillenfeld Property Services) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 726.5 Tm (1900 Saltmeadow Avenue) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 715 Tm (Port Ellison, NJ 08993) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 703.5 Tm (\(609\) 555-0163) Tj T* ET
+BT /F2 18 Tf 21.6 TL ET
+BT 1 0 0 1 401 736 Tm (PURCHASE ORDER) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 716.5 Tm (PO Number:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 420.506 716.5 Tm (77418) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 705 Tm (Terms:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 420.506 705 Tm (Net 30) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 693.5 Tm (Buyer:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 420.506 693.5 Tm (Avery Sundquist) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 675.5 Tm (Vendor:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 664 Tm (Vellumgrove Industrial Supply) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 652.5 Tm (2750 Copperleaf Parkway) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 641 Tm (Alder Falls, OH 45990) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 306 675.5 Tm (Bill To:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 306 664 Tm (Quillenfeld Property Services) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 306 652.5 Tm (1900 Saltmeadow Avenue) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 306 641 Tm (Port Ellison, NJ 08993) Tj T* ET
+.88 g
+n 40 610.5 532 16.5 re f*
+0 g
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 616.5 Tm (Line) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 616.5 Tm (Our Item #) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 616.5 Tm (Vendor Item #) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 616.5 Tm (Description) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 407.997 616.5 Tm (Qty) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 616.5 Tm (UoM) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 472.988 616.5 Tm (Unit Price) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 535.007 616.5 Tm (Amount) Tj T* ET
+.5 w
+n 40 610.5 532 16.5 re S
+n 70 610.5 m 70 627 l S
+n 148 610.5 m 148 627 l S
+n 220 610.5 m 220 627 l S
+n 390 610.5 m 390 627 l S
+n 426 610.5 m 426 627 l S
+n 462 610.5 m 462 627 l S
+n 518 610.5 m 518 627 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 600 Tm (1) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 600 Tm (QPS-51420) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 600 Tm (NP-51420) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 600 Tm (Masking tape, tan, 1 in x 60 yd) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 600 Tm (44) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 600 Tm (RL) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 497.486 600 Tm (3.25) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 541.478 600 Tm (143.00) Tj T* ET
+.5 w
+n 40 595 532 15.5 re S
+n 70 595 m 70 610.5 l S
+n 148 595 m 148 610.5 l S
+n 220 595 m 220 610.5 l S
+n 390 595 m 390 610.5 l S
+n 426 595 m 426 610.5 l S
+n 462 595 m 462 610.5 l S
+n 518 595 m 518 610.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 584.5 Tm (2) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 584.5 Tm (QPS-72160) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 584.5 Tm (NP-72160) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 584.5 Tm (Safety glasses, gray lens) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 584.5 Tm (12) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 584.5 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 497.486 584.5 Tm (3.10) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 546.482 584.5 Tm (37.20) Tj T* ET
+.5 w
+n 40 579.5 532 15.5 re S
+n 70 579.5 m 70 595 l S
+n 148 579.5 m 148 595 l S
+n 220 579.5 m 220 595 l S
+n 390 579.5 m 390 595 l S
+n 426 579.5 m 426 595 l S
+n 462 579.5 m 462 595 l S
+n 518 579.5 m 518 595 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 569 Tm (3) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 569 Tm (QPS-60058) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 569 Tm (NP-60058) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 569 Tm (Disinfectant wipes, 80 count canister) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 569 Tm (45) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 569 Tm (CS) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 492.482 569 Tm (61.80) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 533.972 569 Tm (2,781.00) Tj T* ET
+.5 w
+n 40 564 532 15.5 re S
+n 70 564 m 70 579.5 l S
+n 148 564 m 148 579.5 l S
+n 220 564 m 220 579.5 l S
+n 390 564 m 390 579.5 l S
+n 426 564 m 426 579.5 l S
+n 462 564 m 462 579.5 l S
+n 518 564 m 518 579.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 553.5 Tm (4) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 553.5 Tm (QPS-80412) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 553.5 Tm (NP-80412) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 553.5 Tm (Duplex receptacle, 20A, white) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 553.5 Tm (32) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 553.5 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 497.486 553.5 Tm (2.85) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 546.482 553.5 Tm (91.20) Tj T* ET
+.5 w
+n 40 548.5 532 15.5 re S
+n 70 548.5 m 70 564 l S
+n 148 548.5 m 148 564 l S
+n 220 548.5 m 220 564 l S
+n 390 548.5 m 390 564 l S
+n 426 548.5 m 426 564 l S
+n 462 548.5 m 462 564 l S
+n 518 548.5 m 518 564 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 538 Tm (5) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 538 Tm (QPS-41002) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 538 Tm (NP-41002) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 538 Tm (Copper coupling, 3/4 in) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 538 Tm (29) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 538 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 497.486 538 Tm (2.35) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 546.482 538 Tm (68.15) Tj T* ET
+.5 w
+n 40 533 532 15.5 re S
+n 70 533 m 70 548.5 l S
+n 148 533 m 148 548.5 l S
+n 220 533 m 220 548.5 l S
+n 390 533 m 390 548.5 l S
+n 426 533 m 426 548.5 l S
+n 462 533 m 462 548.5 l S
+n 518 533 m 518 548.5 l S
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 533.972 519.5 Tm (3,120.55) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 484.502 519.5 Tm (Total:) Tj T* ET
+ 
+endstream
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000061 00000 n 
+0000000102 00000 n 
+0000000209 00000 n 
+0000000321 00000 n 
+0000000514 00000 n 
+0000000582 00000 n 
+0000000897 00000 n 
+0000000956 00000 n 
+trailer
+<<
+/ID 
+[<6ead3dbceb6be3b5d79e2ba409c6282e><6ead3dbceb6be3b5d79e2ba409c6282e>]
+% ReportLab generated PDF document -- digest (opensource)
+
+/Info 6 0 R
+/Root 5 0 R
+/Size 9
+>>
+startxref
+7109
+%%EOF

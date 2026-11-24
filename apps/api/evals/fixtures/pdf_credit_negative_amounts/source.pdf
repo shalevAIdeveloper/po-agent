@@ -1,0 +1,273 @@
+%PDF-1.3
+%“Œ‹ž ReportLab Generated PDF document (opensource)
+1 0 obj
+<<
+/F1 2 0 R /F2 3 0 R
+>>
+endobj
+2 0 obj
+<<
+/BaseFont /Helvetica /Encoding /WinAnsiEncoding /Name /F1 /Subtype /Type1 /Type /Font
+>>
+endobj
+3 0 obj
+<<
+/BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding /Name /F2 /Subtype /Type1 /Type /Font
+>>
+endobj
+4 0 obj
+<<
+/Contents 8 0 R /MediaBox [ 0 0 612 792 ] /Parent 7 0 R /Resources <<
+/Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
+>> /Rotate 0 /Trans <<
+
+>> 
+  /Type /Page
+>>
+endobj
+5 0 obj
+<<
+/PageMode /UseNone /Pages 7 0 R /Type /Catalog
+>>
+endobj
+6 0 obj
+<<
+/Author (evals.generate) /CreationDate (D:20000101000000+00'00') /Creator (evals.generate) /Keywords () /ModDate (D:20000101000000+00'00') /Producer (ReportLab PDF Library - \(opensource\)) 
+  /Subject (synthetic eval fixture) /Title (eval case pdf_credit_negative_amounts) /Trapped /False
+>>
+endobj
+7 0 obj
+<<
+/Count 1 /Kids [ 4 0 R ] /Type /Pages
+>>
+endobj
+8 0 obj
+<<
+/Length 6214
+>>
+stream
+1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
+BT /F2 14 Tf 16.8 TL ET
+BT 1 0 0 1 40 738 Tm (Kestrelwick Marine Works) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 726.5 Tm (301 Dockside Lane) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 715 Tm (Gullhaven, ME 04995) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 703.5 Tm (\(207\) 555-0151) Tj T* ET
+BT /F2 18 Tf 21.6 TL ET
+BT 1 0 0 1 401 736 Tm (PURCHASE ORDER) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 716.5 Tm (PO Number:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 420.506 716.5 Tm (KMW-55870) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 705 Tm (PO Date:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 420.506 705 Tm (11/19/2026) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 693.5 Tm (Terms:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 420.506 693.5 Tm (Net 30) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 682 Tm (Buyer:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 420.506 682 Tm (Casey Lindqvist) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 664 Tm (Vendor:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 652.5 Tm (Vellumgrove Industrial Supply) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 641 Tm (2750 Copperleaf Parkway) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 629.5 Tm (Alder Falls, OH 45990) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 217.3333 664 Tm (Ship To:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 217.3333 652.5 Tm (Kestrelwick Marine Works) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 217.3333 641 Tm (301 Dockside Lane) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 217.3333 629.5 Tm (Gullhaven, ME 04995) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 394.6667 664 Tm (Bill To:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 394.6667 652.5 Tm (Kestrelwick Marine Works) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 394.6667 641 Tm (301 Dockside Lane) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 394.6667 629.5 Tm (Gullhaven, ME 04995) Tj T* ET
+.88 g
+n 40 599 532 16.5 re f*
+0 g
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 605 Tm (Line) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 605 Tm (Our Item #) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 605 Tm (Vendor Item #) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 605 Tm (Description) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 407.997 605 Tm (Qty) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 605 Tm (UoM) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 472.988 605 Tm (Unit Price) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 535.007 605 Tm (Amount) Tj T* ET
+.5 w
+n 40 599 532 16.5 re S
+n 70 599 m 70 615.5 l S
+n 148 599 m 148 615.5 l S
+n 220 599 m 220 615.5 l S
+n 390 599 m 390 615.5 l S
+n 426 599 m 426 615.5 l S
+n 462 599 m 462 615.5 l S
+n 518 599 m 518 615.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 588.5 Tm (1) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 588.5 Tm (KMW-31090) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 588.5 Tm (NP-31090) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 588.5 Tm (LED A19 lamp, 9W, 2700K) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 588.5 Tm (23) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 588.5 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 497.486 588.5 Tm (3.15) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 546.482 588.5 Tm (72.45) Tj T* ET
+.5 w
+n 40 583.5 532 15.5 re S
+n 70 583.5 m 70 599 l S
+n 148 583.5 m 148 599 l S
+n 220 583.5 m 220 599 l S
+n 390 583.5 m 390 599 l S
+n 426 583.5 m 426 599 l S
+n 462 583.5 m 462 599 l S
+n 518 583.5 m 518 599 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 573 Tm (2) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 573 Tm (KMW-72210) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 573 Tm (NP-72210) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 573 Tm (Ear plugs, foam, 200 pairs) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 417.996 573 Tm (1) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 573 Tm (BX) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 492.482 573 Tm (24.60) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 546.482 573 Tm (24.60) Tj T* ET
+.5 w
+n 40 568 532 15.5 re S
+n 70 568 m 70 583.5 l S
+n 148 568 m 148 583.5 l S
+n 220 568 m 220 583.5 l S
+n 390 568 m 390 583.5 l S
+n 426 568 m 426 583.5 l S
+n 462 568 m 462 583.5 l S
+n 518 568 m 518 583.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 557.5 Tm (3) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 557.5 Tm (KMW-40210) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 557.5 Tm (NP-40210) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 557.5 Tm (PVC elbow 90 deg, 1 in, Sch 40) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 417.996 557.5 Tm (6) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 557.5 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 497.486 557.5 Tm (0.82) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 551.486 557.5 Tm (4.92) Tj T* ET
+.5 w
+n 40 552.5 532 15.5 re S
+n 70 552.5 m 70 568 l S
+n 148 552.5 m 148 568 l S
+n 220 552.5 m 220 568 l S
+n 390 552.5 m 390 568 l S
+n 426 552.5 m 426 568 l S
+n 462 552.5 m 462 568 l S
+n 518 552.5 m 518 568 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 542 Tm (4) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 542 Tm (KMW-90017) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 542 Tm (NP-90017) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 542 Tm (Credit: returned ball valve, RMA 5512) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 417.996 542 Tm (1) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 542 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 486.488 542 Tm (\(14.35\)) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 540.488 542 Tm (\(14.35\)) Tj T* ET
+.5 w
+n 40 537 532 15.5 re S
+n 70 537 m 70 552.5 l S
+n 148 537 m 148 552.5 l S
+n 220 537 m 220 552.5 l S
+n 390 537 m 390 552.5 l S
+n 426 537 m 426 552.5 l S
+n 462 537 m 462 552.5 l S
+n 518 537 m 518 552.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 526.5 Tm (5) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 526.5 Tm (Promotional allowance) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 543.485 526.5 Tm (25.00-) Tj T* ET
+.5 w
+n 40 521.5 532 15.5 re S
+n 70 521.5 m 70 537 l S
+n 148 521.5 m 148 537 l S
+n 220 521.5 m 220 537 l S
+n 390 521.5 m 390 537 l S
+n 426 521.5 m 426 537 l S
+n 462 521.5 m 462 537 l S
+n 518 521.5 m 518 537 l S
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 546.482 508 Tm (62.62) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 484.502 508 Tm (Total:) Tj T* ET
+ 
+endstream
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000061 00000 n 
+0000000102 00000 n 
+0000000209 00000 n 
+0000000321 00000 n 
+0000000514 00000 n 
+0000000582 00000 n 
+0000000893 00000 n 
+0000000952 00000 n 
+trailer
+<<
+/ID 
+[<f35b1fa39225172c9edccd8ea1774e34><f35b1fa39225172c9edccd8ea1774e34>]
+% ReportLab generated PDF document -- digest (opensource)
+
+/Info 6 0 R
+/Root 5 0 R
+/Size 9
+>>
+startxref
+7217
+%%EOF

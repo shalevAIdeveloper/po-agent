@@ -1,0 +1,265 @@
+%PDF-1.3
+%“Œ‹ž ReportLab Generated PDF document (opensource)
+1 0 obj
+<<
+/F1 2 0 R /F2 3 0 R
+>>
+endobj
+2 0 obj
+<<
+/BaseFont /Helvetica /Encoding /WinAnsiEncoding /Name /F1 /Subtype /Type1 /Type /Font
+>>
+endobj
+3 0 obj
+<<
+/BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding /Name /F2 /Subtype /Type1 /Type /Font
+>>
+endobj
+4 0 obj
+<<
+/Contents 8 0 R /MediaBox [ 0 0 612 792 ] /Parent 7 0 R /Resources <<
+/Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
+>> /Rotate 0 /Trans <<
+
+>> 
+  /Type /Page
+>>
+endobj
+5 0 obj
+<<
+/PageMode /UseNone /Pages 7 0 R /Type /Catalog
+>>
+endobj
+6 0 obj
+<<
+/Author (evals.generate) /CreationDate (D:20000101000000+00'00') /Creator (evals.generate) /Keywords () /ModDate (D:20000101000000+00'00') /Producer (ReportLab PDF Library - \(opensource\)) 
+  /Subject (synthetic eval fixture) /Title (eval case pdf_price_formats) /Trapped /False
+>>
+endobj
+7 0 obj
+<<
+/Count 1 /Kids [ 4 0 R ] /Type /Pages
+>>
+endobj
+8 0 obj
+<<
+/Length 6034
+>>
+stream
+1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
+BT /F2 14 Tf 16.8 TL ET
+BT 1 0 0 1 40 738 Tm (Tallowfen Hospitality Group) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 726.5 Tm (12 Wrenfield Court) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 715 Tm (Cedar Hollow, KY 40994) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 703.5 Tm (\(502\) 555-0128) Tj T* ET
+BT /F2 18 Tf 21.6 TL ET
+BT 1 0 0 1 401 736 Tm (PURCHASE ORDER) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 716.5 Tm (PO Number:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 420.506 716.5 Tm (TH-2026-1203) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 705 Tm (PO Date:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 420.506 705 Tm (11/19/2026) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 693.5 Tm (Terms:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 420.506 693.5 Tm (Net 30) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 682 Tm (Buyer:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 420.506 682 Tm (Riley Okonkwo) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 664 Tm (Vendor:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 652.5 Tm (Vellumgrove Industrial Supply) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 641 Tm (2750 Copperleaf Parkway) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 629.5 Tm (Alder Falls, OH 45990) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 217.3333 664 Tm (Ship To:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 217.3333 652.5 Tm (Tallowfen Hospitality Group) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 217.3333 641 Tm (12 Wrenfield Court) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 217.3333 629.5 Tm (Cedar Hollow, KY 40994) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 394.6667 664 Tm (Bill To:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 394.6667 652.5 Tm (Tallowfen Hospitality Group) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 394.6667 641 Tm (12 Wrenfield Court) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 394.6667 629.5 Tm (Cedar Hollow, KY 40994) Tj T* ET
+.88 g
+n 40 599 508 16.5 re f*
+0 g
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 605 Tm (Line) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 605 Tm (Item) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 143 605 Tm (Description) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 353.997 605 Tm (Qty) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 375 605 Tm (UoM) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 432.988 605 Tm (Unit Price) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 511.007 605 Tm (Amount) Tj T* ET
+.5 w
+n 40 599 508 16.5 re S
+n 70 599 m 70 615.5 l S
+n 140 599 m 140 615.5 l S
+n 336 599 m 336 615.5 l S
+n 372 599 m 372 615.5 l S
+n 408 599 m 408 615.5 l S
+n 478 599 m 478 615.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 588.5 Tm (1) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 588.5 Tm (THG-93101) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 143 588.5 Tm (Commercial mixer service kit) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 363.996 588.5 Tm (1) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 375 588.5 Tm (KT) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 434.968 588.5 Tm ($1,234.50) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 504.968 588.5 Tm ($1,234.50) Tj T* ET
+.5 w
+n 40 583.5 508 15.5 re S
+n 70 583.5 m 70 599 l S
+n 140 583.5 m 140 599 l S
+n 336 583.5 m 336 599 l S
+n 372 583.5 m 372 599 l S
+n 408 583.5 m 408 599 l S
+n 478 583.5 m 478 599 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 573 Tm (2) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 573 Tm (THG-93102) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 143 573 Tm (Imported espresso grinder burr set \(EU pricing\)) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 363.996 573 Tm (2) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 375 573 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 439.972 573 Tm (1.234,50) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 509.972 573 Tm (2.469,00) Tj T* ET
+.5 w
+n 40 568 508 15.5 re S
+n 70 568 m 70 583.5 l S
+n 140 568 m 140 583.5 l S
+n 336 568 m 336 583.5 l S
+n 372 568 m 372 583.5 l S
+n 408 568 m 408 583.5 l S
+n 478 568 m 478 583.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 557.5 Tm (3) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 557.5 Tm (THG-80305) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 143 557.5 Tm (Wire nut, yellow \(priced per 100\)) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 353.988 557.5 Tm (500) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 375 557.5 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 443.482 557.5 Tm (12.50/C) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 522.482 557.5 Tm (62.50) Tj T* ET
+.5 w
+n 40 552.5 508 15.5 re S
+n 70 552.5 m 70 568 l S
+n 140 552.5 m 140 568 l S
+n 336 552.5 m 336 568 l S
+n 372 552.5 m 372 568 l S
+n 408 552.5 m 408 568 l S
+n 478 552.5 m 478 568 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 542 Tm (4) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 542 Tm (THG-00004) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 143 542 Tm (Sample swatch card) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 363.996 542 Tm (2) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 375 542 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 459.502 542 Tm (N/C) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 529.502 542 Tm (N/C) Tj T* ET
+.5 w
+n 40 537 508 15.5 re S
+n 70 537 m 70 552.5 l S
+n 140 537 m 140 552.5 l S
+n 336 537 m 336 552.5 l S
+n 372 537 m 372 552.5 l S
+n 408 537 m 408 552.5 l S
+n 478 537 m 478 552.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 526.5 Tm (5) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 526.5 Tm (THG-90052) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 143 526.5 Tm (PTFE thread seal tape, 1/2 in) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 358.992 526.5 Tm (40) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 375 526.5 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 457.486 526.5 Tm ($.75) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 517.478 526.5 Tm ($30.00) Tj T* ET
+.5 w
+n 40 521.5 508 15.5 re S
+n 70 521.5 m 70 537 l S
+n 140 521.5 m 140 537 l S
+n 336 521.5 m 336 537 l S
+n 372 521.5 m 372 537 l S
+n 408 521.5 m 408 537 l S
+n 478 521.5 m 478 537 l S
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 504.968 508 Tm ($3,796.00) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 444.502 508 Tm (Total:) Tj T* ET
+ 
+endstream
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000061 00000 n 
+0000000102 00000 n 
+0000000209 00000 n 
+0000000321 00000 n 
+0000000514 00000 n 
+0000000582 00000 n 
+0000000883 00000 n 
+0000000942 00000 n 
+trailer
+<<
+/ID 
+[<e3888bb6134b88c5c1e761965d453d11><e3888bb6134b88c5c1e761965d453d11>]
+% ReportLab generated PDF document -- digest (opensource)
+
+/Info 6 0 R
+/Root 5 0 R
+/Size 9
+>>
+startxref
+7027
+%%EOF

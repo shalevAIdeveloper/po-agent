@@ -56,7 +56,7 @@ def totals(lines: Sequence[Line], label: str = "Total:") -> tuple[tuple[str, str
 def header(
     party: Party,
     po: str,
-    po_date: DateText,
+    po_date: DateText | None,
     lines: Sequence[Line],
     **changes: object,
 ) -> Header:

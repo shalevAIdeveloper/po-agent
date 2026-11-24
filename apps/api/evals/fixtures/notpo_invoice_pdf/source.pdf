@@ -1,0 +1,248 @@
+%PDF-1.3
+%“Œ‹ž ReportLab Generated PDF document (opensource)
+1 0 obj
+<<
+/F1 2 0 R /F2 3 0 R
+>>
+endobj
+2 0 obj
+<<
+/BaseFont /Helvetica /Encoding /WinAnsiEncoding /Name /F1 /Subtype /Type1 /Type /Font
+>>
+endobj
+3 0 obj
+<<
+/BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding /Name /F2 /Subtype /Type1 /Type /Font
+>>
+endobj
+4 0 obj
+<<
+/Contents 8 0 R /MediaBox [ 0 0 612 792 ] /Parent 7 0 R /Resources <<
+/Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
+>> /Rotate 0 /Trans <<
+
+>> 
+  /Type /Page
+>>
+endobj
+5 0 obj
+<<
+/PageMode /UseNone /Pages 7 0 R /Type /Catalog
+>>
+endobj
+6 0 obj
+<<
+/Author (evals.generate) /CreationDate (D:20000101000000+00'00') /Creator (evals.generate) /Keywords () /ModDate (D:20000101000000+00'00') /Producer (ReportLab PDF Library - \(opensource\)) 
+  /Subject (synthetic eval fixture) /Title (eval case notpo_invoice_pdf) /Trapped /False
+>>
+endobj
+7 0 obj
+<<
+/Count 1 /Kids [ 4 0 R ] /Type /Pages
+>>
+endobj
+8 0 obj
+<<
+/Length 5507
+>>
+stream
+1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
+BT /F2 14 Tf 16.8 TL ET
+BT 1 0 0 1 40 738 Tm (Vellumgrove Industrial Supply) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 726.5 Tm (2750 Copperleaf Parkway) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 715 Tm (Alder Falls, OH 45990) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 703.5 Tm (\(614\) 555-0100) Tj T* ET
+BT /F2 18 Tf 21.6 TL ET
+BT 1 0 0 1 497.984 736 Tm (INVOICE) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 716.5 Tm (Invoice No.:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 428.507 716.5 Tm (INV-88213) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 705 Tm (Invoice Date:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 428.507 705 Tm (11/14/2026) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 693.5 Tm (Customer:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 428.507 693.5 Tm (Brindlewood Facilities Co.) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 682 Tm (Customer PO:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 428.507 682 Tm (4500012345) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 670.5 Tm (Due Date:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 428.507 670.5 Tm (12/14/2026) Tj T* ET
+.88 g
+n 40 636 532 16.5 re f*
+0 g
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 642 Tm (Line) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 642 Tm (Our Item #) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 642 Tm (Vendor Item #) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 642 Tm (Description) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 407.997 642 Tm (Qty) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 642 Tm (UoM) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 472.988 642 Tm (Unit Price) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 535.007 642 Tm (Amount) Tj T* ET
+.5 w
+n 40 636 532 16.5 re S
+n 70 636 m 70 652.5 l S
+n 148 636 m 148 652.5 l S
+n 220 636 m 220 652.5 l S
+n 390 636 m 390 652.5 l S
+n 426 636 m 426 652.5 l S
+n 462 636 m 462 652.5 l S
+n 518 636 m 518 652.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 625.5 Tm (1) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 625.5 Tm (BFC-92244) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 625.5 Tm (NP-92244) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 625.5 Tm (Floor finish, high gloss, 5 gal) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 625.5 Tm (35) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 625.5 Tm (PL) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 492.482 625.5 Tm (71.20) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 533.972 625.5 Tm (2,492.00) Tj T* ET
+.5 w
+n 40 620.5 532 15.5 re S
+n 70 620.5 m 70 636 l S
+n 148 620.5 m 148 636 l S
+n 220 620.5 m 220 636 l S
+n 390 620.5 m 390 636 l S
+n 426 620.5 m 426 636 l S
+n 462 620.5 m 462 636 l S
+n 518 620.5 m 518 636 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 610 Tm (2) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 610 Tm (BFC-90061) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 610 Tm (NP-90061) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 610 Tm (Pipe thread sealant, 4 oz) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 610 Tm (48) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 610 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 497.486 610 Tm (6.15) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 541.478 610 Tm (295.20) Tj T* ET
+.5 w
+n 40 605 532 15.5 re S
+n 70 605 m 70 620.5 l S
+n 148 605 m 148 620.5 l S
+n 220 605 m 220 620.5 l S
+n 390 605 m 390 620.5 l S
+n 426 605 m 426 620.5 l S
+n 462 605 m 462 620.5 l S
+n 518 605 m 518 620.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 594.5 Tm (3) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 594.5 Tm (BFC-41002) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 594.5 Tm (NP-41002) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 594.5 Tm (Copper coupling, 3/4 in) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 594.5 Tm (12) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 594.5 Tm (EA) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 497.486 594.5 Tm (2.35) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 546.482 594.5 Tm (28.20) Tj T* ET
+.5 w
+n 40 589.5 532 15.5 re S
+n 70 589.5 m 70 605 l S
+n 148 589.5 m 148 605 l S
+n 220 589.5 m 220 605 l S
+n 390 589.5 m 390 605 l S
+n 426 589.5 m 426 605 l S
+n 462 589.5 m 462 605 l S
+n 518 589.5 m 518 605 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 579 Tm (4) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 579 Tm (BFC-60012) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 579 Tm (NP-60012) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 579 Tm (Trash liners, 40-45 gal, 1.5 mil) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 579 Tm (21) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 579 Tm (CS) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 492.482 579 Tm (38.50) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 541.478 579 Tm (808.50) Tj T* ET
+.5 w
+n 40 574 532 15.5 re S
+n 70 574 m 70 589.5 l S
+n 148 574 m 148 589.5 l S
+n 220 574 m 220 589.5 l S
+n 390 574 m 390 589.5 l S
+n 426 574 m 426 589.5 l S
+n 462 574 m 462 589.5 l S
+n 518 574 m 518 589.5 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 533.972 560.5 Tm (3,623.90) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 473.477 560.5 Tm (Subtotal:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 541.478 547 Tm (208.37) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 441.464 547 Tm (Sales tax 5.75%:) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 533.972 533.5 Tm (3,832.27) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 453.506 533.5 Tm (Amount due:) Tj T* ET
+BT /F1 8 Tf 9.6 TL ET
+BT 1 0 0 1 40 515 Tm (Remit to: Vellumgrove Industrial Supply, 2750 Copperleaf Parkway, Alder Falls, OH 45990. Questions: ar@vellumgrove.example.com.) Tj T* ET
+ 
+endstream
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000061 00000 n 
+0000000102 00000 n 
+0000000209 00000 n 
+0000000321 00000 n 
+0000000514 00000 n 
+0000000582 00000 n 
+0000000883 00000 n 
+0000000942 00000 n 
+trailer
+<<
+/ID 
+[<4608f0b224e3953b52f6b274aa095269><4608f0b224e3953b52f6b274aa095269>]
+% ReportLab generated PDF document -- digest (opensource)
+
+/Info 6 0 R
+/Root 5 0 R
+/Size 9
+>>
+startxref
+6500
+%%EOF

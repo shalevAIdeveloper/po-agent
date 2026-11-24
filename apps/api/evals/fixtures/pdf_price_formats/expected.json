@@ -1,0 +1,111 @@
+{
+  "schema_version": "po_extraction.v1",
+  "document_type": "purchase_order",
+  "header": {
+    "customer_name": "Tallowfen Hospitality Group",
+    "customer_po_number": "TH-2026-1203",
+    "po_date_raw": "11/19/2026",
+    "po_date": "2026-11-19",
+    "requested_ship_date_raw": null,
+    "requested_ship_date": null,
+    "ship_to": {
+      "raw_text": "Tallowfen Hospitality Group\n12 Wrenfield Court\nCedar Hollow, KY 40994",
+      "name": "Tallowfen Hospitality Group",
+      "attention": null,
+      "line1": "12 Wrenfield Court",
+      "line2": null,
+      "city": "Cedar Hollow",
+      "state": "KY",
+      "postal_code": "40994",
+      "country": null
+    },
+    "bill_to": {
+      "raw_text": "Tallowfen Hospitality Group\n12 Wrenfield Court\nCedar Hollow, KY 40994",
+      "name": "Tallowfen Hospitality Group",
+      "attention": null,
+      "line1": "12 Wrenfield Court",
+      "line2": null,
+      "city": "Cedar Hollow",
+      "state": "KY",
+      "postal_code": "40994",
+      "country": null
+    },
+    "order_total": "3796.00",
+    "currency": null,
+    "payment_terms": "Net 30",
+    "notes": null
+  },
+  "header_confidence": 1.0,
+  "lines": [
+    {
+      "raw_text": "1 THG-93101 Commercial mixer service kit 1 KT $1,234.50 $1,234.50",
+      "line_no": 1,
+      "line_type": "product",
+      "customer_part_number": "THG-93101",
+      "vendor_part_number": null,
+      "description": "Commercial mixer service kit",
+      "qty": "1",
+      "uom": "KT",
+      "unit_price": "1234.50",
+      "extended_price": "1234.50",
+      "page": 1,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "2 THG-93102 Imported espresso grinder burr set (EU pricing) 2 EA 1.234,50 2.469,00",
+      "line_no": 2,
+      "line_type": "product",
+      "customer_part_number": "THG-93102",
+      "vendor_part_number": null,
+      "description": "Imported espresso grinder burr set (EU pricing)",
+      "qty": "2",
+      "uom": "EA",
+      "unit_price": "1234.50",
+      "extended_price": "2469.00",
+      "page": 1,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "3 THG-80305 Wire nut, yellow (priced per 100) 500 EA 12.50/C 62.50",
+      "line_no": 3,
+      "line_type": "product",
+      "customer_part_number": "THG-80305",
+      "vendor_part_number": null,
+      "description": "Wire nut, yellow (priced per 100)",
+      "qty": "500",
+      "uom": "EA",
+      "unit_price": "12.50",
+      "extended_price": "62.50",
+      "page": 1,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "4 THG-00004 Sample swatch card 2 EA N/C N/C",
+      "line_no": 4,
+      "line_type": "product",
+      "customer_part_number": "THG-00004",
+      "vendor_part_number": null,
+      "description": "Sample swatch card",
+      "qty": "2",
+      "uom": "EA",
+      "unit_price": null,
+      "extended_price": null,
+      "page": 1,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "5 THG-90052 PTFE thread seal tape, 1/2 in 40 EA $.75 $30.00",
+      "line_no": 5,
+      "line_type": "product",
+      "customer_part_number": "THG-90052",
+      "vendor_part_number": null,
+      "description": "PTFE thread seal tape, 1/2 in",
+      "qty": "40",
+      "uom": "EA",
+      "unit_price": "0.75",
+      "extended_price": "30.00",
+      "page": 1,
+      "confidence": 1.0
+    }
+  ]
+}

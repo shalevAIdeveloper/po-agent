@@ -1,0 +1,205 @@
+%PDF-1.3
+%“Œ‹ž ReportLab Generated PDF document (opensource)
+1 0 obj
+<<
+/F1 2 0 R /F2 3 0 R
+>>
+endobj
+2 0 obj
+<<
+/BaseFont /Helvetica /Encoding /WinAnsiEncoding /Name /F1 /Subtype /Type1 /Type /Font
+>>
+endobj
+3 0 obj
+<<
+/BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding /Name /F2 /Subtype /Type1 /Type /Font
+>>
+endobj
+4 0 obj
+<<
+/Contents 8 0 R /MediaBox [ 0 0 612 792 ] /Parent 7 0 R /Resources <<
+/Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
+>> /Rotate 0 /Trans <<
+
+>> 
+  /Type /Page
+>>
+endobj
+5 0 obj
+<<
+/PageMode /UseNone /Pages 7 0 R /Type /Catalog
+>>
+endobj
+6 0 obj
+<<
+/Author (evals.generate) /CreationDate (D:20000101000000+00'00') /Creator (evals.generate) /Keywords () /ModDate (D:20000101000000+00'00') /Producer (ReportLab PDF Library - \(opensource\)) 
+  /Subject (synthetic eval fixture) /Title (eval case pdf_date_formats) /Trapped /False
+>>
+endobj
+7 0 obj
+<<
+/Count 1 /Kids [ 4 0 R ] /Type /Pages
+>>
+endobj
+8 0 obj
+<<
+/Length 4431
+>>
+stream
+1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
+BT /F2 14 Tf 16.8 TL ET
+BT 1 0 0 1 40 738 Tm (Juniperdell Clinics) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 726.5 Tm (55 Bellwether Street) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 715 Tm (Ashgrove, MI 48997) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 703.5 Tm (\(616\) 555-0186) Tj T* ET
+BT /F2 18 Tf 21.6 TL ET
+BT 1 0 0 1 401 736 Tm (PURCHASE ORDER) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 716.5 Tm (PO Number:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 461.015 716.5 Tm (JHC-117950) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 705 Tm (PO Date:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 461.015 705 Tm (03/04/26) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 693.5 Tm (Requested Ship Date:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 461.015 693.5 Tm (April 15, 2026) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 682 Tm (Terms:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 461.015 682 Tm (Net 30) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 362 670.5 Tm (Buyer:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 461.015 670.5 Tm (Sam Whitlock) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 687.5 Tm (Vendor:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 676 Tm (Vellumgrove Industrial Supply) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 664.5 Tm (2750 Copperleaf Parkway) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 653 Tm (Alder Falls, OH 45990) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 637 Tm (Ship To:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 625.5 Tm (Juniperdell Clinics) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 614 Tm (Attn: Maintenance Shop) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 602.5 Tm (480 Kilnworth Avenue) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 591 Tm (Millbrook Station, IN 46996) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 575 Tm (Bill To:) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 563.5 Tm (Juniperdell Clinics) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 552 Tm (55 Bellwether Street) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 40 540.5 Tm (Ashgrove, MI 48997) Tj T* ET
+.88 g
+n 40 506 532 16.5 re f*
+0 g
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 512 Tm (Line) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 512 Tm (Our Item #) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 512 Tm (Vendor Item #) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 512 Tm (Description) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 407.997 512 Tm (Qty) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 512 Tm (UoM) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 472.988 512 Tm (Unit Price) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 535.007 512 Tm (Amount) Tj T* ET
+.6 w
+n 40 506 m 572 506 l S
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 495.5 Tm (1) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 495.5 Tm (JC-80310) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 495.5 Tm (NP-80310) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 495.5 Tm (Wire nut, red, 100 per bag) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 495.5 Tm (28) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 495.5 Tm (BG) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 497.486 495.5 Tm (4.35) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 541.478 495.5 Tm (121.80) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 480 Tm (2) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 480 Tm (JC-10431) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 480 Tm (NP-10431) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 480 Tm (Flat washer, zinc, 3/8 in) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 480 Tm (24) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 480 Tm (BX) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 497.486 480 Tm (6.25) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 541.478 480 Tm (150.00) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 43 464.5 Tm (3) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 73 464.5 Tm (JC-51477) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 151 464.5 Tm (NP-51477) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 223 464.5 Tm (Painter's tape, blue, 1.5 in x 60 yd) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 412.992 464.5 Tm (34) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 429 464.5 Tm (RL) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 497.486 464.5 Tm (6.80) Tj T* ET
+BT /F1 9 Tf 10.8 TL ET
+BT 1 0 0 1 541.478 464.5 Tm (231.20) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 541.478 446 Tm (503.00) Tj T* ET
+BT /F2 9 Tf 10.8 TL ET
+BT 1 0 0 1 484.502 446 Tm (Total:) Tj T* ET
+ 
+endstream
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000061 00000 n 
+0000000102 00000 n 
+0000000209 00000 n 
+0000000321 00000 n 
+0000000514 00000 n 
+0000000582 00000 n 
+0000000882 00000 n 
+0000000941 00000 n 
+trailer
+<<
+/ID 
+[<69f78c6c6e5f97670e29104bedd95853><69f78c6c6e5f97670e29104bedd95853>]
+% ReportLab generated PDF document -- digest (opensource)
+
+/Info 6 0 R
+/Root 5 0 R
+/Size 9
+>>
+startxref
+5423
+%%EOF

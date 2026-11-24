@@ -1,0 +1,26 @@
+{
+  "synthetic": true,
+  "schema_version": "eval_case_meta.v1",
+  "generator": "evals.generate",
+  "generator_version": 1,
+  "seed": 632,
+  "input_type": "pdf",
+  "group": "traps",
+  "tags": [
+    "pdf",
+    "traps"
+  ],
+  "pages": 1,
+  "sender_email": "r.okonkwo@tallowfen.example.com",
+  "received_at": "2026-11-19T09:30:00Z",
+  "expected_input_warnings": [],
+  "expected_extraction_warnings": [
+    {
+      "code": "ungrounded",
+      "path": "lines.1.extended_price",
+      "details": null
+    }
+  ],
+  "not_scored": [],
+  "known_gap": []
+}

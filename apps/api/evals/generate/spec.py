@@ -204,6 +204,8 @@ class PdfDoc:
     show_vendor: bool = True
     issuer: str | None = None  # the name on the letterhead; default: header.customer_name
     letterhead: tuple[str, ...] = ()  # lines under the issuer's name (street, city, phone)
+    # Rows printed in the table that are not order lines (an invoice's): the case has none.
+    table_lines: tuple[Line, ...] | None = None
 
 
 @dataclass(frozen=True, slots=True)
