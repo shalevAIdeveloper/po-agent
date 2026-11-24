@@ -1,0 +1,19 @@
+{
+  "synthetic": true,
+  "schema_version": "eval_case_meta.v1",
+  "generator": "evals.generate",
+  "generator_version": 1,
+  "seed": 803,
+  "input_type": "eml",
+  "group": "eml",
+  "tags": [
+    "eml"
+  ],
+  "pages": 1,
+  "sender_email": "purchasing@quillenfeld.example.com",
+  "received_at": "2026-11-20T14:05:00Z",
+  "expected_input_warnings": [],
+  "expected_extraction_warnings": [],
+  "not_scored": [],
+  "known_gap": []
+}

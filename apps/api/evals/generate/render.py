@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-from evals.generate.spec import Case, PdfDoc, ScanDoc
+from evals.generate.spec import Case, EmailDoc, PdfDoc, ScanDoc
 
 
 @dataclass(frozen=True, slots=True)
@@ -24,4 +24,8 @@ def render(case: Case) -> Rendered:
         from evals.generate import render_scan
 
         return render_scan.render(case, document)
+    if isinstance(document, EmailDoc):
+        from evals.generate import render_email
+
+        return Rendered(render_email.render(case, document), 1, (None,) * len(case.lines))
     raise NotImplementedError(type(document).__name__)
