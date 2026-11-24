@@ -13,9 +13,9 @@ import pytest
 from app.extraction.grounding import check_grounding
 from app.extraction.inputs import ParsedDocument, run_parsers
 from app.extraction.schema import PurchaseOrderExtraction
-from evals.generate import expected, files, meta
+from evals.generate import expected, files, meta, render_pdf
 from evals.generate.cases import CASES
-from evals.generate.spec import Case, PdfDoc
+from evals.generate.spec import Case, PdfDoc, ScanDoc
 from evals.run import FIXTURES_DIR
 
 MAX_FILE_BYTES = 2 * 1024 * 1024
@@ -39,6 +39,26 @@ def _parsed(name: str) -> ParsedDocument:
     outcome = run_parsers((_folder(case) / case.source_name).read_bytes())
     assert isinstance(outcome, ParsedDocument), outcome
     return outcome
+
+
+@functools.cache
+def _text(name: str) -> str | None:
+    """The text the truth is checked against: the source's text layer, or for a scan the
+    text layer of the PDF it was rasterized from (same spec, same renderer)."""
+    case = next(c for c in CASES if c.name == name)
+    if isinstance(case.document, ScanDoc):
+        base = run_parsers(render_pdf.render(case, case.document.pdf).data)
+        assert isinstance(base, ParsedDocument)
+        return base.text
+    return _parsed(name).text
+
+
+def _texted(case: Case) -> bool:
+    return case.input_type in ("pdf", "eml") or isinstance(case.document, ScanDoc)
+
+
+def _paged(case: Case) -> bool:
+    return isinstance(case.document, PdfDoc | ScanDoc)
 
 
 def _expected(case: Case) -> PurchaseOrderExtraction:
@@ -99,13 +119,12 @@ def test_each_file_is_under_the_size_cap(case: Case) -> None:
         assert path.stat().st_size < MAX_FILE_BYTES, path.name
 
 
-@pytest.mark.parametrize("case", _cases(lambda c: c.input_type in ("pdf", "eml")))
+@pytest.mark.parametrize("case", _cases(_texted))
 def test_expected_values_are_grounded_in_the_text(case: Case) -> None:
-    parsed = _parsed(case.name)
-    if parsed.text is None:
-        pytest.skip("no text layer (a scan): grounding doesn't run")
+    text = _text(case.name)
+    assert text is not None
 
-    warnings = check_grounding(_expected(case), parsed.text)
+    warnings = check_grounding(_expected(case), text)
 
     assert [(w.code, w.path) for w in warnings] == [
         (w.code, w.path) for w in _meta(case).expected_extraction_warnings
@@ -117,11 +136,11 @@ def _page_texts(text: str) -> dict[int, str]:
     return {int(number): body for number, body in zip(parts[1::2], parts[2::2], strict=True)}
 
 
-@pytest.mark.parametrize("case", _cases(lambda c: isinstance(c.document, PdfDoc)))
+@pytest.mark.parametrize("case", _cases(_paged))
 def test_every_line_is_printed_on_its_page(case: Case) -> None:
-    parsed = _parsed(case.name)
-    assert parsed.text is not None
-    pages = {number: _fold(body) for number, body in _page_texts(parsed.text).items()}
+    text = _text(case.name)
+    assert text is not None
+    pages = {number: _fold(body) for number, body in _page_texts(text).items()}
     for index, line in enumerate(_expected(case).lines):
         assert line.page is not None, index
         needle = line.customer_part_number or line.vendor_part_number or line.description
@@ -159,13 +178,12 @@ def _text_values(truth: PurchaseOrderExtraction) -> list[tuple[str, str]]:
     return [(path, value) for path, value in found if value is not None]
 
 
-@pytest.mark.parametrize("case", _cases(lambda c: c.input_type in ("pdf", "eml")))
+@pytest.mark.parametrize("case", _cases(_texted))
 def test_every_text_value_of_the_truth_is_printed(case: Case) -> None:
     # Grounding covers ids and numbers only; this covers names, descriptions, units, dates,
     # notes and address parts (whitespace-insensitive: PDF text layers re-space words).
-    parsed = _parsed(case.name)
-    if parsed.text is None:
-        pytest.skip("no text layer (a scan)")
-    text = _fold(parsed.text)
+    raw = _text(case.name)
+    assert raw is not None
+    text = _fold(raw)
     missing = [path for path, value in _text_values(_expected(case)) if _fold(value) not in text]
     assert missing == []

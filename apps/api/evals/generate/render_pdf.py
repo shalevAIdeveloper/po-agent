@@ -1,7 +1,11 @@
 """Text PDFs with reportlab: five layouts, pagination, and the page of every line.
 
 Deterministic: `invariant=True` (fixed creation date and document ID), no page
-compression, built-in fonts only (nothing embedded), fixed metadata. Pagination is the
+compression, fixed metadata, and an embedded font: Bitstream Vera, which ships inside
+reportlab. Not the standard Helvetica: a viewer substitutes a font of its own for a
+non-embedded standard font, and PDFium does so differently on Windows and Linux, so the
+same PDF rasterized to different pixels there (the scans, and the page images the parser
+sends the model). With the font embedded, both platforms draw the same glyphs. Pagination is the
 spec's `page_breaks` (truth by construction); a page that overflows is an error, never a
 silent reflow. Every value the spec prints is drawn whole: only descriptions and free
 text wrap, and a cell that doesn't fit its column is an error.
@@ -11,11 +15,15 @@ import io
 from collections.abc import Sequence
 from dataclasses import dataclass
 from decimal import Decimal
+from pathlib import Path
 from typing import Any, Final
 
+import reportlab
 from reportlab.lib.pagesizes import landscape, letter
 from reportlab.lib.utils import simpleSplit
+from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.pdfmetrics import stringWidth
+from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 
 from evals.generate import GENERATOR
@@ -30,8 +38,12 @@ from evals.generate.spec import (
     money,
 )
 
-FONT: Final = "Helvetica"
-BOLD: Final = "Helvetica-Bold"
+FONT: Final = "Vera"
+BOLD: Final = "VeraBd"
+_FONT_DIR: Final = Path(reportlab.__file__).resolve().parent / "fonts"
+for _name in (FONT, BOLD):
+    if _name not in pdfmetrics.getRegisteredFontNames():
+        pdfmetrics.registerFont(TTFont(_name, str(_FONT_DIR / f"{_name}.ttf")))
 SIZE: Final = 9.0
 LEADING: Final = 11.5
 MARGIN: Final = 40.0

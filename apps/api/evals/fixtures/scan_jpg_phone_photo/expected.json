@@ -1,0 +1,111 @@
+{
+  "schema_version": "po_extraction.v1",
+  "document_type": "purchase_order",
+  "header": {
+    "customer_name": "Silverquill Grove Apartments",
+    "customer_po_number": "SGA-1059",
+    "po_date_raw": "11/18/2026",
+    "po_date": "2026-11-18",
+    "requested_ship_date_raw": null,
+    "requested_ship_date": null,
+    "ship_to": {
+      "raw_text": "Silverquill Grove Apartments\nAttn: Central Stores\n3300 Foundry Row\nQuarry Bend, PA 15992",
+      "name": "Silverquill Grove Apartments",
+      "attention": "Central Stores",
+      "line1": "3300 Foundry Row",
+      "line2": null,
+      "city": "Quarry Bend",
+      "state": "PA",
+      "postal_code": "15992",
+      "country": null
+    },
+    "bill_to": {
+      "raw_text": "Silverquill Grove Apartments\n19 Thistledown Circle\nHarrow Point, WI 53990",
+      "name": "Silverquill Grove Apartments",
+      "attention": null,
+      "line1": "19 Thistledown Circle",
+      "line2": null,
+      "city": "Harrow Point",
+      "state": "WI",
+      "postal_code": "53990",
+      "country": null
+    },
+    "order_total": "1597.15",
+    "currency": null,
+    "payment_terms": "Net 30",
+    "notes": null
+  },
+  "header_confidence": 1.0,
+  "lines": [
+    {
+      "raw_text": "1 SGA-20140 NP-20140 Cut-resistant gloves, level A3, size 9 18 PR 7.65 137.70",
+      "line_no": 1,
+      "line_type": "product",
+      "customer_part_number": "SGA-20140",
+      "vendor_part_number": "NP-20140",
+      "description": "Cut-resistant gloves, level A3, size 9",
+      "qty": "18",
+      "uom": "PR",
+      "unit_price": "7.65",
+      "extended_price": "137.70",
+      "page": 1,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "2 SGA-94410 NP-94410 Deck screw, 3 in, 5 lb box 24 BX 26.40 633.60",
+      "line_no": 2,
+      "line_type": "product",
+      "customer_part_number": "SGA-94410",
+      "vendor_part_number": "NP-94410",
+      "description": "Deck screw, 3 in, 5 lb box",
+      "qty": "24",
+      "uom": "BX",
+      "unit_price": "26.40",
+      "extended_price": "633.60",
+      "page": 1,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "3 SGA-80305 NP-80305 Wire nut, yellow, 100 per bag 21 BG 4.10 86.10",
+      "line_no": 3,
+      "line_type": "product",
+      "customer_part_number": "SGA-80305",
+      "vendor_part_number": "NP-80305",
+      "description": "Wire nut, yellow, 100 per bag",
+      "qty": "21",
+      "uom": "BG",
+      "unit_price": "4.10",
+      "extended_price": "86.10",
+      "page": 1,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "4 SGA-90061 NP-90061 Pipe thread sealant, 4 oz 15 EA 6.15 92.25",
+      "line_no": 4,
+      "line_type": "product",
+      "customer_part_number": "SGA-90061",
+      "vendor_part_number": "NP-90061",
+      "description": "Pipe thread sealant, 4 oz",
+      "qty": "15",
+      "uom": "EA",
+      "unit_price": "6.15",
+      "extended_price": "92.25",
+      "page": 1,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "5 SGA-31005 NP-31005 LED troffer 2x4, 4000K 10 EA 64.75 647.50",
+      "line_no": 5,
+      "line_type": "product",
+      "customer_part_number": "SGA-31005",
+      "vendor_part_number": "NP-31005",
+      "description": "LED troffer 2x4, 4000K",
+      "qty": "10",
+      "uom": "EA",
+      "unit_price": "64.75",
+      "extended_price": "647.50",
+      "page": 1,
+      "confidence": 1.0
+    }
+  ]
+}

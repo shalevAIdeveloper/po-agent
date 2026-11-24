@@ -9,12 +9,14 @@ import random
 from decimal import Decimal
 
 from evals.generate.cases.common import (
+    CPN,
     EXT,
     NO,
     PRICE,
     QTY,
     STANDARD,
     UOM,
+    VPN,
     d,
     letterhead,
     products,
@@ -213,6 +215,16 @@ def _uom_traps() -> Case:
         head,
         "grid",
         group="traps",
+        columns=(
+            NO,
+            CPN,
+            VPN,
+            Col("desc", "Description", 160),
+            QTY,
+            Col("uom", "UoM", 46),
+            PRICE,
+            EXT,
+        ),
         day=18,
         checks="'12 CS' printed in the qty cell (qty 12, uom CS); '1 case of 12' in a "
         "description (qty 1); BX/100; a fractional 12.5 FT; units kept as printed",

@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-from evals.generate.spec import Case, PdfDoc
+from evals.generate.spec import Case, PdfDoc, ScanDoc
 
 
 @dataclass(frozen=True, slots=True)
@@ -20,4 +20,8 @@ def render(case: Case) -> Rendered:
 
         result = render_pdf.render(case, document)
         return Rendered(result.data, result.pages, result.line_pages)
+    if isinstance(document, ScanDoc):
+        from evals.generate import render_scan
+
+        return render_scan.render(case, document)
     raise NotImplementedError(type(document).__name__)
