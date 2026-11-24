@@ -255,6 +255,7 @@ def test_malformed_client_request_id_is_not_logged(settings: Settings, incoming:
         "email",
         "raw_text",
         "unit_price",
+        "price_per",
         "customer_email",
         "ship_to_address",
         "contact_phone",

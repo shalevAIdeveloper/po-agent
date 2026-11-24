@@ -321,6 +321,7 @@ def test_expected_is_the_spec_truth_and_valid_v1() -> None:
         "qty": None,
         "uom": None,
         "unit_price": None,
+        "price_per": None,
         "extended_price": None,
         "page": 1,
         "confidence": 1.0,

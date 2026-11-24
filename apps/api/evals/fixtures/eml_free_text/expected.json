@@ -37,6 +37,7 @@
       "qty": "12",
       "uom": "boxes",
       "unit_price": "11.90",
+      "price_per": null,
       "extended_price": null,
       "page": null,
       "confidence": 1.0
@@ -51,6 +52,7 @@
       "qty": "4",
       "uom": null,
       "unit_price": null,
+      "price_per": null,
       "extended_price": null,
       "page": null,
       "confidence": 1.0
@@ -65,6 +67,7 @@
       "qty": "2",
       "uom": "rolls",
       "unit_price": null,
+      "price_per": null,
       "extended_price": null,
       "page": null,
       "confidence": 1.0

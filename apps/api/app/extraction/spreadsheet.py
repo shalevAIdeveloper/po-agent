@@ -80,6 +80,8 @@ _LINE_FIELDS: Final = (
     "qty",
     "uom",
     "unit_price",
+    # Always None: column_mapping.v1 has no price_per field (M1-SHEET-PRICE-PER).
+    "price_per",
     "extended_price",
 )
 

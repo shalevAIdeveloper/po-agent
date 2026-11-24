@@ -46,6 +46,7 @@ PII_KEYS = frozenset(
         "description",
         "price",
         "unit_price",
+        "price_per",
         "content",
         "body",
         "claims",
