@@ -4,20 +4,19 @@ One test per property, parametrized over the generator's registry. Each source i
 once (`_parsed`, cached) with the real parsers (`run_parsers`, in this process).
 """
 
-import functools
 import re
 from pathlib import Path
 
 import pytest
 
 from app.extraction.grounding import check_grounding
-from app.extraction.inputs import ParsedDocument, run_parsers
+from app.extraction.inputs import ParsedDocument
 from app.extraction.schema import PurchaseOrderExtraction
-from evals.generate import expected, files, meta, render_pdf
+from evals.generate import expected, files, meta
 from evals.generate.cases import CASES
 from evals.generate.spec import Case, PdfDoc, ScanDoc
 from evals.run import FIXTURES_DIR
-from tests.evals.support import parsed
+from tests.evals.support import document_text, parsed
 
 MAX_FILE_BYTES = 2 * 1024 * 1024
 KINDS = {"pdf": "pdf", "png": "png", "jpg": "jpeg", "xlsx": "xlsx", "csv": "csv", "eml": "eml"}
@@ -38,16 +37,8 @@ def _parsed(name: str) -> ParsedDocument:
     return parsed(name)
 
 
-@functools.cache
 def _text(name: str) -> str | None:
-    """The text the truth is checked against: the source's text layer, or for a scan the
-    text layer of the PDF it was rasterized from (same spec, same renderer)."""
-    case = next(c for c in CASES if c.name == name)
-    if isinstance(case.document, ScanDoc):
-        base = run_parsers(render_pdf.render(case, case.document.pdf).data)
-        assert isinstance(base, ParsedDocument)
-        return base.text
-    return _parsed(name).text
+    return document_text(name)
 
 
 def _texted(case: Case) -> bool:
