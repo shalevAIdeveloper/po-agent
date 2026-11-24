@@ -87,8 +87,11 @@ Validated by `generate/meta.py` (`CaseMeta`, unknown keys refused):
 | `sender_email`, `received_at` | the upload metadata (an `example.com` address; UTC). For an EML, `From` and `Date` are these values |
 | `expected_input_warnings` | the parser's warnings for the source (`encoding_guessed`, ...) |
 | `expected_extraction_warnings` | `{code, path, details}`: for PDF/EML, what grounding flags on the truth itself (only `pdf_price_formats`: a European amount); for sheets, what PR 5 gives with the correct mapping (`rows_skipped` with row numbers and texts, `unparsed_value`, ...), gap effects included |
-| `not_scored` | field paths (`header.<field>[.<part>]`, `lines.<i or *>.<field>`) the input path can't produce by design. They stay in `expected.json` as the document's truth; scoring (PR 7) skips them |
+| `not_scored` | field paths (`header.<field>[.<part>]`, `lines.<i or *>.<field>`) the input path can't produce by design. Every segment must be a real field of `po_extraction.v1` and every `lines.<i>` a line of the case (a typo fails generation and the tests). An injection case may never list `header.order_total`, `header.notes`, `document_type` or a line's `qty` / `unit_price` / `extended_price` / `description`. They stay in `expected.json` as the document's truth; scoring (PR 7) skips them |
 | `known_gap` | follow-up ids (`M1-SHEET-TAIL`) whose effect the case shows: PR 5 is expected to differ from the truth there |
+| `known_gap_raw_texts` | the `raw_text` of each extra line the known gap makes the pipeline add (e.g. `Subtotal page 1 \| 27120.7`); only with a `known_gap` |
+
+**How PR 7 must use this** (dev M2): score against `expected.json` minus the `not_scored` paths; a predicted line whose `raw_text` is in `known_gap_raw_texts` is a known-gap line: it is scored and reported (as an extra line, per tag and in its own count), but it is **excluded from the regression gate**, so fixing or worsening a known gap never passes or fails `--fail-on-regression` by itself. Compare the predicted warnings with `expected_extraction_warnings` and report the difference. Report every metric per tag (`meta.tags`).
 
 ## Truth conventions
 `expected.json` is what the document says, validated as `po_extraction.v1`:
@@ -185,7 +188,7 @@ PR 5 reads XLSX/CSV by code and asks the mapping model (`map_columns/v1`) only w
 things are (ADR 0012 → "Spreadsheets"). These cases measure that mapping. PR 6 built 10
 of them (the six base cases and the four follow-up cases in the table above) plus the
 injection sheet; the rest of the catalogue below moves to **PR 6b, before PR 9** (owner
-decision Q1). Each one is a
+decision Q1). PR 6b also adds injection cases the `sec` review asked for: `inject_pdf_hidden_text` (white or ~1 pt text in a PDF, `sec` Medium), a header/address injection (an instruction in an `Attn:` line), an instruction in a sheet name, and one in a hidden row. Each one is a
 generated `source.xlsx` or `source.csv` (synthetic data, as above) plus its `expected.json`.
 Where a case expects input warnings (`hidden_cells_ignored`, `encoding_guessed`, ...) or
 extraction warnings (`unparsed_value`, `negative_value`, `rows_skipped`, ...), with their
