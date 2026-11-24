@@ -151,3 +151,14 @@ def test_a_long_description_wraps_and_stays_whole_in_the_text_layer() -> None:
     text = re.sub(r"\s+", " ", page_texts(_render(changed).data)[0])
 
     assert long.strip() in text
+
+
+def test_a_heading_that_does_not_fit_its_column_is_an_error() -> None:
+    from evals.generate.spec import Col
+
+    case = sample()
+    assert isinstance(case.document, PdfDoc)
+    narrow = (Col("no", "A very long line number heading", 30), *case.document.columns[1:])
+    doc = PdfDoc("grid", narrow)
+    with pytest.raises(ValueError, match="heading"):
+        render_pdf.render(case, doc)

@@ -167,6 +167,11 @@ class _Renderer:
         width = sum(col.width for col in self.doc.columns)
         if width > self.pen.right - MARGIN + 0.01:
             raise ValueError(f"{self.case.name}: columns are wider than the page")
+        for col in self.doc.columns:
+            if not _fits(col.heading, col.width - 6, BOLD):
+                raise ValueError(
+                    f"{self.case.name}: heading {col.heading!r} doesn't fit its column"
+                )
         for line in self.rows:
             for col in self.doc.columns:
                 cell = line.cell(col.key)

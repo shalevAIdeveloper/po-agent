@@ -16,8 +16,8 @@ from evals.generate.spec import AddressBlock, Col, DateText, Line, Num, money, n
 # Standard table columns (widths fit a portrait letter page: 532 pt).
 NO: Final = Col("no", "Line", 30)
 CPN: Final = Col("cpn", "Our Item #", 78)
-VPN: Final = Col("vpn", "Vendor Item #", 72)
-DESC: Final = Col("desc", "Description", 170)
+VPN: Final = Col("vpn", "Vendor Item #", 82)
+DESC: Final = Col("desc", "Description", 160)
 QTY: Final = Col("qty", "Qty", 36, "r")
 UOM: Final = Col("uom", "UoM", 36)
 PRICE: Final = Col("price", "Unit Price", 56, "r")

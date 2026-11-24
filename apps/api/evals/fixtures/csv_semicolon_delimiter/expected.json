@@ -2,7 +2,7 @@
   "schema_version": "po_extraction.v1",
   "document_type": "purchase_order",
   "header": {
-    "customer_name": null,
+    "customer_name": "Corvanthe Building Maintenance",
     "customer_po_number": "CBM-PO-30590",
     "po_date_raw": "11/20/2026",
     "po_date": "2026-11-20",

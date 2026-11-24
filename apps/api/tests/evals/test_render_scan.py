@@ -79,7 +79,7 @@ def test_specks_never_touch_ink() -> None:
     image = clean.copy()
     render_scan._specks(random.Random(1), image, clean, 2000)
 
-    # A speck keeps at least `margin` (4 px here) of white between itself and any ink.
-    near = (86, 36, 114, 64)
+    # A speck keeps at least `margin` (10 px here) of white between itself and any ink.
+    near = (80, 30, 120, 70)
     assert image.crop(near).tobytes() == clean.crop(near).tobytes()
     assert image.tobytes() != clean.tobytes()

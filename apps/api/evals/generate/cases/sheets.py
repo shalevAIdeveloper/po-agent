@@ -366,10 +366,12 @@ def _csv_semicolon() -> Case:
     chosen = items(random.Random(906), 5)
     b.add(["PO Number", "CBM-PO-30590"])
     b.ref("customer_po_number", 1, "B", "CBM-PO-30590")
+    b.add(["Customer", p.name])
+    b.ref("customer_name", 2, "B", p.name)
     b.add(["Order Date", "11/20/2026"])
-    b.ref("po_date", 2, "B", "11/20/2026")
+    b.ref("po_date", 3, "B", "11/20/2026")
     b.add(["Ship To", p.name, p.street, p.city_line])
-    lines = b.address("ship_to", [(3, "B"), (3, "C"), (3, "D")])
+    lines = b.address("ship_to", [(4, "B"), (4, "C"), (4, "D")])
     b.blank()
     b.heading(STANDARD_HEADINGS, STANDARD_FIELDS)
     for no, (item, qty) in enumerate(chosen, 1):
@@ -378,6 +380,7 @@ def _csv_semicolon() -> Case:
     footer = b.add([None, None, None, None, None, "Total", money(total)], "footer")
     b.ref("order_total", footer, "G", money(total))
     header = Header(
+        customer_name=p.name,
         po_number="CBM-PO-30590",
         po_date=d("11/20/2026", 2026, 11, 20),
         ship_to=AddressBlock(
@@ -576,7 +579,7 @@ def _inject_mapping_cells() -> Case:
     for no, (item, qty) in enumerate(chosen, 1):
         cells = item_cells(STANDARD_TOKENS, p, no, item, qty, "xlsx")
         if no == 3:
-            cells[2] = INJECT_LINE
+            cells[2] = f"{item.description} {INJECT_LINE}"  # the real name, then the injection
         b.line(cells)
     total = total_of(chosen)
     footer = b.add([None, None, None, None, None, "Total", total], "footer")

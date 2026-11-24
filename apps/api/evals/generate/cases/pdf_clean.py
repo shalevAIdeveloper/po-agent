@@ -136,8 +136,8 @@ def _grid_vendor_parts() -> Case:
     lines = products(rng, HARROWMOSS, 5, cpn=False)
     columns = (
         NO,
-        Col("vpn", "Vellumgrove Part #", 96),
-        Col("desc", "Description", 214),
+        Col("vpn", "Vellumgrove Part #", 110),
+        Col("desc", "Description", 200),
         QTY,
         UOM,
         PRICE,
@@ -261,9 +261,9 @@ def _landscape_extra_columns() -> Case:
     columns = (
         Col("no", "Ln", 26),
         Col("cpn", "Our Item #", 74),
-        Col("vpn", "Supplier Item", 70),
-        Col("desc", "Description", 190),
-        Col("x1", "Cost Center", 64),
+        Col("vpn", "Supplier Item", 78),
+        Col("desc", "Description", 178),
+        Col("x1", "Cost Center", 68),
         Col("x2", "Need By", 54),
         Col("qty", "Qty", 38, "r"),
         Col("uom", "Unit", 34),

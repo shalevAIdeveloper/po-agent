@@ -6,6 +6,7 @@ description, the notes) and changes nothing else.
 """
 
 import random
+from dataclasses import replace
 from decimal import Decimal
 
 from evals.generate.cases.common import (
@@ -19,6 +20,7 @@ from evals.generate.cases.common import (
     VPN,
     d,
     letterhead,
+    product,
     products,
     site,
     when,
@@ -26,6 +28,7 @@ from evals.generate.cases.common import (
 from evals.generate.cases.pdf_clean import header, pdf_case
 from evals.generate.data import (
     BRINDLEWOOD,
+    CATALOG,
     CORVANTHE,
     DISTRIBUTOR,
     FENWHISTLE,
@@ -117,8 +120,8 @@ def _no_uom_no_line_numbers() -> Case:
     lines = products(random.Random(623), CORVANTHE, 6, first_no=None, uom=False)
     columns = (
         Col("cpn", "Item", 84),
-        Col("vpn", "Mfr / Vendor #", 80),
-        Col("desc", "Description", 214),
+        Col("vpn", "Mfr / Vendor #", 84),
+        Col("desc", "Description", 210),
         QTY,
         PRICE,
         EXT,
@@ -219,7 +222,7 @@ def _uom_traps() -> Case:
             NO,
             CPN,
             VPN,
-            Col("desc", "Description", 160),
+            Col("desc", "Description", 150),
             QTY,
             Col("uom", "UoM", 46),
             PRICE,
@@ -411,17 +414,11 @@ def _inject_ignore_and_fake_system() -> Case:
 def _inject_line_description() -> Case:
     p = FENWHISTLE
     goods = products(random.Random(652), p, 4)
-    victim = goods[2]
-    injected = Line(
-        no=victim.no,
-        cpn=victim.cpn,
-        vpn=victim.vpn,
-        desc=INJECT_DESCRIPTION,
-        qty=victim.qty,
-        uom=victim.uom,
-        price=victim.price,
-        ext=victim.ext,
-    )
+    # The injected description starts with the real item's name: the line's part numbers,
+    # unit and price are that item's (the ball valve), only its description carries more.
+    valve = next(item for item in CATALOG if item.sku == "NP-90017")
+    base = product(p, valve, 14, no=3)
+    injected = replace(base, desc=INJECT_DESCRIPTION)
     lines = [goods[0], goods[1], injected, goods[3]]
     head = header(p, "FRB-7802", d("11/20/2026", 2026, 11, 20), lines, ship_to=site(p, 4))
     return pdf_case(

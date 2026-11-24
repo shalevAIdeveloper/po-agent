@@ -22,6 +22,7 @@ from PIL import Image, ImageChops, ImageDraw, ImageFilter
 from reportlab import rl_config
 from reportlab.lib.pagesizes import landscape, letter
 from reportlab.lib.utils import ImageReader
+from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen import canvas
 
 from evals.generate import GENERATOR, render_pdf
@@ -56,7 +57,8 @@ def _stamp(size: tuple[float, float], text: str, dpi: int) -> Image.Image:
     pdf.setStrokeColorRGB(*(c / 255 for c in STAMP_RED))
     pdf.setFillColorRGB(*(c / 255 for c in STAMP_RED))
     pdf.setLineWidth(3)
-    pdf.roundRect(-120, -26, 240, 52, 8, stroke=1, fill=0)
+    half = stringWidth(text, render_pdf.BOLD, 20) / 2 + 14
+    pdf.roundRect(-half, -26, 2 * half, 52, 8, stroke=1, fill=0)
     pdf.setFont(render_pdf.BOLD, 20)
     pdf.drawCentredString(0, -7, text)
     pdf.showPage()
@@ -90,7 +92,7 @@ def _specks(rng: random.Random, image: Image.Image, clean: Image.Image, count: i
     be what the image shows."""
     draw = ImageDraw.Draw(image)
     width, height = image.size
-    margin = max(4, width // 200)
+    margin = max(10, width // 100)  # well clear of ink: never read as a decimal point
     for _ in range(count):
         x, y, r = rng.randrange(width), rng.randrange(height), rng.choice((1, 1, 2))
         box = (x - r - margin, y - r - margin, x + r + margin + 1, y + r + margin + 1)

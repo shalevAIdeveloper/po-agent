@@ -25,10 +25,12 @@
           1,
           2,
           3,
-          11
+          4,
+          12
         ],
         "texts": [
           "PO Number | CBM-PO-30590",
+          "Customer | Corvanthe Building Maintenance",
           "Order Date | 11/20/2026",
           "Ship To | Corvanthe Building Maintenance | 7735 Ironweed Boulevard | Millbrook Station, IN 46996",
           "Total | 3,376.50"
