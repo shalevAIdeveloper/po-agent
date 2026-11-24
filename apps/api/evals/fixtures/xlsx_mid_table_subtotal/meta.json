@@ -1,0 +1,42 @@
+{
+  "synthetic": true,
+  "schema_version": "eval_case_meta.v1",
+  "generator": "evals.generate",
+  "generator_version": 1,
+  "seed": 911,
+  "input_type": "xlsx",
+  "group": "sheet",
+  "tags": [
+    "follow_up",
+    "long_sheet",
+    "sheet",
+    "spreadsheet",
+    "xlsx"
+  ],
+  "pages": 1,
+  "sender_email": "amarchetti@fenwhistlerowe.example.com",
+  "received_at": "2026-11-20T15:20:00Z",
+  "expected_input_warnings": [],
+  "expected_extraction_warnings": [
+    {
+      "code": "rows_skipped",
+      "path": "lines",
+      "details": {
+        "names": [],
+        "rows": [
+          64
+        ],
+        "texts": [
+          "Total | 33266.95"
+        ],
+        "hidden_rows": null,
+        "hidden_columns": null,
+        "count": null
+      }
+    }
+  ],
+  "not_scored": [],
+  "known_gap": [
+    "M1-SHEET-TAIL"
+  ]
+}

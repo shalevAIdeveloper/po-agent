@@ -227,6 +227,7 @@ class SheetBuilder:
             oracle=self.oracle(),
             merges=tuple(self.merges),
             formats=tuple(self.formats),
+            gap_rows=tuple(n for n, _, role in self._non_empty() if role == "gap"),
             **options,  # type: ignore[arg-type]
         )
 

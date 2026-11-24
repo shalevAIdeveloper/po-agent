@@ -260,6 +260,9 @@ class SheetDoc:
     delimiter: str = ","  # CSV
     encoding: str = "utf-8"  # CSV
     newline: str = "\r\n"  # CSV
+    # Rows the PR 5 pipeline turns into lines although they are not (a known gap, listed
+    # in `Case.known_gap`): outside the mapping sample, so the oracle cannot name them.
+    gap_rows: tuple[int, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)

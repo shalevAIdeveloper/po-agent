@@ -1,0 +1,47 @@
+{
+  "synthetic": true,
+  "schema_version": "eval_case_meta.v1",
+  "generator": "evals.generate",
+  "generator_version": 1,
+  "seed": 914,
+  "input_type": "xlsx",
+  "group": "sheet",
+  "tags": [
+    "follow_up",
+    "sheet",
+    "spreadsheet",
+    "xlsx"
+  ],
+  "pages": 1,
+  "sender_email": "supplies@juniperdell.example.com",
+  "received_at": "2026-11-21T15:20:00Z",
+  "expected_input_warnings": [],
+  "expected_extraction_warnings": [
+    {
+      "code": "rows_skipped",
+      "path": "lines",
+      "details": {
+        "names": [],
+        "rows": [
+          10,
+          11,
+          12,
+          13,
+          14
+        ],
+        "texts": [
+          "Subtotal | 3626.5",
+          "Sales tax 6% | 217.59",
+          "Shipping & handling | 45",
+          "Total | 3889.09",
+          "Authorized by: Sam Whitlock"
+        ],
+        "hidden_rows": null,
+        "hidden_columns": null,
+        "count": null
+      }
+    }
+  ],
+  "not_scored": [],
+  "known_gap": []
+}
