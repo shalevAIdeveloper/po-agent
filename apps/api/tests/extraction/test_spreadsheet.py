@@ -70,6 +70,7 @@ async def test_lines_header_and_addresses_come_from_the_cells() -> None:
     assert first.raw_text == "00123-A | Widget, blue | 12 | $1,234.50"
     assert (first.customer_part_number, first.description) == ("00123-A", "Widget, blue")
     assert (first.qty, first.unit_price) == (Decimal("12"), Decimal("1234.50"))
+    assert [line.price_per for line in extraction.lines] == [None, None]  # never from a cell
     assert (first.line_type, first.confidence, first.page, first.line_no) == (
         "product",
         0.9,

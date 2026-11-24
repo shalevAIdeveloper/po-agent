@@ -47,7 +47,6 @@ from evals.generate.spec import (
     Header,
     Line,
     PdfDoc,
-    WarningSpec,
     money,
     n,
     n_as,
@@ -261,8 +260,9 @@ def _price_formats() -> Case:
             desc="Imported espresso grinder burr set (EU pricing)",
             qty=n("2"),
             uom="EA",
-            price=n_as("1.234,50", "1234.50"),
-            ext=n_as("2.469,00", "2469.00"),
+            # US notation only (owner, M1-PRICE-NOTATION): null, raw_text keeps it.
+            price=n_as("1.234,50", None),
+            ext=n_as("2.469,00", None),
         ),
         Line(
             no="3",
@@ -270,8 +270,9 @@ def _price_formats() -> Case:
             desc="Wire nut, yellow (priced per 100)",
             qty=n("500"),
             uom="EA",
-            price=n_as("12.50/C", "12.50"),
-            ext=n("62.50"),
+            price=n_as("12.50/C", "12.50"),  # never divided
+            per="100",
+            ext=n("62.50"),  # as printed (prompt rule 7)
         ),
         Line(
             no="4",
@@ -295,10 +296,7 @@ def _price_formats() -> Case:
     head = header(
         p, "TH-2026-1203", d("11/19/2026", 2026, 11, 19), lines, order_total=n("$3,796.00")
     )
-    # Grounding reads numbers in US notation: the European extended price is flagged on
-    # the truth itself (its unit price, 1234.50, is grounded by line 1's "$1,234.50").
-    warnings = (WarningSpec("ungrounded", "lines.1.extended_price"),)
-    case = pdf_case(
+    return pdf_case(
         "pdf_price_formats",
         632,
         p,
@@ -317,25 +315,9 @@ def _price_formats() -> Case:
         ),
         day=19,
         totals=(("Total:", "$3,796.00"),),
-        checks="$1,234.50; European 1.234,50 on a line whose arithmetic fixes the reading; "
-        "a per-100 price (12.50/C: unit_price 12.50, never divided); N/C (null); $.75 (0.75)",
+        checks="$1,234.50; a European 1.234,50 (null: US notation only); a per-100 price "
+        "(12.50/C: unit_price 12.50, price_per 100, never divided); N/C (null); $.75 (0.75)",
     )
-    # Owner decision (PR 6): both wait for M1-PRICE-NOTATION; the truth keeps the printed
-    # values (raw_text keeps the printed form).
-    european = (
-        "M1-PRICE-NOTATION: a European notation; schema/prompt v1 don't say to null it "
-        "(values.py is US only). Expected null once prompt rule 6 is US-only"
-    )
-    per_100 = (
-        "M1-PRICE-NOTATION: 12.50/C is per 100, which v1 can't express (no price basis); "
-        "scored again with price_per 100"
-    )
-    not_scored = (
-        ("lines.1.unit_price", european),
-        ("lines.1.extended_price", european),
-        ("lines.2.unit_price", per_100),
-    )
-    return _with(case, expected_extraction_warnings=warnings, not_scored=not_scored)
 
 
 def _credit_negative_amounts() -> Case:
@@ -515,12 +497,6 @@ def _invoice() -> Case:
         not_scored=ALL_HEADER_FIELDS,
         checks="the distributor's own invoice: not_a_po with no lines; header not scored",
     )
-
-
-def _with(case: Case, **changes: object) -> Case:
-    fields = {name: getattr(case, name) for name in case.__dataclass_fields__}
-    fields.update(changes)
-    return Case(**fields)
 
 
 CASES: tuple[Case, ...] = (

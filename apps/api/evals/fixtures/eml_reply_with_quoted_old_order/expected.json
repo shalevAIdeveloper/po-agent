@@ -27,6 +27,7 @@
       "qty": "22",
       "uom": "EA",
       "unit_price": "4.95",
+      "price_per": null,
       "extended_price": "108.90",
       "page": null,
       "confidence": 1.0
@@ -41,6 +42,7 @@
       "qty": "2",
       "uom": "EA",
       "unit_price": "21.70",
+      "price_per": null,
       "extended_price": "43.40",
       "page": null,
       "confidence": 1.0
@@ -55,6 +57,7 @@
       "qty": "5",
       "uom": "CS",
       "unit_price": "42.00",
+      "price_per": null,
       "extended_price": "210.00",
       "page": null,
       "confidence": 1.0

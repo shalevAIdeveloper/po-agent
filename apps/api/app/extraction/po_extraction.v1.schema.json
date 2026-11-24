@@ -380,6 +380,18 @@
           ],
           "title": "Unit Price"
         },
+        "price_per": {
+          "anyOf": [
+            {
+              "pattern": "^[1-9][0-9]{0,5}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Price Per"
+        },
         "extended_price": {
           "anyOf": [
             {
@@ -421,6 +433,7 @@
         "qty",
         "uom",
         "unit_price",
+        "price_per",
         "extended_price",
         "page",
         "confidence"

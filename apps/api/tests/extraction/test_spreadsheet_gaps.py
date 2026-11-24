@@ -8,13 +8,17 @@ from app.llm.fake import FakeResponse
 from app.llm.prompts import load_prompt
 from tests.extraction.test_spreadsheet import STANDARD, mapped, run
 
-# extract_po/v1 as merged in PR 3 (63bc609, before PR 5). PR 5 refactored the call path
-# (T8) and tightened `parse_prompt` (M1-BRACES); neither may change this prompt's hash,
-# which the replay cassettes (PR 7) and every stored extraction record.
-EXTRACT_PO_V1_SHA256 = "d0419a6e4fb4511b1d6e778d5d211a995973a3b527a7a3847535c10171935c17"
+# extract_po/v1 as rewritten in place by M1-PRICE-NOTATION (owner, 2026-11-24; Q15 allows
+# it: no extraction stored and no eval baseline yet). Previous hashes:
+# - d0419a6e4fb4511b1d6e778d5d211a995973a3b527a7a3847535c10171935c17 (PR 3, 63bc609);
+# - 5913a350009f7e31fb97ac87601d059fbc1a972492e30afd1cee37a5c9fae231 (1f3d276, before the
+#   `sec` L fix to rule 14's "Per" column).
+# Refactors of the call path or of `parse_prompt` may not change it; the replay cassettes
+# (PR 7) and every stored extraction records it. From the PR 9 baseline on, v1 is immutable.
+EXTRACT_PO_V1_SHA256 = "b46c228e6b38848346fcbcba6a74eb728ad78b33379e48a9e0a3d5af52586f6d"
 
 
-def test_the_extract_po_prompt_hash_is_the_pr3_one() -> None:
+def test_the_extract_po_prompt_hash_is_pinned() -> None:
     assert load_prompt("extract_po", 1).sha256 == EXTRACT_PO_V1_SHA256
 
 

@@ -47,6 +47,7 @@
       "qty": "28",
       "uom": "BG",
       "unit_price": "4.35",
+      "price_per": null,
       "extended_price": "121.80",
       "page": 1,
       "confidence": 1.0
@@ -61,6 +62,7 @@
       "qty": "24",
       "uom": "BX",
       "unit_price": "6.25",
+      "price_per": null,
       "extended_price": "150.00",
       "page": 1,
       "confidence": 1.0
@@ -75,6 +77,7 @@
       "qty": "34",
       "uom": "RL",
       "unit_price": "6.80",
+      "price_per": null,
       "extended_price": "231.20",
       "page": 1,
       "confidence": 1.0

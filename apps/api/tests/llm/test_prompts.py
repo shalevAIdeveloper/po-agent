@@ -1,8 +1,11 @@
 import hashlib
+import re
 from pathlib import Path
 
 import pytest
+from pydantic import BaseModel
 
+from app.extraction.schema import PurchaseOrderHeader, PurchaseOrderLine
 from app.llm.prompts import PROMPTS_DIR, PromptError, load_prompt, parse_prompt
 
 GOOD = """# demo — v1
@@ -228,3 +231,56 @@ def test_the_committed_extract_po_prompt_loads() -> None:
     assert prompt.prompt_version == "extract_po/v1"
     assert (PROMPTS_DIR / "extract_po" / "v1.md").is_file()
     assert {"System", "User", "Retry"} <= set(prompt.sections)
+
+
+# Header fields extract_po v1 has never named; the model fills them from the schema alone.
+# Naming them is an owner open point (progress.md, before the PR 9 baseline). Exact set:
+# naming one of them must shrink this list, and any new field must be named.
+_UNNAMED_HEADER_FIELDS = frozenset(
+    {
+        "customer_name",
+        "customer_po_number",
+        "ship_to",
+        "bill_to",
+        "payment_terms",
+        "notes",
+    }
+)
+
+
+def _named(name: str, text: str) -> bool:
+    # Whole word: "price" inside "unit_price" or "page" inside "pages" doesn't count.
+    return re.search(rf"\b{re.escape(name)}\b", text) is not None
+
+
+@pytest.mark.parametrize(
+    ("model", "exceptions"),
+    [(PurchaseOrderHeader, _UNNAMED_HEADER_FIELDS), (PurchaseOrderLine, frozenset())],
+)
+def test_every_extraction_field_is_named_in_the_extract_po_prompt(
+    model: type[BaseModel], exceptions: frozenset[str]
+) -> None:
+    system = load_prompt("extract_po", 1).sections["System"]
+    missing = {name for name in model.model_fields if not _named(name, system)}
+    assert missing == exceptions
+
+
+def test_the_extract_po_prompt_reads_us_notation_only_and_states_price_per() -> None:
+    # Owner, 2026-11-24 (M1-PRICE-NOTATION): a European number is null (raw_text keeps
+    # it); "/C" and "/M" give price_per, a pack size never does, nothing is divided.
+    system = load_prompt("extract_po", 1).sections["System"]
+    needles = (
+        '"1.234,50"',
+        '"1,2345"',
+        "groups of three",
+        '"/C"',
+        '"/M"',
+        '"/EA"',
+        '"/E"',
+        '"BX/100"',
+        "never divided",
+        # sec L: a "Per" column is one whose printed header is "Per", nothing looser.
+        'whose printed header is "Per"',
+    )
+    for needle in needles:
+        assert needle in system, needle

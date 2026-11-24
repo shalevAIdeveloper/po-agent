@@ -196,6 +196,7 @@ def assert_from_cells(extraction: PurchaseOrderExtraction, table: SheetTable) ->
             value = getattr(line, name)
             assert value is None or value in [to_decimal(t) for t in texts], name
         assert line.line_no is None or line.line_no in [to_line_no(t) for t in texts]
+        assert line.price_per is None  # column_mapping can't fill it (M1-SHEET-PRICE-PER)
     header = extraction.header
     for name in ("customer_name", "customer_po_number", "payment_terms", "notes"):
         value = getattr(header, name)

@@ -231,3 +231,10 @@ def test_a_huge_number_from_the_model_is_flagged_not_a_crash() -> None:
 def test_flags_follow_line_order() -> None:
     result = extraction([a_line(), a_line(customer_part_number="NOPE", qty="99")])
     assert paths(result) == ["lines.1.customer_part_number", "lines.1.qty"]
+
+
+def test_price_per_is_never_grounded() -> None:
+    # It is a basis read next to the price ("/C" = 100), not a printed number (ADR 0011).
+    assert "100" not in SOURCE.split()
+    result = extraction([a_line(price_per="100")])
+    assert paths(result) == []

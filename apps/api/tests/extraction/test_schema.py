@@ -46,6 +46,7 @@ def a_line(**overrides: Any) -> dict[str, Any]:
         "qty": "12",
         "uom": "CS",
         "unit_price": "1234.50",
+        "price_per": None,
         "extended_price": None,
         "raw_text": "1  00123-A  Widget, blue  12 CS  $1,234.50",
         "line_type": "product",
@@ -319,6 +320,7 @@ def test_comment_line_may_have_only_raw_text() -> None:
             "qty": None,
             "uom": None,
             "unit_price": None,
+            "price_per": None,
             "extended_price": None,
             "raw_text": "** Deliver to dock 4 **",
             "line_type": "comment",
@@ -413,6 +415,83 @@ def test_decimal_instances_are_accepted_from_python() -> None:
 def test_non_finite_decimal_instances_are_rejected(value: Decimal) -> None:
     with pytest.raises(ValidationError):
         PurchaseOrderLine.model_validate(a_line(qty=value))
+
+
+# --- price_per (M1-PRICE-NOTATION, owner 2026-11-24) ------------------------------------
+
+
+@pytest.mark.parametrize("value", ["1", "100", "1000", "999999"])
+def test_price_per_accepts_a_positive_whole_number_string(value: str) -> None:
+    line = PurchaseOrderLine.model_validate(a_line(price_per=value))
+
+    assert line.price_per == Decimal(value)
+    dumped = line.model_dump(mode="json")
+    assert dumped["price_per"] == value
+    assert PurchaseOrderLine.model_validate(dumped) == line
+    assert PurchaseOrderLine.model_validate_json(line.model_dump_json()) == line
+
+
+def test_price_per_may_be_null() -> None:
+    assert PurchaseOrderLine.model_validate(a_line(price_per=None)).price_per is None
+
+
+@pytest.mark.parametrize(
+    "value",
+    ["0", "-100", "12.5", "100.0", "1,000", "0100", "+100", " 100", "", "/C", "C", "1000000"],
+)
+def test_price_per_rejects_anything_but_a_positive_whole_number(value: str) -> None:
+    with pytest.raises(ValidationError) as exc:
+        PurchaseOrderLine.model_validate(a_line(price_per=value))
+
+    assert error_locs(exc) == [("price_per",)]
+
+
+@pytest.mark.parametrize("value", [100, 100.0, True])
+def test_price_per_rejects_json_numbers(value: object) -> None:
+    with pytest.raises(ValidationError) as exc:
+        PurchaseOrderLine.model_validate(a_line(price_per=value))
+
+    assert error_locs(exc) == [("price_per",)]
+
+
+@pytest.mark.parametrize("value", [Decimal("0"), Decimal("-1"), Decimal("1.5"), Decimal("NaN")])
+def test_price_per_rejects_bad_decimal_instances(value: Decimal) -> None:
+    with pytest.raises(ValidationError):
+        PurchaseOrderLine.model_validate(a_line(price_per=value))
+
+
+def test_price_per_accepts_a_whole_decimal_instance() -> None:
+    line = PurchaseOrderLine.model_validate(a_line(price_per=Decimal("1E+2")))
+
+    assert line.model_dump(mode="json")["price_per"] == "100"
+
+
+def test_price_per_is_required() -> None:
+    line = a_line()
+    del line["price_per"]
+
+    with pytest.raises(ValidationError) as exc:
+        PurchaseOrderLine.model_validate(line)
+
+    assert error_locs(exc) == [("price_per",)]
+
+
+def test_price_per_follows_unit_price_in_the_json_schema() -> None:
+    line = json_schema()["$defs"]["PurchaseOrderLine"]["properties"]
+    names = list(line)
+
+    assert names.index("price_per") == names.index("unit_price") + 1
+    [string] = [v for v in line["price_per"]["anyOf"] if v.get("type") == "string"]
+    assert string["pattern"] == "^[1-9][0-9]{0,5}$"
+
+
+def test_price_per_does_not_change_unit_or_extended_price() -> None:
+    # Never computed: the printed unit and extended prices stay as given.
+    line = PurchaseOrderLine.model_validate(
+        a_line(qty="5", unit_price="12.50", price_per="100", extended_price="62.50")
+    )
+
+    assert (line.unit_price, line.extended_price) == (Decimal("12.50"), Decimal("62.50"))
 
 
 # --- document -------------------------------------------------------------------------

@@ -14,9 +14,16 @@ The schema stores only what it is given; it never interprets, converts or comput
   reinterpreted: the model normalizes, `raw_text` keeps the printed form.
 - `extended_price` / `order_total` are only ever the printed values; F4 computes and
   compares later. `uom` is kept as written (conversion is M2/M4).
+- `price_per` (M1-PRICE-NOTATION, owner 2026-11-24) is the quantity the printed
+  `unit_price` is for: `"100"` for "/C", `"1000"` for "/M", N for an explicit "per N";
+  null for "/EA" and when the document gives none. A positive whole number string
+  (`^[1-9][0-9]{0,5}$`), Decimal-backed. `unit_price` is never divided by it and it is
+  never computed; a pack size ("BX/100") is not a `price_per`.
 - `confidence` / `header_confidence` are the model's uncalibrated self-report (Q6).
 
 A breaking change is a new module and a new `schema_version` (`po_extraction.v2`).
+Exception (owner, 2026-11-24): `price_per` was added to v1 in place, before any extraction
+was stored or an eval baseline committed (PR 9). From that baseline on, v1 is frozen.
 The JSON Schema is committed next to this file; regenerate it with (from apps/api):
 
     uv run python -m app.extraction.schema app/extraction/po_extraction.v1.schema.json
@@ -47,6 +54,8 @@ SCHEMA_VERSION: Final = "po_extraction.v1"
 _DECIMAL_PATTERN: Final = r"^-?[0-9]+(\.[0-9]+)?$"
 _DECIMAL_RE: Final = re.compile(_DECIMAL_PATTERN)
 _DATE_RE: Final = re.compile(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$")
+_PRICE_PER_PATTERN: Final = r"^[1-9][0-9]{0,5}$"
+_PRICE_PER_RE: Final = re.compile(_PRICE_PER_PATTERN)
 
 # Error messages never echo the input: PR 2 sends them back to the model and may log them.
 _DECIMAL_ERROR: Final = (
@@ -66,6 +75,26 @@ def _parse_decimal(value: object) -> Decimal:
         raise ValueError(_DECIMAL_ERROR)
     if not _DECIMAL_RE.fullmatch(text):
         raise ValueError(_DECIMAL_ERROR)
+    return Decimal(text)
+
+
+_PRICE_PER_ERROR: Final = (
+    "must be a positive whole number string of at most 6 digits, without a leading zero, "
+    "sign, separator or fraction"
+)
+
+
+def _parse_price_per(value: object) -> Decimal:
+    if isinstance(value, Decimal):  # Python callers only, as for DecimalString
+        if not value.is_finite():
+            raise ValueError(_PRICE_PER_ERROR)
+        text = format(value, "f")
+    elif isinstance(value, str):
+        text = value
+    else:
+        raise ValueError(_PRICE_PER_ERROR)
+    if not _PRICE_PER_RE.fullmatch(text):
+        raise ValueError(_PRICE_PER_ERROR)
     return Decimal(text)
 
 
@@ -91,6 +120,12 @@ DecimalString = Annotated[
     PlainValidator(_parse_decimal, json_schema_input_type=str),
     PlainSerializer(lambda d: format(d, "f"), return_type=str, when_used="json"),
     WithJsonSchema({"type": "string", "pattern": _DECIMAL_PATTERN}),
+]
+PricePer = Annotated[
+    Decimal,
+    PlainValidator(_parse_price_per, json_schema_input_type=str),
+    PlainSerializer(lambda d: format(d, "f"), return_type=str, when_used="json"),
+    WithJsonSchema({"type": "string", "pattern": _PRICE_PER_PATTERN}),
 ]
 IsoDate = Annotated[
     date,
@@ -157,6 +192,7 @@ class PurchaseOrderLine(_Model):
     qty: DecimalString | None
     uom: Text | None
     unit_price: DecimalString | None
+    price_per: PricePer | None
     extended_price: DecimalString | None
     page: Annotated[int, Field(ge=1, strict=True)] | None
     confidence: Confidence

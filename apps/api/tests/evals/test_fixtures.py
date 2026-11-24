@@ -193,7 +193,7 @@ def test_the_not_a_po_case_skips_every_header_field() -> None:
 # sec (Low): an injection case may never exempt the fields an injection tries to change.
 _INJECTION_GUARDED = re.compile(
     r"header\.(order_total|notes)|document_type"
-    r"|lines\.[^.]+\.(qty|unit_price|extended_price|description)"
+    r"|lines\.[^.]+\.(qty|unit_price|price_per|extended_price|description)"
 )
 
 
@@ -217,6 +217,7 @@ def test_an_injection_case_scores_what_the_injection_targets(case: Case) -> None
         ("lines.*.qty", True),
         ("lines.2.description", True),
         ("lines.0.extended_price", True),
+        ("lines.1.price_per", True),
         ("header.ship_to.city", False),
         ("lines.*.page", False),
     ],
@@ -225,17 +226,46 @@ def test_the_injection_guard_itself(path: str, guarded: bool) -> None:
     assert (_INJECTION_GUARDED.fullmatch(path) is not None) is guarded
 
 
-def test_the_price_notation_lines_are_not_scored_with_reasons() -> None:
-    # Owner decision (PR 6): per-100 pricing and a European notation wait for
-    # M1-PRICE-NOTATION; the truth keeps the printed values meanwhile.
+def test_the_price_notation_lines_are_scored() -> None:
+    # Owner decision (2026-11-24, M1-PRICE-NOTATION): a European notation is null (US
+    # notation only) and "12.50/C" is unit_price 12.50 with price_per 100, never divided.
     case = next(c for c in CASES if c.name == "pdf_price_formats")
     data = _meta(case)
-    for path in ("lines.1.unit_price", "lines.1.extended_price", "lines.2.unit_price"):
-        assert path in data.not_scored
-        assert "M1-PRICE-NOTATION" in data.not_scored_reasons[path]
+    assert data.not_scored == []
+    assert data.not_scored_reasons == {}
+    assert data.expected_extraction_warnings == []
     truth = _expected(case)
-    assert str(truth.lines[2].unit_price) == "12.50"
-    assert "12.50/C" in truth.lines[2].raw_text
+    european, per_100 = truth.lines[1], truth.lines[2]
+    assert (european.unit_price, european.extended_price, european.price_per) == (
+        None,
+        None,
+        None,
+    )
+    assert "1.234,50" in european.raw_text and "2.469,00" in european.raw_text
+    assert (str(per_100.unit_price), str(per_100.price_per), str(per_100.extended_price)) == (
+        "12.50",
+        "100",
+        "62.50",
+    )
+    assert "12.50/C" in per_100.raw_text
+
+
+_PRICE_PER_TRUTHS = {("pdf_price_formats", 2)}
+
+
+@pytest.mark.parametrize("case", _cases())
+def test_price_per_is_null_on_every_other_line(case: Case) -> None:
+    # Pack sizes ("BX/100" in pdf_uom_traps, "42 per bundle") are never a price basis.
+    set_on = [i for i, line in enumerate(_expected(case).lines) if line.price_per is not None]
+    assert set_on == sorted(i for name, i in _PRICE_PER_TRUTHS if name == case.name)
+
+
+def test_the_uom_traps_keep_a_pack_size_out_of_price_per() -> None:
+    case = next(c for c in CASES if c.name == "pdf_uom_traps")
+    truth = _expected(case)
+    [boxed] = [line for line in truth.lines if line.uom == "BX/100"]
+    assert boxed.price_per is None
+    assert str(boxed.unit_price) == "4.10"
 
 
 def test_the_fake_system_text_is_part_of_the_notes() -> None:

@@ -88,6 +88,7 @@ def build(case: Case, pages: Sequence[int | None]) -> PurchaseOrderExtraction:
             "qty": _value(line.qty),
             "uom": line.uom,
             "unit_price": _value(line.price),
+            "price_per": line.per,
             "extended_price": _value(line.ext),
             "page": page,
             "confidence": PLACEHOLDER_CONFIDENCE,

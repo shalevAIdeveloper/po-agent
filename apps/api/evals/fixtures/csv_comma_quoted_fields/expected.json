@@ -27,6 +27,7 @@
       "qty": "10",
       "uom": "BX",
       "unit_price": "18.40",
+      "price_per": null,
       "extended_price": "184.00",
       "page": null,
       "confidence": 1.0
@@ -41,6 +42,7 @@
       "qty": "2",
       "uom": "RL",
       "unit_price": "212.50",
+      "price_per": null,
       "extended_price": "425.00",
       "page": null,
       "confidence": 1.0
@@ -55,6 +57,7 @@
       "qty": "3",
       "uom": "EA",
       "unit_price": "84.95",
+      "price_per": null,
       "extended_price": "254.85",
       "page": null,
       "confidence": 1.0
@@ -69,6 +72,7 @@
       "qty": "24",
       "uom": "EA",
       "unit_price": "2.95",
+      "price_per": null,
       "extended_price": "70.80",
       "page": null,
       "confidence": 1.0
@@ -83,6 +87,7 @@
       "qty": "6",
       "uom": "EA",
       "unit_price": "21.30",
+      "price_per": null,
       "extended_price": "127.80",
       "page": null,
       "confidence": 1.0
