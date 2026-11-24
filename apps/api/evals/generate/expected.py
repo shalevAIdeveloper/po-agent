@@ -88,7 +88,7 @@ def build(case: Case, pages: Sequence[int | None]) -> PurchaseOrderExtraction:
             "qty": _value(line.qty),
             "uom": line.uom,
             "unit_price": _value(line.price),
-            "price_per": None,  # M1 PRICE-NOTATION P3 sets it from the spec
+            "price_per": line.per,
             "extended_price": _value(line.ext),
             "page": page,
             "confidence": PLACEHOLDER_CONFIDENCE,

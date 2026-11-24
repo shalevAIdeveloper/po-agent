@@ -8,7 +8,9 @@ Conventions for the truth (also in `evals/README.md`):
 - a comment line's text is its `description`; a charge line (freight) sits in the item
   table; rows of the totals block (subtotal, tax, total) are not lines;
 - `notes` is only text printed under a "Notes" / "Special instructions" label;
-- address parts: `attention` without its "Attn:" label; `country` only when printed.
+- address parts: `attention` without its "Attn:" label; `country` only when printed;
+- `price_per` only from a price basis printed with the price ("12.50/C" is 100), never
+  from a pack size ("BX/100"); a European "1.234,50" is null (US notation only).
 """
 
 from dataclasses import dataclass
@@ -136,6 +138,8 @@ class Line:
     qty: Num | None = None
     uom: str | None = None
     price: Num | None = None
+    # price_per truth ("100" for a price printed "12.50/C"); not a printed cell of its own.
+    per: str | None = None
     ext: Num | None = None
     # Printed cell text that differs from the default (e.g. qty printed "12 CS").
     cells: tuple[tuple[ColKey, str], ...] = ()

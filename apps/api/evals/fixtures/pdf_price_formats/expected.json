@@ -61,9 +61,9 @@
       "description": "Imported espresso grinder burr set (EU pricing)",
       "qty": "2",
       "uom": "EA",
-      "unit_price": "1234.50",
+      "unit_price": null,
       "price_per": null,
-      "extended_price": "2469.00",
+      "extended_price": null,
       "page": 1,
       "confidence": 1.0
     },
@@ -77,7 +77,7 @@
       "qty": "500",
       "uom": "EA",
       "unit_price": "12.50",
-      "price_per": null,
+      "price_per": "100",
       "extended_price": "62.50",
       "page": 1,
       "confidence": 1.0

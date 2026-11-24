@@ -14,23 +14,9 @@
   "sender_email": "r.okonkwo@tallowfen.example.com",
   "received_at": "2026-11-19T09:30:00Z",
   "expected_input_warnings": [],
-  "expected_extraction_warnings": [
-    {
-      "code": "ungrounded",
-      "path": "lines.1.extended_price",
-      "details": null
-    }
-  ],
-  "not_scored": [
-    "lines.1.unit_price",
-    "lines.1.extended_price",
-    "lines.2.unit_price"
-  ],
-  "not_scored_reasons": {
-    "lines.1.unit_price": "M1-PRICE-NOTATION: a European notation; schema/prompt v1 don't say to null it (values.py is US only). Expected null once prompt rule 6 is US-only",
-    "lines.1.extended_price": "M1-PRICE-NOTATION: a European notation; schema/prompt v1 don't say to null it (values.py is US only). Expected null once prompt rule 6 is US-only",
-    "lines.2.unit_price": "M1-PRICE-NOTATION: 12.50/C is per 100, which v1 can't express (no price basis); scored again with price_per 100"
-  },
+  "expected_extraction_warnings": [],
+  "not_scored": [],
+  "not_scored_reasons": {},
   "known_gap": [],
   "known_gap_raw_texts": []
 }
