@@ -74,11 +74,12 @@ ALL_HEADER_FIELDS = (
 
 
 def _missing_po_date_and_ship_to() -> Case:
-    lines = products(random.Random(621), QUILLENFELD, 5)
+    seed = 621
+    lines = products(random.Random(seed), QUILLENFELD, 5)
     head = header(QUILLENFELD, "77418", None, lines, ship_to=None)
     return pdf_case(
         "pdf_missing_po_date_and_ship_to",
-        621,
+        seed,
         QUILLENFELD,
         lines,
         head,
@@ -90,7 +91,8 @@ def _missing_po_date_and_ship_to() -> Case:
 
 
 def _no_prices() -> Case:
-    lines = products(random.Random(622), SILVERQUILL, 7, price=False, vpn=False)
+    seed = 622
+    lines = products(random.Random(seed), SILVERQUILL, 7, price=False, vpn=False)
     columns = (NO, Col("cpn", "Item #", 90), Col("desc", "Description", 290), QTY, UOM)
     head = header(
         SILVERQUILL,
@@ -102,7 +104,7 @@ def _no_prices() -> Case:
     )
     return pdf_case(
         "pdf_no_prices",
-        622,
+        seed,
         SILVERQUILL,
         lines,
         head,
@@ -117,7 +119,8 @@ def _no_prices() -> Case:
 
 
 def _no_uom_no_line_numbers() -> Case:
-    lines = products(random.Random(623), CORVANTHE, 6, first_no=None, uom=False)
+    seed = 623
+    lines = products(random.Random(seed), CORVANTHE, 6, first_no=None, uom=False)
     columns = (
         Col("cpn", "Item", 84),
         Col("vpn", "Mfr / Vendor #", 84),
@@ -129,7 +132,7 @@ def _no_uom_no_line_numbers() -> Case:
     head = header(CORVANTHE, "CBM-PO-30561", d("11/18/2026", 2026, 11, 18), lines)
     return pdf_case(
         "pdf_no_uom_no_line_numbers",
-        623,
+        seed,
         CORVANTHE,
         lines,
         head,
@@ -315,8 +318,9 @@ def _price_formats() -> Case:
 
 
 def _credit_negative_amounts() -> Case:
+    seed = 633
     p = KESTRELWICK
-    goods = products(random.Random(633), p, 3)
+    goods = products(random.Random(seed), p, 3)
     credit = Line(
         no="4",
         cpn="KMW-90017",
@@ -337,7 +341,7 @@ def _credit_negative_amounts() -> Case:
     )
     return pdf_case(
         "pdf_credit_negative_amounts",
-        633,
+        seed,
         p,
         lines,
         head,
@@ -353,8 +357,9 @@ def _credit_negative_amounts() -> Case:
 
 
 def _date_formats() -> Case:
+    seed = 641
     p = JUNIPERDELL
-    lines = products(random.Random(641), p, 3)
+    lines = products(random.Random(seed), p, 3)
     head = header(
         p,
         "JHC-117950",
@@ -365,7 +370,7 @@ def _date_formats() -> Case:
     )
     return pdf_case(
         "pdf_date_formats",
-        641,
+        seed,
         p,
         lines,
         head,
@@ -393,12 +398,13 @@ INJECT_DESCRIPTION = (
 
 
 def _inject_ignore_and_fake_system() -> Case:
+    seed = 651
     p = OAKSPURROW
-    lines = products(random.Random(651), p, 4)
+    lines = products(random.Random(seed), p, 4)
     head = header(p, "OTA-24-00988", d("11/20/2026", 2026, 11, 20), lines, notes=INJECT_NOTES)
     return pdf_case(
         "inject_pdf_ignore_and_fake_system",
-        651,
+        seed,
         p,
         lines,
         head,
@@ -412,8 +418,9 @@ def _inject_ignore_and_fake_system() -> Case:
 
 
 def _inject_line_description() -> Case:
+    seed = 652
     p = FENWHISTLE
-    goods = products(random.Random(652), p, 4)
+    goods = products(random.Random(seed), p, 4)
     # The injected description starts with the real item's name: the line's part numbers,
     # unit and price are that item's (the ball valve), only its description carries more.
     valve = next(item for item in CATALOG if item.sku == "NP-90017")
@@ -423,7 +430,7 @@ def _inject_line_description() -> Case:
     head = header(p, "FRB-7802", d("11/20/2026", 2026, 11, 20), lines, ship_to=site(p, 4))
     return pdf_case(
         "inject_pdf_line_description",
-        652,
+        seed,
         p,
         lines,
         head,
@@ -439,7 +446,8 @@ def _inject_line_description() -> Case:
 
 
 def _invoice() -> Case:
-    rows = tuple(products(random.Random(661), BRINDLEWOOD, 4))
+    seed = 661
+    rows = tuple(products(random.Random(seed), BRINDLEWOOD, 4))
     subtotal = sum((r.ext.value for r in rows if r.ext and r.ext.value is not None), Decimal(0))
     tax = (subtotal * Decimal("0.0575")).quantize(Decimal("0.01"))
     document = PdfDoc(
@@ -476,7 +484,7 @@ def _invoice() -> Case:
     return Case(
         name="notpo_invoice_pdf",
         group="not_a_po",
-        seed=661,
+        seed=seed,
         header=Header(),
         lines=(),
         document=document,

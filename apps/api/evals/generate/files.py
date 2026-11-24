@@ -66,16 +66,22 @@ def case_meta(case: Case, rendered: Rendered) -> meta.CaseMeta:
         ],
         not_scored=list(case.not_scored),
         known_gap=list(case.known_gap),
+        known_gap_raw_texts=list(case.known_gap_raw_texts),
     )
 
 
 def build_files(case: Case) -> CaseFiles:
     rendered = render(case)
     truth = expected.build(case, rendered.line_pages)
+    described = case_meta(case, rendered)
+    meta.check_line_paths(described, len(truth.lines))
+    truths = {line.raw_text for line in truth.lines}
+    if any(text in truths for text in described.known_gap_raw_texts):
+        raise ValueError(f"{case.name}: a known-gap line is also a line of the truth")
     files = {
         case.source_name: rendered.source,
         EXPECTED_NAME: expected.dump(truth),
-        META_NAME: meta.dump(case_meta(case, rendered)),
+        META_NAME: meta.dump(described),
     }
     return CaseFiles(case=case, rendered=rendered, files=files)
 

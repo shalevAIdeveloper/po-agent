@@ -109,7 +109,8 @@ def pdf_case(
 
 
 def _grid_basic() -> Case:
-    rng = random.Random(601)
+    seed = 601
+    rng = random.Random(seed)
     lines = products(rng, BRINDLEWOOD, 6)
     head = header(
         BRINDLEWOOD,
@@ -121,7 +122,7 @@ def _grid_basic() -> Case:
     )
     return pdf_case(
         "pdf_grid_basic",
-        601,
+        seed,
         BRINDLEWOOD,
         lines,
         head,
@@ -132,7 +133,8 @@ def _grid_basic() -> Case:
 
 
 def _grid_vendor_parts() -> Case:
-    rng = random.Random(602)
+    seed = 602
+    rng = random.Random(seed)
     lines = products(rng, HARROWMOSS, 5, cpn=False)
     columns = (
         NO,
@@ -148,7 +150,7 @@ def _grid_vendor_parts() -> Case:
     )
     return pdf_case(
         "pdf_grid_vendor_parts",
-        602,
+        seed,
         HARROWMOSS,
         lines,
         head,
@@ -160,7 +162,8 @@ def _grid_vendor_parts() -> Case:
 
 
 def _nogrid_aligned() -> Case:
-    rng = random.Random(603)
+    seed = 603
+    rng = random.Random(seed)
     lines = products(rng, QUILLENFELD, 8, vpn=False)
     columns = (NO, Col("cpn", "Item", 84), Col("desc", "Description", 236), QTY, UOM, PRICE, EXT)
     head = header(
@@ -172,7 +175,7 @@ def _nogrid_aligned() -> Case:
     )
     return pdf_case(
         "pdf_nogrid_aligned",
-        603,
+        seed,
         QUILLENFELD,
         lines,
         head,
@@ -184,7 +187,8 @@ def _nogrid_aligned() -> Case:
 
 
 def _nogrid_comment_lines() -> Case:
-    rng = random.Random(604)
+    seed = 604
+    rng = random.Random(seed)
     goods = products(rng, TALLOWFEN, 5)
     lines = [
         goods[0],
@@ -201,7 +205,7 @@ def _nogrid_comment_lines() -> Case:
     )
     return pdf_case(
         "pdf_nogrid_comment_lines",
-        604,
+        seed,
         TALLOWFEN,
         lines,
         head,
@@ -213,7 +217,8 @@ def _nogrid_comment_lines() -> Case:
 
 
 def _two_column_header() -> Case:
-    rng = random.Random(605)
+    seed = 605
+    rng = random.Random(seed)
     lines = products(rng, KESTRELWICK, 4)
     head = header(
         KESTRELWICK,
@@ -228,7 +233,7 @@ def _two_column_header() -> Case:
     )
     return pdf_case(
         "pdf_two_column_header",
-        605,
+        seed,
         KESTRELWICK,
         lines,
         head,
@@ -240,7 +245,8 @@ def _two_column_header() -> Case:
 
 
 def _landscape_extra_columns() -> Case:
-    rng = random.Random(606)
+    seed = 606
+    rng = random.Random(seed)
     base = products(rng, CORVANTHE, 7)
     centers = ("CC-4410", "CC-4410", "CC-5120", "CC-5120", "CC-7031", "CC-7031", "CC-4410")
     need = ("12/01/26", "12/01/26", "12/08/26", "12/08/26", "12/15/26", "12/15/26", "12/01/26")
@@ -273,7 +279,7 @@ def _landscape_extra_columns() -> Case:
     head = header(CORVANTHE, "CBM-PO-30552", d("11/07/2026", 2026, 11, 7), lines)
     return pdf_case(
         "pdf_landscape_extra_columns",
-        606,
+        seed,
         CORVANTHE,
         lines,
         head,
@@ -286,7 +292,8 @@ def _landscape_extra_columns() -> Case:
 
 
 def _letterhead_fine_print() -> Case:
-    rng = random.Random(607)
+    seed = 607
+    rng = random.Random(seed)
     lines = products(rng, JUNIPERDELL, 5)
     head = header(
         JUNIPERDELL,
@@ -315,7 +322,7 @@ def _letterhead_fine_print() -> Case:
     )
     return pdf_case(
         "pdf_letterhead_fine_print",
-        607,
+        seed,
         JUNIPERDELL,
         lines,
         head,
@@ -395,14 +402,15 @@ def _grid_wrapped_descriptions() -> Case:
 
 
 def _multipage_continued() -> Case:
-    rng = random.Random(611)
+    seed = 611
+    rng = random.Random(seed)
     lines = products(rng, FENWHISTLE, 34)
     head = header(
         FENWHISTLE, "FRB-7781", d("11/11/2026", 2026, 11, 11), lines, ship_to=site(FENWHISTLE, 4)
     )
     return pdf_case(
         "pdf_multipage_continued",
-        611,
+        seed,
         FENWHISTLE,
         lines,
         head,
@@ -417,12 +425,13 @@ def _multipage_continued() -> Case:
 
 
 def _multipage_repeated_header() -> Case:
-    rng = random.Random(612)
+    seed = 612
+    rng = random.Random(seed)
     lines = products(rng, SILVERQUILL, 44)
     head = header(SILVERQUILL, "SGA-1032", d("11/12/2026", 2026, 11, 12), lines)
     return pdf_case(
         "pdf_multipage_repeated_header",
-        612,
+        seed,
         SILVERQUILL,
         lines,
         head,
@@ -435,7 +444,8 @@ def _multipage_repeated_header() -> Case:
 
 
 def _multipage_page_subtotals() -> Case:
-    rng = random.Random(613)
+    seed = 613
+    rng = random.Random(seed)
     lines = products(rng, BRINDLEWOOD, 36)
     head = header(
         BRINDLEWOOD,
@@ -446,7 +456,7 @@ def _multipage_page_subtotals() -> Case:
     )
     return pdf_case(
         "pdf_multipage_page_subtotals",
-        613,
+        seed,
         BRINDLEWOOD,
         lines,
         head,
@@ -460,7 +470,8 @@ def _multipage_page_subtotals() -> Case:
 
 
 def _multipage_terms_page() -> Case:
-    rng = random.Random(614)
+    seed = 614
+    rng = random.Random(seed)
     lines = products(rng, HARROWMOSS, 30)
     head = header(
         HARROWMOSS,
@@ -486,7 +497,7 @@ def _multipage_terms_page() -> Case:
     )
     return pdf_case(
         "pdf_multipage_30_lines_terms_page",
-        614,
+        seed,
         HARROWMOSS,
         lines,
         head,

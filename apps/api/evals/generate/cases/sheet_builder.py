@@ -143,6 +143,10 @@ class SheetBuilder:
     def _row_text(self, cells: Sequence[CellValue | None]) -> str:
         return SEPARATOR.join(shown(c, self.kind) for c in cells if c is not None)
 
+    def gap_texts(self) -> tuple[str, ...]:
+        """The raw_text PR 5 gives each gap row's (wrong) line."""
+        return tuple(self._row_text(c) for _, c, role in self._non_empty() if role == "gap")
+
     def first_data_row(self) -> int | None:
         return next((n for n, _, role in self._non_empty() if role == "line"), None)
 

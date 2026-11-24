@@ -29,5 +29,6 @@
     "header.payment_terms",
     "header.notes"
   ],
-  "known_gap": []
+  "known_gap": [],
+  "known_gap_raw_texts": []
 }

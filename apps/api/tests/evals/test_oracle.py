@@ -176,4 +176,32 @@ def test_not_scored_lists_only_what_the_sheet_path_cannot_produce(case: Case) ->
         others = [p for p in _meta(case).not_scored if p != path]
         if _scored(patched, others) == _scored(truth, others):
             # Allowed only when both are null there (an address part the sheet doesn't print).
-            assert path.startswith("header.ship_to.") or path.startswith("header.bill_to."), path
+            assert path.startswith(("header.ship_to.", "header.bill_to.")), path
+            assert _at(_scored(patched, []), path) is None, path
+            assert _at(_scored(truth, []), path) is None, path
+
+
+def _at(data: dict[str, Any], path: str) -> object:
+    node: Any = data
+    for part in path.split("."):
+        if node is None:
+            return None
+        node = node[int(part)] if part.isdigit() else node[part]
+    return node
+
+
+def test_at_reads_a_path_and_stops_at_null() -> None:
+    data = {"header": {"ship_to": None, "notes": "x"}, "lines": [{"qty": 2}]}
+    assert _at(data, "header.notes") == "x"
+    assert _at(data, "header.ship_to.city") is None
+    assert _at(data, "lines.0.qty") == 2
+
+
+@pytest.mark.parametrize("case", SHEETS)
+def test_known_gap_raw_texts_are_the_gap_lines(case: Case) -> None:
+    # dev M2: PR 7 tells gap lines from real extra lines by these texts.
+    data = _meta(case)
+    extraction, _ = _run(case)
+    found = [line.raw_text for line in extraction.lines if line.raw_text in _gap_texts(case)]
+    assert sorted(data.known_gap_raw_texts) == sorted(found) == sorted(_gap_texts(case))
+    assert bool(data.known_gap_raw_texts) == bool(data.known_gap)

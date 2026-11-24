@@ -308,6 +308,8 @@ class Case:
     document_type: Literal["purchase_order", "not_a_po"] = "purchase_order"
     not_scored: tuple[str, ...] = ()
     known_gap: tuple[str, ...] = ()
+    # raw_text of the lines a known gap makes the pipeline add (meta.known_gap_raw_texts).
+    known_gap_raw_texts: tuple[str, ...] = ()
     expected_input_warnings: tuple[InputWarningCode, ...] = ()
     expected_extraction_warnings: tuple[WarningSpec, ...] = ()
     # Free notes for the README case table (what the case checks).

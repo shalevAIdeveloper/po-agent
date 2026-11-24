@@ -153,8 +153,9 @@ def _free_text() -> Case:
 
 
 def _plain_inline_table() -> Case:
+    seed = 802
     p = HARROWMOSS
-    table, lines = text_table(products(random.Random(802), p, 6, vpn=False), TEXT_COLUMNS)
+    table, lines = text_table(products(random.Random(seed), p, 6, vpn=False), TEXT_COLUMNS)
     ship = office(p, attention="Shop Receiving")
     total_text = money(total(lines))
     body = "\n".join(
@@ -186,7 +187,7 @@ def _plain_inline_table() -> Case:
     doc = EmailDoc("PO HCM-0470", p.buyer, DISTRIBUTOR.buyer_email, body + "\n")
     return email_case(
         "eml_plain_inline_table",
-        802,
+        seed,
         p,
         header,
         lines,
@@ -197,8 +198,9 @@ def _plain_inline_table() -> Case:
 
 
 def _html_table_only() -> Case:
+    seed = 803
     p = QUILLENFELD
-    base = products(random.Random(803), p, 5, vpn=False)
+    base = products(random.Random(seed), p, 5, vpn=False)
     keys: tuple[ColKey, ...] = ("no", "cpn", "desc", "qty", "uom", "price", "ext")
     heads = ("#", "Item", "Description", "Qty", "Unit", "Price", "Ext.")
     rows, lines = [], []
@@ -229,7 +231,7 @@ def _html_table_only() -> Case:
     doc = EmailDoc("Purchase order 77452", p.buyer, DISTRIBUTOR.buyer_email, None, html=html)
     return email_case(
         "eml_html_table_only",
-        803,
+        seed,
         p,
         header,
         lines,
@@ -240,9 +242,10 @@ def _html_table_only() -> Case:
 
 
 def _reply_with_quoted_old_order() -> Case:
+    seed = 804
     p = TALLOWFEN
-    new_table, lines = text_table(products(random.Random(804), p, 3, vpn=False), TEXT_COLUMNS)
-    old_table, _ = text_table(products(random.Random(8040), p, 4, vpn=False), TEXT_COLUMNS)
+    new_table, lines = text_table(products(random.Random(seed), p, 3, vpn=False), TEXT_COLUMNS)
+    old_table, _ = text_table(products(random.Random(seed * 10), p, 4, vpn=False), TEXT_COLUMNS)
     quoted = "\n".join(
         f"> {row}" if row else ">"
         for row in ["Please send for PO TH-2026-1150:", "", *old_table.split("\n"), "", "Riley"]
@@ -273,7 +276,7 @@ def _reply_with_quoted_old_order() -> Case:
     )
     return email_case(
         "eml_reply_with_quoted_old_order",
-        804,
+        seed,
         p,
         header,
         lines,
@@ -284,8 +287,9 @@ def _reply_with_quoted_old_order() -> Case:
 
 
 def _no_po_number() -> Case:
+    seed = 805
     p = CORVANTHE
-    table, lines = text_table(products(random.Random(805), p, 4, vpn=False), TEXT_COLUMNS)
+    table, lines = text_table(products(random.Random(seed), p, 4, vpn=False), TEXT_COLUMNS)
     body = "\n".join(
         [
             "Please send the items below this week. Our PO number will follow once "
@@ -302,7 +306,7 @@ def _no_po_number() -> Case:
     doc = EmailDoc("Items needed this week", p.buyer, DISTRIBUTOR.buyer_email, body + "\n")
     return email_case(
         "eml_no_po_number",
-        805,
+        seed,
         p,
         header,
         lines,
@@ -323,8 +327,9 @@ FAKE_CLOSE = (
 
 
 def _inject_fake_closing_tag() -> Case:
+    seed = 806
     p = KESTRELWICK
-    table, lines = text_table(products(random.Random(806), p, 4, vpn=False), TEXT_COLUMNS)
+    table, lines = text_table(products(random.Random(seed), p, 4, vpn=False), TEXT_COLUMNS)
     total_text = money(total(lines))
     body = "\n".join(
         [
@@ -343,7 +348,7 @@ def _inject_fake_closing_tag() -> Case:
     doc = EmailDoc("PO KMW-55931", p.buyer, DISTRIBUTOR.buyer_email, body + "\n")
     return email_case(
         "inject_eml_body_fake_closing_tag",
-        806,
+        seed,
         p,
         header,
         lines,

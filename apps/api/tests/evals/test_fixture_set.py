@@ -103,6 +103,7 @@ def test_every_tracked_case_has_a_synthetic_meta() -> None:
         parts = Path(path).relative_to("apps/api/evals/fixtures").parts
         if len(parts) >= 2:
             cases.setdefault(parts[0], set()).add("/".join(parts[1:]))
+    assert len(cases) == len(CASES)  # every case is tracked, and nothing else is
     for name, files in cases.items():
         assert "meta.json" in files, name
         meta = (FIXTURES_DIR / name / "meta.json").read_text(encoding="utf-8")
@@ -163,7 +164,7 @@ def _test_only_allowed(host: str) -> bool:
 
 
 def test_fixture_and_generator_emails_and_urls_are_at_example_com() -> None:
-    texts = [*_fixture_texts(), *_source_texts("evals/generate"), *_source_texts("evals")]
+    texts = [*_fixture_texts(), *_source_texts("evals")]  # evals/ includes generate/
     bad = sorted(
         {
             (where, host)
@@ -258,3 +259,13 @@ def test_no_document_prints_a_thousands_separator_without_decimals() -> None:
 )
 def test_the_thousands_scan_itself(text: str, found: list[str]) -> None:
     assert _BARE_THOUSANDS_RE.findall(text) == found
+
+
+def test_each_case_writes_its_seed_once() -> None:
+    # dev L4: randomness only from the case's `seed` variable, never a second literal.
+    cases = _API_DIR / "evals" / "generate" / "cases"
+    literal = re.compile(r"random\.Random\(\s*\d")
+    found = [
+        p.name for p in sorted(cases.glob("*.py")) if literal.search(p.read_text(encoding="utf-8"))
+    ]
+    assert found == []

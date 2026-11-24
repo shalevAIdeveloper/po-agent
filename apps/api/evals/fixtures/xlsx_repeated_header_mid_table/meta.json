@@ -58,5 +58,8 @@
   "not_scored": [],
   "known_gap": [
     "M1-SHEET-TAIL"
+  ],
+  "known_gap_raw_texts": [
+    "Line | Item # | Description | Qty | UoM | Unit Price | Ext Price"
   ]
 }

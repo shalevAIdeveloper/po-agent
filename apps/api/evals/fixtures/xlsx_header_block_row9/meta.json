@@ -52,5 +52,6 @@
     "header.ship_to.country",
     "header.po_date_raw"
   ],
-  "known_gap": []
+  "known_gap": [],
+  "known_gap_raw_texts": []
 }

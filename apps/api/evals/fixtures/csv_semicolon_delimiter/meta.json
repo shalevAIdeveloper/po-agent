@@ -51,5 +51,6 @@
     "header.ship_to.postal_code",
     "header.ship_to.country"
   ],
-  "known_gap": []
+  "known_gap": [],
+  "known_gap_raw_texts": []
 }

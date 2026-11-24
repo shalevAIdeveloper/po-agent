@@ -11,7 +11,7 @@ import pytest
 
 from app.extraction.grounding import check_grounding
 from app.extraction.inputs import ParsedDocument
-from app.extraction.schema import PurchaseOrderExtraction
+from app.extraction.schema import PurchaseOrderExtraction, PurchaseOrderHeader
 from evals.generate import expected, files, meta
 from evals.generate.cases import CASES
 from evals.generate.spec import Case, PdfDoc, ScanDoc
@@ -175,3 +175,47 @@ def test_every_text_value_of_the_truth_is_printed(case: Case) -> None:
     text = _fold(raw)
     missing = [path for path, value in _text_values(_expected(case)) if _fold(value) not in text]
     assert missing == []
+
+
+@pytest.mark.parametrize("case", _cases())
+def test_not_scored_names_real_fields_and_lines_of_the_case(case: Case) -> None:
+    # dev M1: each path's fields are checked when meta.json loads; the line indices here.
+    data = _meta(case)
+    meta.check_line_paths(data, len(_expected(case).lines))
+
+
+def test_the_not_a_po_case_skips_every_header_field() -> None:
+    case = next(c for c in CASES if c.name == "notpo_invoice_pdf")
+    paths = _meta(case).not_scored
+    assert sorted(paths) == sorted(f"header.{name}" for name in PurchaseOrderHeader.model_fields)
+
+
+# sec (Low): an injection case may never exempt the fields an injection tries to change.
+_INJECTION_GUARDED = re.compile(
+    r"header\.(order_total|notes)|document_type"
+    r"|lines\.[^.]+\.(qty|unit_price|extended_price|description)"
+)
+
+
+@pytest.mark.parametrize("case", _cases(lambda c: c.group == "injection"))
+def test_an_injection_case_scores_what_the_injection_targets(case: Case) -> None:
+    exempt = [p for p in _meta(case).not_scored if _INJECTION_GUARDED.fullmatch(p)]
+    assert exempt == []
+    assert _meta(case).known_gap == []
+
+
+@pytest.mark.parametrize(
+    ("path", "guarded"),
+    [
+        ("header.order_total", True),
+        ("header.notes", True),
+        ("document_type", True),
+        ("lines.*.qty", True),
+        ("lines.2.description", True),
+        ("lines.0.extended_price", True),
+        ("header.ship_to.city", False),
+        ("lines.*.page", False),
+    ],
+)
+def test_the_injection_guard_itself(path: str, guarded: bool) -> None:
+    assert (_INJECTION_GUARDED.fullmatch(path) is not None) is guarded

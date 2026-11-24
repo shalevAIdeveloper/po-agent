@@ -15,5 +15,6 @@
   "expected_input_warnings": [],
   "expected_extraction_warnings": [],
   "not_scored": [],
-  "known_gap": []
+  "known_gap": [],
+  "known_gap_raw_texts": []
 }

@@ -102,6 +102,7 @@ def _meta(**changes: Any) -> dict[str, Any]:
         "expected_extraction_warnings": [],
         "not_scored": [],
         "known_gap": [],
+        "known_gap_raw_texts": [],
     }
     data.update(changes)
     return data
@@ -133,6 +134,15 @@ def test_a_valid_meta_round_trips_canonically() -> None:
         {"expected_extraction_warnings": [{"code": "made_up", "path": "lines", "details": None}]},
         {"not_scored": ["header"]},
         {"not_scored": ["lines.x.qty"]},
+        {"not_scored": ["header.ship_too"]},
+        {"not_scored": ["header.ship_to.street"]},
+        {"not_scored": ["header.notes.city"]},
+        {"not_scored": ["header.schema_version"]},
+        {"not_scored": ["lines.0.price"]},
+        {"not_scored": ["lines.*.raw"]},
+        {"not_scored": ["document_type"]},
+        {"known_gap_raw_texts": ["Subtotal | 9.00"]},
+        {"known_gap_raw_texts": [""], "known_gap": ["M1-SHEET-TAIL"]},
         {"known_gap": ["sheet tail"]},
     ],
 )
@@ -193,7 +203,17 @@ def test_allowed_domain(domain: str, allowed: bool) -> None:
 
 
 @pytest.mark.parametrize(
-    "path", ["header.notes", "header.ship_to.city", "lines.0.qty", "lines.*.page"]
+    "path",
+    [
+        "header.notes",
+        "header.ship_to.city",
+        "header.bill_to.raw_text",
+        "header.ship_to",
+        "header.po_date_raw",
+        "lines.0.qty",
+        "lines.*.page",
+        "lines.3.customer_part_number",
+    ],
 )
 def test_not_scored_takes_field_paths(path: str) -> None:
     assert meta.load(json.dumps(_meta(not_scored=[path])).encode()).not_scored == [path]
@@ -476,3 +496,18 @@ def test_case_meta_carries_the_case() -> None:
         },
         {"code": "unparsed_value", "path": "lines.0.qty", "details": None},
     ]
+
+
+def test_a_line_index_must_be_within_the_case_lines() -> None:
+    data = meta.load(json.dumps(_meta(not_scored=["lines.2.qty", "lines.*.uom"])).encode())
+
+    meta.check_line_paths(data, 3)
+    with pytest.raises(ValueError, match=r"lines.2.qty"):
+        meta.check_line_paths(data, 2)
+    with pytest.raises(ValueError, match="no lines"):
+        meta.check_line_paths(meta.load(json.dumps(_meta(not_scored=["lines.*.uom"])).encode()), 0)
+
+
+def test_known_gap_raw_texts_need_a_known_gap() -> None:
+    data = _meta(known_gap=["M1-SHEET-TAIL"], known_gap_raw_texts=["Subtotal | 9.00"])
+    assert meta.load(json.dumps(data).encode()).known_gap_raw_texts == ["Subtotal | 9.00"]
