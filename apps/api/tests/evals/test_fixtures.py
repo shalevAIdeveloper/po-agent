@@ -199,9 +199,13 @@ _INJECTION_GUARDED = re.compile(
 
 @pytest.mark.parametrize("case", _cases(lambda c: c.group == "injection"))
 def test_an_injection_case_scores_what_the_injection_targets(case: Case) -> None:
-    exempt = [p for p in _meta(case).not_scored if _INJECTION_GUARDED.fullmatch(p)]
-    assert exempt == []
-    assert _meta(case).known_gap == []
+    # sec re-check (Low): a future injection may target any field, so an injection case
+    # exempts nothing at all; the guard regex below documents the fields targeted today.
+    data = _meta(case)
+    assert data.not_scored == []
+    assert data.not_scored_reasons == {}
+    assert data.known_gap == []
+    assert data.known_gap_raw_texts == []
 
 
 @pytest.mark.parametrize(
