@@ -1,0 +1,77 @@
+{
+  "schema_version": "po_extraction.v1",
+  "document_type": "purchase_order",
+  "header": {
+    "customer_name": "Corvanthe Building Maintenance",
+    "customer_po_number": null,
+    "po_date_raw": null,
+    "po_date": null,
+    "requested_ship_date_raw": null,
+    "requested_ship_date": null,
+    "ship_to": null,
+    "bill_to": null,
+    "order_total": null,
+    "currency": null,
+    "payment_terms": null,
+    "notes": null
+  },
+  "header_confidence": 1.0,
+  "lines": [
+    {
+      "raw_text": "1      CBM-96035    Batteries, AAA, 24 per pack                 4  PK         13.80       55.20",
+      "line_no": 1,
+      "line_type": "product",
+      "customer_part_number": "CBM-96035",
+      "vendor_part_number": null,
+      "description": "Batteries, AAA, 24 per pack",
+      "qty": "4",
+      "uom": "PK",
+      "unit_price": "13.80",
+      "extended_price": "55.20",
+      "page": null,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "2      CBM-96020    Batteries, AA, 24 per pack                 30  PK         13.80      414.00",
+      "line_no": 2,
+      "line_type": "product",
+      "customer_part_number": "CBM-96020",
+      "vendor_part_number": null,
+      "description": "Batteries, AA, 24 per pack",
+      "qty": "30",
+      "uom": "PK",
+      "unit_price": "13.80",
+      "extended_price": "414.00",
+      "page": null,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "3      CBM-51477    Painter's tape, blue, 1.5 in x 60 yd       30  RL          6.80      204.00",
+      "line_no": 3,
+      "line_type": "product",
+      "customer_part_number": "CBM-51477",
+      "vendor_part_number": null,
+      "description": "Painter's tape, blue, 1.5 in x 60 yd",
+      "qty": "30",
+      "uom": "RL",
+      "unit_price": "6.80",
+      "extended_price": "204.00",
+      "page": null,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "4      CBM-31095    LED PAR38 lamp, 15W, 3000K                 47  EA          8.70      408.90",
+      "line_no": 4,
+      "line_type": "product",
+      "customer_part_number": "CBM-31095",
+      "vendor_part_number": null,
+      "description": "LED PAR38 lamp, 15W, 3000K",
+      "qty": "47",
+      "uom": "EA",
+      "unit_price": "8.70",
+      "extended_price": "408.90",
+      "page": null,
+      "confidence": 1.0
+    }
+  ]
+}

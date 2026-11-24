@@ -1,0 +1,111 @@
+{
+  "schema_version": "po_extraction.v1",
+  "document_type": "purchase_order",
+  "header": {
+    "customer_name": "Juniperdell Clinics",
+    "customer_po_number": "JHC-118204",
+    "po_date_raw": "November 9, 2026",
+    "po_date": "2026-11-09",
+    "requested_ship_date_raw": null,
+    "requested_ship_date": null,
+    "ship_to": {
+      "raw_text": "Juniperdell Clinics\nAttn: Maintenance Shop\n480 Kilnworth Avenue\nMillbrook Station, IN 46996",
+      "name": "Juniperdell Clinics",
+      "attention": "Maintenance Shop",
+      "line1": "480 Kilnworth Avenue",
+      "line2": null,
+      "city": "Millbrook Station",
+      "state": "IN",
+      "postal_code": "46996",
+      "country": null
+    },
+    "bill_to": {
+      "raw_text": "Juniperdell Clinics\n55 Bellwether Street\nAshgrove, MI 48997",
+      "name": "Juniperdell Clinics",
+      "attention": null,
+      "line1": "55 Bellwether Street",
+      "line2": null,
+      "city": "Ashgrove",
+      "state": "MI",
+      "postal_code": "48997",
+      "country": null
+    },
+    "order_total": "3777.60",
+    "currency": null,
+    "payment_terms": "Net 30",
+    "notes": "Please include the packing slip in box 1."
+  },
+  "header_confidence": 1.0,
+  "lines": [
+    {
+      "raw_text": "1 JC-60012 NP-60012 Trash liners, 40-45 gal, 1.5 mil 11 CS 38.50 423.50",
+      "line_no": 1,
+      "line_type": "product",
+      "customer_part_number": "JC-60012",
+      "vendor_part_number": "NP-60012",
+      "description": "Trash liners, 40-45 gal, 1.5 mil",
+      "qty": "11",
+      "uom": "CS",
+      "unit_price": "38.50",
+      "extended_price": "423.50",
+      "page": 1,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "2 JC-72188 NP-72188 Hi-vis vest, class 2, XL 33 EA 8.25 272.25",
+      "line_no": 2,
+      "line_type": "product",
+      "customer_part_number": "JC-72188",
+      "vendor_part_number": "NP-72188",
+      "description": "Hi-vis vest, class 2, XL",
+      "qty": "33",
+      "uom": "EA",
+      "unit_price": "8.25",
+      "extended_price": "272.25",
+      "page": 1,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "3 JC-90017 NP-90017 Ball valve, brass, 3/4 in 16 EA 14.35 229.60",
+      "line_no": 3,
+      "line_type": "product",
+      "customer_part_number": "JC-90017",
+      "vendor_part_number": "NP-90017",
+      "description": "Ball valve, brass, 3/4 in",
+      "qty": "16",
+      "uom": "EA",
+      "unit_price": "14.35",
+      "extended_price": "229.60",
+      "page": 1,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "4 JC-51420 NP-51420 Masking tape, tan, 1 in x 60 yd 1 RL 3.25 3.25",
+      "line_no": 4,
+      "line_type": "product",
+      "customer_part_number": "JC-51420",
+      "vendor_part_number": "NP-51420",
+      "description": "Masking tape, tan, 1 in x 60 yd",
+      "qty": "1",
+      "uom": "RL",
+      "unit_price": "3.25",
+      "extended_price": "3.25",
+      "page": 1,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "5 JC-31005 NP-31005 LED troffer 2x4, 4000K 44 EA 64.75 2,849.00",
+      "line_no": 5,
+      "line_type": "product",
+      "customer_part_number": "JC-31005",
+      "vendor_part_number": "NP-31005",
+      "description": "LED troffer 2x4, 4000K",
+      "qty": "44",
+      "uom": "EA",
+      "unit_price": "64.75",
+      "extended_price": "2849.00",
+      "page": 1,
+      "confidence": 1.0
+    }
+  ]
+}

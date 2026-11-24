@@ -1,0 +1,97 @@
+{
+  "schema_version": "po_extraction.v1",
+  "document_type": "purchase_order",
+  "header": {
+    "customer_name": "Oakspurrow Transit Authority",
+    "customer_po_number": "OTA-24-00917",
+    "po_date_raw": "11/10/2026",
+    "po_date": "2026-11-10",
+    "requested_ship_date_raw": null,
+    "requested_ship_date": null,
+    "ship_to": {
+      "raw_text": "Oakspurrow Transit Authority\nAttn: Fleet Maintenance\n2 Depot Square\nLantern Ridge, WV 25998",
+      "name": "Oakspurrow Transit Authority",
+      "attention": "Fleet Maintenance",
+      "line1": "2 Depot Square",
+      "line2": null,
+      "city": "Lantern Ridge",
+      "state": "WV",
+      "postal_code": "25998",
+      "country": null
+    },
+    "bill_to": {
+      "raw_text": "Oakspurrow Transit Authority\n2 Depot Square\nLantern Ridge, WV 25998",
+      "name": "Oakspurrow Transit Authority",
+      "attention": null,
+      "line1": "2 Depot Square",
+      "line2": null,
+      "city": "Lantern Ridge",
+      "state": "WV",
+      "postal_code": "25998",
+      "country": null
+    },
+    "order_total": "2940.60",
+    "currency": null,
+    "payment_terms": "Net 30",
+    "notes": null
+  },
+  "header_confidence": 1.0,
+  "lines": [
+    {
+      "raw_text": "1 OTA-2107 Wire rope assembly, galvanized steel, 3/8 in x 25 ft, with thimble eyes on both ends and a load tag 4 EA 48.60 194.40",
+      "line_no": 1,
+      "line_type": "product",
+      "customer_part_number": "OTA-2107",
+      "vendor_part_number": null,
+      "description": "Wire rope assembly, galvanized steel, 3/8 in x 25 ft, with thimble eyes on both ends and a load tag",
+      "qty": "4",
+      "uom": "EA",
+      "unit_price": "48.60",
+      "extended_price": "194.40",
+      "page": 1,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "2 OTA-2114 Replacement seat cushion kit for transit bench model TB-40, vinyl, charcoal, includes mounting hardware 12 KT 112.75 1,353.00",
+      "line_no": 2,
+      "line_type": "product",
+      "customer_part_number": "OTA-2114",
+      "vendor_part_number": null,
+      "description": "Replacement seat cushion kit for transit bench model TB-40, vinyl, charcoal, includes mounting hardware",
+      "qty": "12",
+      "uom": "KT",
+      "unit_price": "112.75",
+      "extended_price": "1353.00",
+      "page": 1,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "3 OTA-2121 Anti-slip stair tread tape, 4 in x 60 ft roll, black with yellow safety border 6 RL 39.20 235.20",
+      "line_no": 3,
+      "line_type": "product",
+      "customer_part_number": "OTA-2121",
+      "vendor_part_number": null,
+      "description": "Anti-slip stair tread tape, 4 in x 60 ft roll, black with yellow safety border",
+      "qty": "6",
+      "uom": "RL",
+      "unit_price": "39.20",
+      "extended_price": "235.20",
+      "page": 1,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "4 OTA-2128 Fluorescent-to-LED retrofit kit for 4 ft two-lamp fixtures, ballast bypass, 4000K, includes driver and wiring harness 20 KT 57.90 1,158.00",
+      "line_no": 4,
+      "line_type": "product",
+      "customer_part_number": "OTA-2128",
+      "vendor_part_number": null,
+      "description": "Fluorescent-to-LED retrofit kit for 4 ft two-lamp fixtures, ballast bypass, 4000K, includes driver and wiring harness",
+      "qty": "20",
+      "uom": "KT",
+      "unit_price": "57.90",
+      "extended_price": "1158.00",
+      "page": 1,
+      "confidence": 1.0
+    }
+  ]
+}

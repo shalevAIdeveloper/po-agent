@@ -1,0 +1,48 @@
+{
+  "synthetic": true,
+  "schema_version": "eval_case_meta.v1",
+  "generator": "evals.generate",
+  "generator_version": 1,
+  "seed": 661,
+  "input_type": "pdf",
+  "group": "not_a_po",
+  "tags": [
+    "not_a_po",
+    "pdf"
+  ],
+  "pages": 1,
+  "sender_email": "ar@vellumgrove.example.com",
+  "received_at": "2026-11-14T09:30:00Z",
+  "expected_input_warnings": [],
+  "expected_extraction_warnings": [],
+  "not_scored": [
+    "header.customer_name",
+    "header.customer_po_number",
+    "header.po_date_raw",
+    "header.po_date",
+    "header.requested_ship_date_raw",
+    "header.requested_ship_date",
+    "header.ship_to",
+    "header.bill_to",
+    "header.order_total",
+    "header.currency",
+    "header.payment_terms",
+    "header.notes"
+  ],
+  "not_scored_reasons": {
+    "header.customer_name": "not_a_po: the header of a document that is not an order is not scored (Q3)",
+    "header.customer_po_number": "not_a_po: the header of a document that is not an order is not scored (Q3)",
+    "header.po_date_raw": "not_a_po: the header of a document that is not an order is not scored (Q3)",
+    "header.po_date": "not_a_po: the header of a document that is not an order is not scored (Q3)",
+    "header.requested_ship_date_raw": "not_a_po: the header of a document that is not an order is not scored (Q3)",
+    "header.requested_ship_date": "not_a_po: the header of a document that is not an order is not scored (Q3)",
+    "header.ship_to": "not_a_po: the header of a document that is not an order is not scored (Q3)",
+    "header.bill_to": "not_a_po: the header of a document that is not an order is not scored (Q3)",
+    "header.order_total": "not_a_po: the header of a document that is not an order is not scored (Q3)",
+    "header.currency": "not_a_po: the header of a document that is not an order is not scored (Q3)",
+    "header.payment_terms": "not_a_po: the header of a document that is not an order is not scored (Q3)",
+    "header.notes": "not_a_po: the header of a document that is not an order is not scored (Q3)"
+  },
+  "known_gap": [],
+  "known_gap_raw_texts": []
+}

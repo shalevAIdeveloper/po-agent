@@ -1,0 +1,101 @@
+{
+  "schema_version": "po_extraction.v1",
+  "document_type": "purchase_order",
+  "header": {
+    "customer_name": "Quillenfeld Property Services",
+    "customer_po_number": "77418",
+    "po_date_raw": null,
+    "po_date": null,
+    "requested_ship_date_raw": null,
+    "requested_ship_date": null,
+    "ship_to": null,
+    "bill_to": {
+      "raw_text": "Quillenfeld Property Services\n1900 Saltmeadow Avenue\nPort Ellison, NJ 08993",
+      "name": "Quillenfeld Property Services",
+      "attention": null,
+      "line1": "1900 Saltmeadow Avenue",
+      "line2": null,
+      "city": "Port Ellison",
+      "state": "NJ",
+      "postal_code": "08993",
+      "country": null
+    },
+    "order_total": "3120.55",
+    "currency": null,
+    "payment_terms": "Net 30",
+    "notes": null
+  },
+  "header_confidence": 1.0,
+  "lines": [
+    {
+      "raw_text": "1 QPS-51420 NP-51420 Masking tape, tan, 1 in x 60 yd 44 RL 3.25 143.00",
+      "line_no": 1,
+      "line_type": "product",
+      "customer_part_number": "QPS-51420",
+      "vendor_part_number": "NP-51420",
+      "description": "Masking tape, tan, 1 in x 60 yd",
+      "qty": "44",
+      "uom": "RL",
+      "unit_price": "3.25",
+      "extended_price": "143.00",
+      "page": 1,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "2 QPS-72160 NP-72160 Safety glasses, gray lens 12 EA 3.10 37.20",
+      "line_no": 2,
+      "line_type": "product",
+      "customer_part_number": "QPS-72160",
+      "vendor_part_number": "NP-72160",
+      "description": "Safety glasses, gray lens",
+      "qty": "12",
+      "uom": "EA",
+      "unit_price": "3.10",
+      "extended_price": "37.20",
+      "page": 1,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "3 QPS-60058 NP-60058 Disinfectant wipes, 80 count canister 45 CS 61.80 2,781.00",
+      "line_no": 3,
+      "line_type": "product",
+      "customer_part_number": "QPS-60058",
+      "vendor_part_number": "NP-60058",
+      "description": "Disinfectant wipes, 80 count canister",
+      "qty": "45",
+      "uom": "CS",
+      "unit_price": "61.80",
+      "extended_price": "2781.00",
+      "page": 1,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "4 QPS-80412 NP-80412 Duplex receptacle, 20A, white 32 EA 2.85 91.20",
+      "line_no": 4,
+      "line_type": "product",
+      "customer_part_number": "QPS-80412",
+      "vendor_part_number": "NP-80412",
+      "description": "Duplex receptacle, 20A, white",
+      "qty": "32",
+      "uom": "EA",
+      "unit_price": "2.85",
+      "extended_price": "91.20",
+      "page": 1,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "5 QPS-41002 NP-41002 Copper coupling, 3/4 in 29 EA 2.35 68.15",
+      "line_no": 5,
+      "line_type": "product",
+      "customer_part_number": "QPS-41002",
+      "vendor_part_number": "NP-41002",
+      "description": "Copper coupling, 3/4 in",
+      "qty": "29",
+      "uom": "EA",
+      "unit_price": "2.35",
+      "extended_price": "68.15",
+      "page": 1,
+      "confidence": 1.0
+    }
+  ]
+}

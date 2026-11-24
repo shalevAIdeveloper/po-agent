@@ -1,0 +1,73 @@
+{
+  "schema_version": "po_extraction.v1",
+  "document_type": "purchase_order",
+  "header": {
+    "customer_name": "Brindlewood Facilities Co.",
+    "customer_po_number": "4500012377",
+    "po_date_raw": null,
+    "po_date": null,
+    "requested_ship_date_raw": "Friday 11/20",
+    "requested_ship_date": null,
+    "ship_to": {
+      "raw_text": "Brindlewood Facilities Co.\n4410 Larkspur Way\nFernhill, OH 45991",
+      "name": "Brindlewood Facilities Co.",
+      "attention": null,
+      "line1": "4410 Larkspur Way",
+      "line2": null,
+      "city": "Fernhill",
+      "state": "OH",
+      "postal_code": "45991",
+      "country": null
+    },
+    "bill_to": null,
+    "order_total": null,
+    "currency": null,
+    "payment_terms": null,
+    "notes": null
+  },
+  "header_confidence": 1.0,
+  "lines": [
+    {
+      "raw_text": "- 12 boxes of nitrile gloves, large (NP-20117) at $11.90 a box",
+      "line_no": null,
+      "line_type": "product",
+      "customer_part_number": null,
+      "vendor_part_number": "NP-20117",
+      "description": "nitrile gloves, large",
+      "qty": "12",
+      "uom": "boxes",
+      "unit_price": "11.90",
+      "extended_price": null,
+      "page": null,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "- 4 LED troffers 2x4, 4000K (NP-31005)",
+      "line_no": null,
+      "line_type": "product",
+      "customer_part_number": null,
+      "vendor_part_number": "NP-31005",
+      "description": "LED troffers 2x4, 4000K",
+      "qty": "4",
+      "uom": null,
+      "unit_price": null,
+      "extended_price": null,
+      "page": null,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "- 2 rolls of duct tape",
+      "line_no": null,
+      "line_type": "product",
+      "customer_part_number": null,
+      "vendor_part_number": null,
+      "description": "duct tape",
+      "qty": "2",
+      "uom": "rolls",
+      "unit_price": null,
+      "extended_price": null,
+      "page": null,
+      "confidence": 1.0
+    }
+  ]
+}

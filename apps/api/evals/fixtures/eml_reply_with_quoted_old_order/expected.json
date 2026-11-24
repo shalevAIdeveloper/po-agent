@@ -1,0 +1,63 @@
+{
+  "schema_version": "po_extraction.v1",
+  "document_type": "purchase_order",
+  "header": {
+    "customer_name": "Tallowfen Hospitality Group",
+    "customer_po_number": "TH-2026-1222",
+    "po_date_raw": null,
+    "po_date": null,
+    "requested_ship_date_raw": null,
+    "requested_ship_date": null,
+    "ship_to": null,
+    "bill_to": null,
+    "order_total": null,
+    "currency": null,
+    "payment_terms": null,
+    "notes": null
+  },
+  "header_confidence": 1.0,
+  "lines": [
+    {
+      "raw_text": "1      THG-94470    Construction adhesive, 10 oz               22  EA          4.95      108.90",
+      "line_no": 1,
+      "line_type": "product",
+      "customer_part_number": "THG-94470",
+      "vendor_part_number": null,
+      "description": "Construction adhesive, 10 oz",
+      "qty": "22",
+      "uom": "EA",
+      "unit_price": "4.95",
+      "extended_price": "108.90",
+      "page": null,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "2      THG-93110    Extension cord, 14/3, 25 ft                 2  EA         21.70       43.40",
+      "line_no": 2,
+      "line_type": "product",
+      "customer_part_number": "THG-93110",
+      "vendor_part_number": null,
+      "description": "Extension cord, 14/3, 25 ft",
+      "qty": "2",
+      "uom": "EA",
+      "unit_price": "21.70",
+      "extended_price": "43.40",
+      "page": null,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "3      THG-60019    Paper towel, roll, 800 ft                   5  CS         42.00      210.00",
+      "line_no": 3,
+      "line_type": "product",
+      "customer_part_number": "THG-60019",
+      "vendor_part_number": null,
+      "description": "Paper towel, roll, 800 ft",
+      "qty": "5",
+      "uom": "CS",
+      "unit_price": "42.00",
+      "extended_price": "210.00",
+      "page": null,
+      "confidence": 1.0
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+From: Avery Sundquist <purchasing@quillenfeld.example.com>
+To: orders@vellumgrove.example.com
+Subject: Purchase order 77452
+Date: Fri, 20 Nov 2026 14:05:00 +0000
+Message-ID: <eval-803-1@quillenfeld.example.com>
+Content-Type: text/html; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+MIME-Version: 1.0
+
+<html><head><style>td{padding:2px 6px}</style></head><body><p>Hello,</p><p>Pl=
+ease process purchase order <b>77452</b> dated 11/20/2026.</p><table border=
+=3D"1"><tr><th>#</th><th>Item</th><th>Description</th><th>Qty</th><th>Unit</t=
+h><th>Price</th><th>Ext.</th></tr><tr><td>1</td><td>QPS-72150</td><td>Safety =
+glasses, clear, anti-fog</td><td>16</td><td>EA</td><td>2.95</td><td>47.20</td=
+></tr><tr><td>2</td><td>QPS-93101</td><td>Extension cord, 12/3, 50 ft</td><td=
+>48</td><td>EA</td><td>39.90</td><td>1,915.20</td></tr><tr><td>3</td><td>QPS-=
+95530</td><td>Marking paint, fluorescent orange, 17 oz</td><td>10</td><td>EA<=
+/td><td>6.85</td><td>68.50</td></tr><tr><td>4</td><td>QPS-90020</td><td>Ball =
+valve, brass, 1/2 in</td><td>16</td><td>EA</td><td>11.20</td><td>179.20</td><=
+/tr><tr><td>5</td><td>QPS-72188</td><td>Hi-vis vest, class 2, XL</td><td>15</=
+td><td>EA</td><td>8.25</td><td>123.75</td></tr><tr><td colspan=3D"6">Total</t=
+d><td>2,333.85</td></tr></table><p><b>Ship to:</b><br>Quillenfeld Property Se=
+rvices<br>1900 Saltmeadow Avenue<br>Port Ellison, NJ 08993</p><p>Regards,<br>=
+Avery Sundquist<br>Quillenfeld Property Services</p></body></html>

@@ -1,4 +1,8 @@
-"""The M1 PR 0b eval runner: every outcome fails, each with its own exit code (owner rule)."""
+"""The eval runner: every outcome fails, each with its own exit code (owner rule, M1 PR 0b).
+
+Since PR 6 the committed fixtures exist, so CI stops at "missing recordings" (22) until
+PR 9 commits recordings and the baseline.
+"""
 
 import builtins
 import io
@@ -217,14 +221,23 @@ def _committed_cases() -> list[str]:
     )
 
 
-def test_the_committed_fixtures_dir_has_no_cases_yet(capsys: pytest.CaptureFixture[str]) -> None:
-    # Exactly what CI sees until PR 6 adds fixtures (default --fixtures). PR 6 replaces
-    # this test (docs/plans/m1.md); the subprocess tests below rely on it meanwhile.
-    assert _committed_cases() == [], "PR 6 must replace this test and the subprocess tests"
+def _committed_line() -> str:
+    names = _committed_cases()
+    return f"evals: {len(names)} case(s) without a recording: {', '.join(names)}\n"
+
+
+def test_the_committed_fixtures_have_cases_and_no_recordings_yet(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    # PR 6 handover (docs/plans/m1.md): the committed fixtures are the generator's
+    # registry, every case is valid, and with no recording (PR 9) CI stops at 22.
+    from evals.generate.cases import by_name
+
+    assert _committed_cases() == sorted(by_name())
     code, err = _main(capsys, "--replay", "--fail-on-regression")
 
-    assert code == run.EXIT_NO_FIXTURES
-    assert "no fixtures" in err
+    assert code == run.EXIT_MISSING_RECORDINGS
+    assert err == _committed_line()
 
 
 def test_private_fixtures_are_skipped_by_default(
@@ -479,17 +492,20 @@ def test_running_as_a_module_exits_non_zero(monkeypatch: pytest.MonkeyPatch) -> 
     with pytest.raises(SystemExit) as exc:
         run.run_cli()
 
-    assert exc.value.code == run.EXIT_NO_FIXTURES
+    assert exc.value.code == run.EXIT_MISSING_RECORDINGS
 
 
 # --- the real entry point, exactly as CI runs it (sec M1) ----------------------------------
 
 
 def _entry_point(*argv: str) -> subprocess.CompletedProcess[str]:
-    # CI: `uv run python -m evals.run ...` in apps/api, no -I, no LLM_API_KEY. Only the
-    # committed fixtures matter: with no public case the runner stops at "no fixtures",
-    # before it looks at recordings or a baseline (checked by the assert below).
-    assert _committed_cases() == [], "PR 6 must replace this test"
+    # CI: `uv run python -m evals.run ...` in apps/api, no -I, no LLM_API_KEY. The real
+    # recordings directory doesn't exist until PR 9, so the committed fixtures stop at
+    # "missing recordings" (22), before the baseline check (asserted here, from the source
+    # path: RECORDINGS_DIR itself is patched per test).
+    assert not (Path(run.__file__).resolve().parent / "recordings").exists(), (
+        "PR 9 must replace this test: recordings exist now"
+    )
     env = {k: v for k, v in os.environ.items() if k not in {"LLM_API_KEY", "PYTHONSAFEPATH"}}
     return subprocess.run(  # noqa: S603 - this interpreter, fixed arguments
         [sys.executable, "-m", "evals.run", *argv],
@@ -502,12 +518,12 @@ def _entry_point(*argv: str) -> subprocess.CompletedProcess[str]:
     )
 
 
-def test_ci_command_exits_no_fixtures() -> None:
+def test_ci_command_exits_missing_recordings() -> None:
     proc = _entry_point("--replay", "--fail-on-regression")
 
-    assert proc.returncode == run.EXIT_NO_FIXTURES, proc.stderr
+    assert proc.returncode == run.EXIT_MISSING_RECORDINGS, proc.stderr
     assert proc.stdout == ""
-    assert proc.stderr == "evals: no fixtures found (expected fixtures/<case>/)\n"
+    assert proc.stderr == _committed_line()
 
 
 def test_help_through_the_entry_point_exits_usage() -> None:

@@ -1,0 +1,68 @@
+{
+  "synthetic": true,
+  "schema_version": "eval_case_meta.v1",
+  "generator": "evals.generate",
+  "generator_version": 1,
+  "seed": 901,
+  "input_type": "xlsx",
+  "group": "sheet",
+  "tags": [
+    "sheet",
+    "spreadsheet",
+    "xlsx"
+  ],
+  "pages": 1,
+  "sender_email": "m.ellery@brindlewood.example.com",
+  "received_at": "2026-11-12T15:20:00Z",
+  "expected_input_warnings": [],
+  "expected_extraction_warnings": [
+    {
+      "code": "rows_skipped",
+      "path": "lines",
+      "details": {
+        "names": [],
+        "rows": [
+          2,
+          3,
+          4,
+          5,
+          19
+        ],
+        "texts": [
+          "Purchase Order",
+          "PO Number | 4500012402",
+          "PO Date | 2026-11-12",
+          "Ship To | Brindlewood Facilities Co.",
+          "Total | 2235.25"
+        ],
+        "hidden_rows": null,
+        "hidden_columns": null,
+        "count": null
+      }
+    }
+  ],
+  "not_scored": [
+    "header.ship_to.name",
+    "header.ship_to.attention",
+    "header.ship_to.line1",
+    "header.ship_to.line2",
+    "header.ship_to.city",
+    "header.ship_to.state",
+    "header.ship_to.postal_code",
+    "header.ship_to.country",
+    "header.po_date_raw"
+  ],
+  "not_scored_reasons": {
+    "header.ship_to.name": "sheet path: an address is raw_text only (Q-PR5-3), its parts are never produced",
+    "header.ship_to.attention": "sheet path: an address is raw_text only (Q-PR5-3), its parts are never produced",
+    "header.ship_to.line1": "sheet path: an address is raw_text only (Q-PR5-3), its parts are never produced",
+    "header.ship_to.line2": "sheet path: an address is raw_text only (Q-PR5-3), its parts are never produced",
+    "header.ship_to.city": "sheet path: an address is raw_text only (Q-PR5-3), its parts are never produced",
+    "header.ship_to.state": "sheet path: an address is raw_text only (Q-PR5-3), its parts are never produced",
+    "header.ship_to.postal_code": "sheet path: an address is raw_text only (Q-PR5-3), its parts are never produced",
+    "header.ship_to.country": "sheet path: an address is raw_text only (Q-PR5-3), its parts are never produced",
+    "header.po_date_raw": "sheet path: a real date cell is read as ISO, not in its displayed form"
+  },
+  "known_gap": [],
+  "known_gap_raw_texts": []
+}

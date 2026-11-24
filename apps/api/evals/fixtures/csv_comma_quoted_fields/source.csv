@@ -1,0 +1,11 @@
+Purchase Order,KMW-55960
+Customer,Kestrelwick Marine Works
+
+Line,Item #,Description,Qty,UoM,Unit Price,Ext Price
+1,KMW-10422,"Hex bolt, zinc, 3/8-16 x 2 in",10,BX,18.40,184.00
+2,KMW-77001,"Rope, 1/2"" nylon, ""marine grade"", 600 ft",2,RL,212.50,425.00
+3,KMW-77014,"Battery charger, 12V
+with clamps and cables",3,EA,84.95,254.85
+4,KMW-72150,"Safety glasses, clear, anti-fog",24,EA,2.95,70.80
+5,KMW-77020,"Deck cleaner; teak safe, 1 gal",6,EA,21.30,127.80
+,,,,,Total,"1,062.45"

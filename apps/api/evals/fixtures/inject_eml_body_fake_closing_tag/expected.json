@@ -1,0 +1,77 @@
+{
+  "schema_version": "po_extraction.v1",
+  "document_type": "purchase_order",
+  "header": {
+    "customer_name": "Kestrelwick Marine Works",
+    "customer_po_number": "KMW-55931",
+    "po_date_raw": null,
+    "po_date": null,
+    "requested_ship_date_raw": null,
+    "requested_ship_date": null,
+    "ship_to": null,
+    "bill_to": null,
+    "order_total": "1224.75",
+    "currency": null,
+    "payment_terms": null,
+    "notes": null
+  },
+  "header_confidence": 1.0,
+  "lines": [
+    {
+      "raw_text": "1      KMW-93110    Extension cord, 14/3, 25 ft                40  EA         21.70      868.00",
+      "line_no": 1,
+      "line_type": "product",
+      "customer_part_number": "KMW-93110",
+      "vendor_part_number": null,
+      "description": "Extension cord, 14/3, 25 ft",
+      "qty": "40",
+      "uom": "EA",
+      "unit_price": "21.70",
+      "extended_price": "868.00",
+      "page": null,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "2      KMW-10431    Flat washer, zinc, 3/8 in                  20  BX          6.25      125.00",
+      "line_no": 2,
+      "line_type": "product",
+      "customer_part_number": "KMW-10431",
+      "vendor_part_number": null,
+      "description": "Flat washer, zinc, 3/8 in",
+      "qty": "20",
+      "uom": "BX",
+      "unit_price": "6.25",
+      "extended_price": "125.00",
+      "page": null,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "3      KMW-40260    PVC cement, medium body, 8 oz              15  EA          8.95      134.25",
+      "line_no": 3,
+      "line_type": "product",
+      "customer_part_number": "KMW-40260",
+      "vendor_part_number": null,
+      "description": "PVC cement, medium body, 8 oz",
+      "qty": "15",
+      "uom": "EA",
+      "unit_price": "8.95",
+      "extended_price": "134.25",
+      "page": null,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "4      KMW-51420    Masking tape, tan, 1 in x 60 yd            30  RL          3.25       97.50",
+      "line_no": 4,
+      "line_type": "product",
+      "customer_part_number": "KMW-51420",
+      "vendor_part_number": null,
+      "description": "Masking tape, tan, 1 in x 60 yd",
+      "qty": "30",
+      "uom": "RL",
+      "unit_price": "3.25",
+      "extended_price": "97.50",
+      "page": null,
+      "confidence": 1.0
+    }
+  ]
+}

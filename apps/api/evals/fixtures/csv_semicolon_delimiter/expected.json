@@ -1,0 +1,101 @@
+{
+  "schema_version": "po_extraction.v1",
+  "document_type": "purchase_order",
+  "header": {
+    "customer_name": "Corvanthe Building Maintenance",
+    "customer_po_number": "CBM-PO-30590",
+    "po_date_raw": "11/20/2026",
+    "po_date": "2026-11-20",
+    "requested_ship_date_raw": null,
+    "requested_ship_date": null,
+    "ship_to": {
+      "raw_text": "Corvanthe Building Maintenance\n7735 Ironweed Boulevard\nMillbrook Station, IN 46996",
+      "name": "Corvanthe Building Maintenance",
+      "attention": null,
+      "line1": "7735 Ironweed Boulevard",
+      "line2": null,
+      "city": "Millbrook Station",
+      "state": "IN",
+      "postal_code": "46996",
+      "country": null
+    },
+    "bill_to": null,
+    "order_total": "3376.50",
+    "currency": null,
+    "payment_terms": null,
+    "notes": null
+  },
+  "header_confidence": 1.0,
+  "lines": [
+    {
+      "raw_text": "1 | CBM-10422 | Hex bolt, zinc, 3/8-16 x 2 in | 19 | BX | 18.40 | 349.60",
+      "line_no": 1,
+      "line_type": "product",
+      "customer_part_number": "CBM-10422",
+      "vendor_part_number": null,
+      "description": "Hex bolt, zinc, 3/8-16 x 2 in",
+      "qty": "19",
+      "uom": "BX",
+      "unit_price": "18.40",
+      "extended_price": "349.60",
+      "page": null,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "2 | CBM-31012 | LED wall pack, 40W, 5000K | 26 | EA | 88.30 | 2,295.80",
+      "line_no": 2,
+      "line_type": "product",
+      "customer_part_number": "CBM-31012",
+      "vendor_part_number": null,
+      "description": "LED wall pack, 40W, 5000K",
+      "qty": "26",
+      "uom": "EA",
+      "unit_price": "88.30",
+      "extended_price": "2295.80",
+      "page": null,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "3 | CBM-72190 | Hard hat, type 1, white | 22 | EA | 14.95 | 328.90",
+      "line_no": 3,
+      "line_type": "product",
+      "customer_part_number": "CBM-72190",
+      "vendor_part_number": null,
+      "description": "Hard hat, type 1, white",
+      "qty": "22",
+      "uom": "EA",
+      "unit_price": "14.95",
+      "extended_price": "328.90",
+      "page": null,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "4 | CBM-51477 | Painter's tape, blue, 1.5 in x 60 yd | 31 | RL | 6.80 | 210.80",
+      "line_no": 4,
+      "line_type": "product",
+      "customer_part_number": "CBM-51477",
+      "vendor_part_number": null,
+      "description": "Painter's tape, blue, 1.5 in x 60 yd",
+      "qty": "31",
+      "uom": "RL",
+      "unit_price": "6.80",
+      "extended_price": "210.80",
+      "page": null,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "5 | CBM-31095 | LED PAR38 lamp, 15W, 3000K | 22 | EA | 8.70 | 191.40",
+      "line_no": 5,
+      "line_type": "product",
+      "customer_part_number": "CBM-31095",
+      "vendor_part_number": null,
+      "description": "LED PAR38 lamp, 15W, 3000K",
+      "qty": "22",
+      "uom": "EA",
+      "unit_price": "8.70",
+      "extended_price": "191.40",
+      "page": null,
+      "confidence": 1.0
+    }
+  ]
+}

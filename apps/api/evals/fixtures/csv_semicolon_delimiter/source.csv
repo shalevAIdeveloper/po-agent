@@ -1,0 +1,12 @@
+PO Number;CBM-PO-30590
+Customer;Corvanthe Building Maintenance
+Order Date;11/20/2026
+Ship To;Corvanthe Building Maintenance;7735 Ironweed Boulevard;Millbrook Station, IN 46996
+
+Line;Item #;Description;Qty;UoM;Unit Price;Ext Price
+1;CBM-10422;Hex bolt, zinc, 3/8-16 x 2 in;19;BX;18.40;349.60
+2;CBM-31012;LED wall pack, 40W, 5000K;26;EA;88.30;2,295.80
+3;CBM-72190;Hard hat, type 1, white;22;EA;14.95;328.90
+4;CBM-51477;Painter's tape, blue, 1.5 in x 60 yd;31;RL;6.80;210.80
+5;CBM-31095;LED PAR38 lamp, 15W, 3000K;22;EA;8.70;191.40
+;;;;;Total;3,376.50

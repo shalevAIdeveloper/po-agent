@@ -18,3 +18,10 @@
 *.ico  binary
 *.woff binary
 *.woff2 binary
+
+# Eval fixtures (M1 PR 6): sources are compared byte for byte (CSV CRLF / encodings, EML
+# CRLF), so git must never normalize them, whatever their extension. `-text` stops
+# normalization; `diff` keeps text diffs of CSV/EML reviewable (dev L7). Later lines win,
+# so this overrides `*.pdf binary` etc. for these paths only (PDF/images still show as
+# binary diffs: git detects NUL bytes).
+apps/api/evals/fixtures/**/source.* -text diff

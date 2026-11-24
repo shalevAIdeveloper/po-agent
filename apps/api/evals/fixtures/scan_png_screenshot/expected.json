@@ -1,0 +1,111 @@
+{
+  "schema_version": "po_extraction.v1",
+  "document_type": "purchase_order",
+  "header": {
+    "customer_name": "Corvanthe Building Maintenance",
+    "customer_po_number": "CBM-PO-30577",
+    "po_date_raw": "11/13/2026",
+    "po_date": "2026-11-13",
+    "requested_ship_date_raw": null,
+    "requested_ship_date": null,
+    "ship_to": {
+      "raw_text": "Corvanthe Building Maintenance\nAttn: Job Site Trailer 3\nLot 17, Cobbler Ridge Road\nStonebridge Mills, VA 22999",
+      "name": "Corvanthe Building Maintenance",
+      "attention": "Job Site Trailer 3",
+      "line1": "Lot 17, Cobbler Ridge Road",
+      "line2": null,
+      "city": "Stonebridge Mills",
+      "state": "VA",
+      "postal_code": "22999",
+      "country": null
+    },
+    "bill_to": {
+      "raw_text": "Corvanthe Building Maintenance\n7735 Ironweed Boulevard\nMillbrook Station, IN 46996",
+      "name": "Corvanthe Building Maintenance",
+      "attention": null,
+      "line1": "7735 Ironweed Boulevard",
+      "line2": null,
+      "city": "Millbrook Station",
+      "state": "IN",
+      "postal_code": "46996",
+      "country": null
+    },
+    "order_total": "3033.50",
+    "currency": null,
+    "payment_terms": "Net 30",
+    "notes": null
+  },
+  "header_confidence": 1.0,
+  "lines": [
+    {
+      "raw_text": "1 CBM-72210 NP-72210 Ear plugs, foam, 200 pairs 21 BX 24.60 516.60",
+      "line_no": 1,
+      "line_type": "product",
+      "customer_part_number": "CBM-72210",
+      "vendor_part_number": "NP-72210",
+      "description": "Ear plugs, foam, 200 pairs",
+      "qty": "21",
+      "uom": "BX",
+      "unit_price": "24.60",
+      "extended_price": "516.60",
+      "page": 1,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "2 CBM-41002 NP-41002 Copper coupling, 3/4 in 29 EA 2.35 68.15",
+      "line_no": 2,
+      "line_type": "product",
+      "customer_part_number": "CBM-41002",
+      "vendor_part_number": "NP-41002",
+      "description": "Copper coupling, 3/4 in",
+      "qty": "29",
+      "uom": "EA",
+      "unit_price": "2.35",
+      "extended_price": "68.15",
+      "page": 1,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "3 CBM-80350 NP-80350 THHN wire, 12 AWG, white, 500 ft 24 RL 96.00 2,304.00",
+      "line_no": 3,
+      "line_type": "product",
+      "customer_part_number": "CBM-80350",
+      "vendor_part_number": "NP-80350",
+      "description": "THHN wire, 12 AWG, white, 500 ft",
+      "qty": "24",
+      "uom": "RL",
+      "unit_price": "96.00",
+      "extended_price": "2304.00",
+      "page": 1,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "4 CBM-90061 NP-90061 Pipe thread sealant, 4 oz 12 EA 6.15 73.80",
+      "line_no": 4,
+      "line_type": "product",
+      "customer_part_number": "CBM-90061",
+      "vendor_part_number": "NP-90061",
+      "description": "Pipe thread sealant, 4 oz",
+      "qty": "12",
+      "uom": "EA",
+      "unit_price": "6.15",
+      "extended_price": "73.80",
+      "page": 1,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "5 CBM-91125 NP-91125 Air filter, MERV 8, 16x25x2 11 EA 6.45 70.95",
+      "line_no": 5,
+      "line_type": "product",
+      "customer_part_number": "CBM-91125",
+      "vendor_part_number": "NP-91125",
+      "description": "Air filter, MERV 8, 16x25x2",
+      "qty": "11",
+      "uom": "EA",
+      "unit_price": "6.45",
+      "extended_price": "70.95",
+      "page": 1,
+      "confidence": 1.0
+    }
+  ]
+}

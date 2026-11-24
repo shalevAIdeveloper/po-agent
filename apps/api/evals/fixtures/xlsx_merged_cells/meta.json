@@ -1,0 +1,40 @@
+{
+  "synthetic": true,
+  "schema_version": "eval_case_meta.v1",
+  "generator": "evals.generate",
+  "generator_version": 1,
+  "seed": 903,
+  "input_type": "xlsx",
+  "group": "sheet",
+  "tags": [
+    "sheet",
+    "spreadsheet",
+    "xlsx"
+  ],
+  "pages": 1,
+  "sender_email": "purchasing@quillenfeld.example.com",
+  "received_at": "2026-11-18T15:20:00Z",
+  "expected_input_warnings": [],
+  "expected_extraction_warnings": [
+    {
+      "code": "rows_skipped",
+      "path": "lines",
+      "details": {
+        "names": [],
+        "rows": [
+          11
+        ],
+        "texts": [
+          "Total | 1734.3"
+        ],
+        "hidden_rows": null,
+        "hidden_columns": null,
+        "count": null
+      }
+    }
+  ],
+  "not_scored": [],
+  "not_scored_reasons": {},
+  "known_gap": [],
+  "known_gap_raw_texts": []
+}

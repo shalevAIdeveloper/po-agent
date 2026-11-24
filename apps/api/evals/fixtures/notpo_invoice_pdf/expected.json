@@ -1,0 +1,20 @@
+{
+  "schema_version": "po_extraction.v1",
+  "document_type": "not_a_po",
+  "header": {
+    "customer_name": null,
+    "customer_po_number": null,
+    "po_date_raw": null,
+    "po_date": null,
+    "requested_ship_date_raw": null,
+    "requested_ship_date": null,
+    "ship_to": null,
+    "bill_to": null,
+    "order_total": null,
+    "currency": null,
+    "payment_terms": null,
+    "notes": null
+  },
+  "header_confidence": 1.0,
+  "lines": []
+}

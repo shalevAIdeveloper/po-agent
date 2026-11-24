@@ -1,0 +1,83 @@
+{
+  "schema_version": "po_extraction.v1",
+  "document_type": "purchase_order",
+  "header": {
+    "customer_name": "Juniperdell Clinics",
+    "customer_po_number": "JHC-117950",
+    "po_date_raw": "03/04/26",
+    "po_date": "2026-03-04",
+    "requested_ship_date_raw": "April 15, 2026",
+    "requested_ship_date": "2026-04-15",
+    "ship_to": {
+      "raw_text": "Juniperdell Clinics\nAttn: Maintenance Shop\n480 Kilnworth Avenue\nMillbrook Station, IN 46996",
+      "name": "Juniperdell Clinics",
+      "attention": "Maintenance Shop",
+      "line1": "480 Kilnworth Avenue",
+      "line2": null,
+      "city": "Millbrook Station",
+      "state": "IN",
+      "postal_code": "46996",
+      "country": null
+    },
+    "bill_to": {
+      "raw_text": "Juniperdell Clinics\n55 Bellwether Street\nAshgrove, MI 48997",
+      "name": "Juniperdell Clinics",
+      "attention": null,
+      "line1": "55 Bellwether Street",
+      "line2": null,
+      "city": "Ashgrove",
+      "state": "MI",
+      "postal_code": "48997",
+      "country": null
+    },
+    "order_total": "503.00",
+    "currency": null,
+    "payment_terms": "Net 30",
+    "notes": null
+  },
+  "header_confidence": 1.0,
+  "lines": [
+    {
+      "raw_text": "1 JC-80310 NP-80310 Wire nut, red, 100 per bag 28 BG 4.35 121.80",
+      "line_no": 1,
+      "line_type": "product",
+      "customer_part_number": "JC-80310",
+      "vendor_part_number": "NP-80310",
+      "description": "Wire nut, red, 100 per bag",
+      "qty": "28",
+      "uom": "BG",
+      "unit_price": "4.35",
+      "extended_price": "121.80",
+      "page": 1,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "2 JC-10431 NP-10431 Flat washer, zinc, 3/8 in 24 BX 6.25 150.00",
+      "line_no": 2,
+      "line_type": "product",
+      "customer_part_number": "JC-10431",
+      "vendor_part_number": "NP-10431",
+      "description": "Flat washer, zinc, 3/8 in",
+      "qty": "24",
+      "uom": "BX",
+      "unit_price": "6.25",
+      "extended_price": "150.00",
+      "page": 1,
+      "confidence": 1.0
+    },
+    {
+      "raw_text": "3 JC-51477 NP-51477 Painter's tape, blue, 1.5 in x 60 yd 34 RL 6.80 231.20",
+      "line_no": 3,
+      "line_type": "product",
+      "customer_part_number": "JC-51477",
+      "vendor_part_number": "NP-51477",
+      "description": "Painter's tape, blue, 1.5 in x 60 yd",
+      "qty": "34",
+      "uom": "RL",
+      "unit_price": "6.80",
+      "extended_price": "231.20",
+      "page": 1,
+      "confidence": 1.0
+    }
+  ]
+}
